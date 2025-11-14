@@ -6,6 +6,7 @@ import '../../models/route_model.dart';
 import '../../services/route_service.dart';
 import '../../services/favorite_service.dart';
 import '../../services/photo_service.dart';
+import 'package:share_plus/share_plus.dart';
 import 'route_edit_screen.dart';
 
 class RouteDetailScreen extends StatefulWidget {
@@ -125,6 +126,25 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     }
 
     setState(() => _isFavoriteLoading = false);
+  }
+
+  Future<void> _shareRoute() async {
+    if (_route == null) return;
+
+    final shareText = '''
+\${_route!.title}
+
+📍 距離: \${_route!.formattedDistance}
+⏱️ 時間: \${_route!.formattedDuration}
+📅 日時: \${_route!.formatDate()}
+
+#WanMap #散歩ルート #愛犬との散歩
+''';
+
+    await Share.share(
+      shareText,
+      subject: 'WanMapルート: \${_route!.title}',
+    );
   }
 
   void _fitMapToBounds(List<LatLng> points) {
@@ -320,6 +340,11 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                   tooltip: _isFavorite ? 'お気に入りから削除' : 'お気に入りに追加',
                   onPressed: _toggleFavorite,
                 ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: '共有',
+            onPressed: _shareRoute,
+          ),
           if (isOwnRoute)
             IconButton(
               icon: const Icon(Icons.edit),
