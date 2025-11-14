@@ -10,11 +10,21 @@ final publicRoutesProvider = FutureProvider<List<RouteModel>>((ref) async {
 });
 
 /// 公開ルート一覧画面
-class PublicRoutesScreen extends ConsumerWidget {
+class PublicRoutesScreen extends ConsumerStatefulWidget {
   const PublicRoutesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PublicRoutesScreen> createState() => _PublicRoutesScreenState();
+}
+
+class _PublicRoutesScreenState extends ConsumerState<PublicRoutesScreen> {
+  String _searchQuery = '';
+  String _sortBy = 'newest'; // newest, distance, duration
+  double? _maxDistance; // in kilometers
+
+
+  @override
+  Widget build(BuildContext context) {
     final routesAsync = ref.watch(publicRoutesProvider);
 
     return Scaffold(
@@ -23,7 +33,7 @@ class PublicRoutesScreen extends ConsumerWidget {
       ),
       body: routesAsync.when(
         data: (routes) {
-          if (routes.isEmpty) {
+          if (filteredRoutes.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -61,9 +71,9 @@ class PublicRoutesScreen extends ConsumerWidget {
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: routes.length,
+              itemCount: filteredRoutes.length,
               itemBuilder: (context, index) {
-                final route = routes[index];
+                final route = filteredRoutes[index];
                 return _PublicRouteCard(route: route);
               },
             ),

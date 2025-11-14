@@ -29,11 +29,19 @@ final favoriteRoutesProvider = FutureProvider<List<RouteModel>>((ref) async {
 });
 
 /// お気に入り一覧画面
-class FavoritesScreen extends ConsumerWidget {
+class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FavoritesScreen> createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
+  String _searchQuery = '';
+  String _sortBy = 'newest';
+
+  @override
+  Widget build(BuildContext context) {
     final routesAsync = ref.watch(favoriteRoutesProvider);
 
     return Scaffold(
@@ -42,7 +50,7 @@ class FavoritesScreen extends ConsumerWidget {
       ),
       body: routesAsync.when(
         data: (routes) {
-          if (routes.isEmpty) {
+          if (filteredRoutes.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -80,9 +88,9 @@ class FavoritesScreen extends ConsumerWidget {
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: routes.length,
+              itemCount: filteredRoutes.length,
               itemBuilder: (context, index) {
-                final route = routes[index];
+                final route = filteredRoutes[index];
                 return _FavoriteRouteCard(route: route, ref: ref);
               },
             ),
