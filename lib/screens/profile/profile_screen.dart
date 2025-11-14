@@ -95,6 +95,19 @@ class ProfileScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('プロフィール'),
         actions: [
+          // ユーザー検索ボタン
+          IconButton(
+            icon: const Icon(Icons.person_search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserSearchScreen(),
+                ),
+              );
+            },
+          ),
+          actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {

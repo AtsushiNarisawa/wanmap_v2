@@ -220,4 +220,18 @@ class RouteService {
       return false;
     }
   }
+  /// 特定ユーザーの公開ルートを取得
+  Future<List<RouteModel>> getPublicRoutesByUser(String userId) async {
+    final response = await _supabase
+        .from('routes')
+        .select()
+        .eq('user_id', userId)
+        .eq('is_public', true)
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((json) => RouteModel.fromJson(json))
+        .toList();
+  }
+
 }

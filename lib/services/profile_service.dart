@@ -120,4 +120,15 @@ class ProfileService {
       return false;
     }
   }
+  /// IDでプロフィールを取得
+  Future<ProfileModel> getProfileById(String userId) async {
+    final response = await _supabase
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .single();
+
+    return ProfileModel.fromJson(response);
+  }
+
 }
