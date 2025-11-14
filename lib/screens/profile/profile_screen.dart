@@ -188,14 +188,13 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: 4),
               
               // メールアドレス
-              if (profile?.email != null)
-                Text(
-                  profile!.email,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+              Text(
+                user?.email ?? profile?.email ?? 'メールアドレス未設定',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
                 ),
+              ),
               
               const SizedBox(height: 8),
               
