@@ -30,9 +30,13 @@ class WanMapApp extends StatelessWidget {
   const WanMapApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
       title: 'WanMap',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // メインカラー：落ち着いた青色
@@ -158,7 +162,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return Scaffold(
       backgroundColor: const Color(0xFF4A90E2),
       body: FadeTransition(

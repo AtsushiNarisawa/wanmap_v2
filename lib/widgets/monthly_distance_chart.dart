@@ -96,7 +96,7 @@ class _MonthlyDistanceChartState extends State<MonthlyDistanceChart> {
                       barRods: [
                         BarChartRodData(
                           toY: _monthlyDistances[index],
-                          color: Colors.blue,
+                          color: Theme.of(context).colorScheme.primary,
                           width: 16,
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(4),
@@ -114,7 +114,10 @@ class _MonthlyDistanceChartState extends State<MonthlyDistanceChart> {
                         getTitlesWidget: (value, meta) {
                           return Text(
                             '\${value.toInt()}km',
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                           );
                         },
                       ),
@@ -142,7 +145,10 @@ class _MonthlyDistanceChartState extends State<MonthlyDistanceChart> {
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
                                 months[value.toInt()],
-                                style: const TextStyle(fontSize: 10),
+                                style: TextStyle(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                               ),
                             );
                           }

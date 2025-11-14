@@ -96,6 +96,19 @@ class ProfileScreen extends ConsumerWidget {
         title: const Text('プロフィール'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+        actions: [
+          IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'ログアウト',
             onPressed: () async {

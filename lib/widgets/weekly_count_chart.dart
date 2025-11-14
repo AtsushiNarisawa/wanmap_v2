@@ -115,12 +115,12 @@ class _WeeklyCountChartState extends State<WeeklyCountChart> {
                         ),
                       ),
                       isCurved: true,
-                      color: Colors.green,
+                      color: Theme.of(context).colorScheme.secondary,
                       barWidth: 3,
                       dotData: const FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.green.withOpacity(0.1),
+                        color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
                       ),
                     ),
                   ],
@@ -132,7 +132,10 @@ class _WeeklyCountChartState extends State<WeeklyCountChart> {
                         getTitlesWidget: (value, meta) {
                           return Text(
                             '\${value.toInt()}回',
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                           );
                         },
                       ),
@@ -147,7 +150,10 @@ class _WeeklyCountChartState extends State<WeeklyCountChart> {
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
                                 _weekLabels[index],
-                                style: const TextStyle(fontSize: 10),
+                                style: TextStyle(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                               ),
                             );
                           }

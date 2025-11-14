@@ -258,7 +258,9 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               // OpenStreetMapタイル
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          urlTemplate: Theme.of(context).brightness == Brightness.dark
+              ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
+              : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.wanmap_v2',
               ),
               
