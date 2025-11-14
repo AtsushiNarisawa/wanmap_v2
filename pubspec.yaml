@@ -27,6 +27,7 @@ dependencies:
   
   # UI・アニメーション
   cached_network_image: ^3.3.0
+  fl_chart: ^0.65.0
   
   # 画像処理
   image_picker: ^1.2.1
@@ -39,6 +40,8 @@ dependencies:
   # ユーティリティ
   intl: ^0.18.1
   uuid: ^4.2.1
+  share_plus: ^7.2.1
+  url_launcher: ^6.2.1
   
   # ローカルストレージ
   shared_preferences: ^2.2.2
@@ -51,9 +54,9 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
   isar_generator: ^3.1.0+1
   build_runner: ^2.4.7
-    sdk: flutter
   flutter_lints: ^3.0.0
 
 flutter:
