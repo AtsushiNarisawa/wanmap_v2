@@ -30,6 +30,9 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
   bool _isFavoriteLoading = true;
   List<RoutePhoto> _photos = [];
   bool _isPhotosLoading = false;
+  List<CommentModel> _comments = [];
+  bool _isCommentsLoading = false;
+  final TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     _loadRouteDetail();
     _checkFavoriteStatus();
     _loadPhotos();
+    _loadComments();
   }
 
   Future<void> _loadRouteDetail() async {
@@ -487,6 +491,126 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                                 ),
                                 
                                 const SizedBox(height: 24),
+
+            const SizedBox(height: 16),
+            
+            // コメントセクション
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.comment, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'コメント (${_comments.length})',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // コメント投稿フォーム
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _commentController,
+                          decoration: const InputDecoration(
+                            hintText: 'コメントを入力...',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.send),
+                        onPressed: _postComment,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // コメント一覧
+                  _isCommentsLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _comments.isEmpty
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(32),
+                                child: Text(
+                                  'まだコメントがありません',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _comments.length,
+                              separatorBuilder: (context, index) => const Divider(),
+                              itemBuilder: (context, index) {
+                                final comment = _comments[index];
+                                final currentUser = Supabase.instance.client.auth.currentUser;
+                                final isOwnComment = currentUser != null && 
+                                                    comment.userId == currentUser.id;
+                                
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundImage: comment.userAvatarUrl != null
+                                        ? NetworkImage(comment.userAvatarUrl!)
+                                        : null,
+                                    child: comment.userAvatarUrl == null
+                                        ? const Icon(Icons.person)
+                                        : null,
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                        comment.userDisplayName ?? 'ユーザー',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        comment.formatTimeAgo(),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(comment.content),
+                                  ),
+                                  trailing: isOwnComment
+                                      ? IconButton(
+                                          icon: const Icon(Icons.delete_outline),
+                                          onPressed: () => _deleteComment(comment.id),
+                                          color: Colors.grey,
+                                        )
+                                      : null,
+                                );
+                              },
+                            ),
+                ],
+              ),
+            ),
                                 
                                 // 写真ギャラリー
                                 Row(
