@@ -167,12 +167,22 @@ class RouteService {
     await saveRoute(route3);
   }
 
-  Future<List<RouteModel>> getPublicRoutes({int limit = 20}) async {
+  Future<List<RouteModel>> getPublicRoutes({
+    int limit = 20,
+    String? area,
+  }) async {
     try {
-      final response = await _supabase
+      var query = _supabase
           .from('routes')
           .select()
-          .eq('is_public', true)
+          .eq('is_public', true);
+      
+      // エリアフィルタリング
+      if (area != null && area.isNotEmpty) {
+        query = query.eq('area', area);
+      }
+      
+      final response = await query
           .order('created_at', ascending: false)
           .limit(limit);
 
@@ -188,6 +198,9 @@ class RouteService {
           endedAt: json['ended_at'] != null ? DateTime.parse(json['ended_at'] as String) : null,
           points: [],
           isPublic: json['is_public'] as bool? ?? false,
+          area: json['area'] as String?,
+          prefecture: json['prefecture'] as String?,
+          thumbnailUrl: json['thumbnail_url'] as String?,
         );
       }).toList();
     } catch (e) {

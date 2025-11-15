@@ -14,6 +14,10 @@ class RouteModel {
   final DateTime? endedAt; // 終了時刻
   final bool isPublic;
   final DateTime createdAt;
+  // 🆕 エリア情報フィールド
+  final String? area; // エリアID (hakone, izu, nasu, etc.)
+  final String? prefecture; // 都道府県名
+  final String? thumbnailUrl; // サムネイル画像URL
 
   RouteModel({
     this.id,
@@ -28,6 +32,9 @@ class RouteModel {
     this.endedAt,
     this.isPublic = false,
     DateTime? createdAt,
+    this.area,
+    this.prefecture,
+    this.thumbnailUrl,
   }) : startedAt = startedAt ?? DateTime.now(),
        createdAt = createdAt ?? DateTime.now();
 
@@ -46,6 +53,9 @@ class RouteModel {
       endedAt: json['ended_at'] != null ? DateTime.parse(json['ended_at'] as String) : null,
       isPublic: json['is_public'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
+      area: json['area'] as String?,
+      prefecture: json['prefecture'] as String?,
+      thumbnailUrl: json['thumbnail_url'] as String?,
     );
   }
 
@@ -63,6 +73,9 @@ class RouteModel {
       'ended_at': endedAt?.toIso8601String(),
       'is_public': isPublic,
       'created_at': createdAt.toIso8601String(),
+      'area': area,
+      'prefecture': prefecture,
+      'thumbnail_url': thumbnailUrl,
     };
   }
 
