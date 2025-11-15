@@ -82,7 +82,7 @@ class GpsService {
     // 位置情報の更新を監視
     const locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10, // 10メートル移動ごとに更新
+      distanceFilter: 3, // 3メートル移動ごとに更新（テスト用に短縮）
     );
 
     _positionStreamSubscription = Geolocator.getPositionStream(
@@ -101,9 +101,12 @@ class GpsService {
     required String title,
     String? description,
     String? dogId,
+    bool isPublic = false,
   }) {
+    print('🔵 stopRecording 呼び出し: isRecording=$_isRecording, points=${_currentRoutePoints.length}');
+    
     if (!_isRecording) {
-      print('記録していません');
+      print('❌ 記録していません');
       return null;
     }
 
@@ -111,8 +114,16 @@ class GpsService {
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
 
+    print('🔵 記録されたポイント数: ${_currentRoutePoints.length}');
+    
     if (_currentRoutePoints.isEmpty) {
-      print('記録されたポイントがありません');
+      print('❌ 記録されたポイントがありません');
+      return null;
+    }
+    
+    // テスト用：最低1ポイントあればOK（本番では2ポイント以上推奨）
+    if (_currentRoutePoints.length < 1) {
+      print('❌ ポイントが不足しています（最低1ポイント必要）');
       return null;
     }
 
@@ -120,6 +131,8 @@ class GpsService {
     final duration = _startTime != null
         ? DateTime.now().difference(_startTime!).inSeconds
         : 0;
+
+    print('🔵 ルートモデル作成中: userId=$userId, title=$title, points=${_currentRoutePoints.length}');
 
     // ルートモデルを作成
     final route = RouteModel(
@@ -129,10 +142,12 @@ class GpsService {
       description: description,
       points: List.from(_currentRoutePoints),
       duration: duration,
+      isPublic: isPublic,
     );
 
     // 距離を計算
     final distance = route.calculateDistance();
+    print('🔵 計算された距離: $distance meters');
 
     final completedRoute = route.copyWith(distance: distance);
 
@@ -140,7 +155,7 @@ class GpsService {
     _currentRoutePoints.clear();
     _startTime = null;
 
-    print('ルート記録を停止しました: ${completedRoute.formatDistance()}, ${completedRoute.formatDuration()}');
+    print('✅ ルート記録を停止しました: ${completedRoute.formatDistance()}, ${completedRoute.formatDuration()}');
     return completedRoute;
   }
 

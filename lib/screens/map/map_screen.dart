@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../services/gps_service.dart';
 import '../../config/supabase_config.dart';
+import '../../models/route_model.dart';
 
 /// マップ画面
 class MapScreen extends StatefulWidget {
@@ -84,11 +85,14 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  /// ルート記録停止
+  /// ルート記録停止（ダイアログ表示のみ）
   void _stopRecording() {
+    print('🔵 _stopRecording が呼ばれました');
+    
     final userId = SupabaseConfig.userId;
     
     if (userId == null) {
+      print('❌ userId が null です');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('ログインしてください'),
@@ -98,7 +102,21 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
-    // タイトル入力ダイアログ
+    print('🔵 記録中かどうか: ${_gpsService.isRecording}');
+    
+    if (!_gpsService.isRecording) {
+      print('❌ 記録していません');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('記録していません'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    print('🔵 ダイアログを表示します（記録はまだ停止していません）');
+    // タイトル入力ダイアログを表示（記録は続行中）
     _showSaveRouteDialog(userId);
   }
 
@@ -106,32 +124,66 @@ class _MapScreenState extends State<MapScreen> {
   void _showSaveRouteDialog(String userId) {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
+    bool isPublic = false; // デフォルトは非公開
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ルートを保存'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'タイトル',
-                hintText: '朝の散歩',
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('ルートを保存'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'タイトル',
+                    hintText: '朝の散歩',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: '説明（任意）',
+                    hintText: '公園を一周',
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                // 公開設定トグル
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SwitchListTile(
+                    title: const Text(
+                      '公開設定',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      isPublic 
+                          ? '他のユーザーがこのルートを閲覧できます' 
+                          : 'このルートは非公開です',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    value: isPublic,
+                    onChanged: (value) {
+                      setState(() => isPublic = value);
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: '説明（任意）',
-                hintText: '公園を一周',
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
+          ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -139,8 +191,13 @@ class _MapScreenState extends State<MapScreen> {
           ),
           ElevatedButton(
             onPressed: () {
+              print('🔵 保存ボタンがタップされました');
+              
               final title = titleController.text.trim();
+              print('🔵 入力されたタイトル: "$title"');
+              
               if (title.isEmpty) {
+                print('❌ タイトルが空です');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('タイトルを入力してください'),
@@ -150,28 +207,24 @@ class _MapScreenState extends State<MapScreen> {
                 return;
               }
 
+              print('🔵 stopRecording を呼び出します (isPublic: $isPublic)');
               final route = _gpsService.stopRecording(
                 userId: userId,
                 title: title,
                 description: descriptionController.text.trim(),
+                isPublic: isPublic,
               );
 
+              print('🔵 stopRecording の結果: ${route != null ? "成功" : "null"}');
+              
               Navigator.pop(context);
 
               if (route != null && mounted) {
-                setState(() {
-                  _isRecording = false;
-                  _routePoints.clear();
-                });
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'ルートを保存しました\n距離: ${route.formatDistance()}, 時間: ${route.formatDuration()}',
-                    ),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                print('🔵 _saveRouteToSupabase を呼び出します');
+                // Supabase にルートを保存
+                _saveRouteToSupabase(route);
+              } else {
+                print('❌ route が null または mounted が false');
               }
             },
             child: const Text('保存'),
@@ -193,6 +246,83 @@ class _MapScreenState extends State<MapScreen> {
         _startPointUpdateTimer();
       }
     });
+  }
+
+  /// Supabase にルートを保存
+  Future<void> _saveRouteToSupabase(RouteModel route) async {
+    print('🔵 保存処理開始');
+    print('🔵 ルート情報: title=${route.title}, points=${route.points.length}, distance=${route.distance}');
+    
+    try {
+      print('🔵 routesテーブルに保存中...');
+      
+      // routes テーブルに保存
+      final routeData = await SupabaseConfig.client.from('routes').insert({
+        'user_id': route.userId,
+        'dog_id': route.dogId,
+        'title': route.title,
+        'description': route.description,
+        'distance': route.distance,
+        'duration': route.duration,
+        'is_public': route.isPublic,
+      }).select().single();
+
+      final routeId = routeData['id'];
+      print('🟢 routesテーブルに保存成功: routeId=$routeId');
+
+      // route_points テーブルにポイントを保存
+      print('🔵 route_pointsテーブルに${route.points.length}件保存中...');
+      
+      final pointsData = route.points.asMap().entries.map((entry) {
+        final point = entry.value;
+        return {
+          'route_id': routeId,
+          'latitude': point.latLng.latitude,
+          'longitude': point.latLng.longitude,
+          'altitude': point.altitude,
+          'timestamp': point.timestamp.toIso8601String(),
+          'sequence_number': point.sequenceNumber,
+        };
+      }).toList();
+
+      await SupabaseConfig.client.from('route_points').insert(pointsData);
+      print('🟢 route_pointsテーブルに保存成功');
+
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+          _routePoints.clear();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'ルートを保存しました\n距離: ${route.formatDistance()}, 時間: ${route.formatDuration()}',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      print('✅ ルートをSupabaseに保存しました: $routeId');
+    } catch (e, stackTrace) {
+      print('❌ ルート保存エラー: $e');
+      print('❌ スタックトレース: $stackTrace');
+      
+      if (mounted) {
+        setState(() {
+          _isRecording = false;
+          _routePoints.clear();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ルートの保存に失敗しました\n$e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -330,7 +460,17 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isRecording ? _stopRecording : _startRecording,
+        onPressed: () {
+          print('🔵🔵🔵 FloatingActionButton がタップされました！');
+          print('🔵🔵🔵 _isRecording = $_isRecording');
+          if (_isRecording) {
+            print('🔵🔵🔵 _stopRecording を呼び出します');
+            _stopRecording();
+          } else {
+            print('🔵🔵🔵 _startRecording を呼び出します');
+            _startRecording();
+          }
+        },
         backgroundColor: _isRecording ? Colors.red : const Color(0xFF7ED321),
         icon: Icon(_isRecording ? Icons.stop : Icons.play_arrow),
         label: Text(_isRecording ? '記録停止' : '記録開始'),
