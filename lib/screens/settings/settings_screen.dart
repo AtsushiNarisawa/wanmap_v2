@@ -111,7 +111,8 @@ class SettingsScreen extends ConsumerWidget {
                       enabled: notificationSettings.enabled &&
                           notificationSettings.dailyReminderEnabled,
                       onTap: () {
-                        _selectReminderTime(context, ref);
+                        // TODO: Implement reminder time selection
+                        // _selectReminderTime(context, ref);
                       },
                     );
                   },

@@ -219,7 +219,7 @@ class UserProfileScreen extends ConsumerWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => RouteDetailScreen(
-                                  routeId: route.id,
+                                  routeId: route.id!,
                                 ),
                               ),
                             );
