@@ -5,6 +5,8 @@ import '../../services/route_service.dart';
 import '../../services/profile_service.dart';
 import '../../models/profile_model.dart';
 import '../auth/login_screen.dart';
+import '../social/user_search_screen.dart';
+import '../settings/settings_screen.dart';
 import 'profile_edit_screen.dart';
 
 /// ユーザー統計情報

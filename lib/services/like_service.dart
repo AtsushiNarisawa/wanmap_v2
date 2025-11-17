@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:wanmap/models/like_model.dart';
+import 'package:wanmap_v2/models/like_model.dart';
 
 class LikeService {
   final _supabase = Supabase.instance.client;
@@ -46,10 +46,11 @@ class LikeService {
   Future<int> getLikeCount(String routeId) async {
     final response = await _supabase
         .from('likes')
-        .select('id', const FetchOptions(count: CountOption.exact))
-        .eq('route_id', routeId);
+        .select('id')
+        .eq('route_id', routeId)
+        .count(CountOption.exact);
 
-    return response.count ?? 0;
+    return response.count;
   }
 
   /// ユーザーがいいねしたルート一覧を取得

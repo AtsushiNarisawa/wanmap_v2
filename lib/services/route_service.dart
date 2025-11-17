@@ -203,11 +203,15 @@ class RouteService {
                 .order('sequence_number', ascending: true)
                 .limit(100); // パフォーマンスのため最大100ポイントに制限
             
-            points = (pointsResponse as List).map((p) {
+            points = (pointsResponse as List).map<RoutePoint>((p) {
               return RoutePoint(
-                latitude: (p['latitude'] as num).toDouble(),
-                longitude: (p['longitude'] as num).toDouble(),
+                latLng: LatLng(
+                  (p['latitude'] as num).toDouble(),
+                  (p['longitude'] as num).toDouble(),
+                ),
+                altitude: p['altitude']?.toDouble(),
                 timestamp: DateTime.parse(p['timestamp'] as String),
+                sequenceNumber: p['sequence_number'] as int,
               );
             }).toList();
           } catch (e) {
