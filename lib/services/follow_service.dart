@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:wanmap/models/follow_model.dart';
-import 'package:wanmap/models/profile_model.dart';
+import 'package:wanmap_v2/models/follow_model.dart';
+import 'package:wanmap_v2/models/profile_model.dart';
 
 class FollowService {
   final _supabase = Supabase.instance.client;

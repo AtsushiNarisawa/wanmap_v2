@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wanmap/models/profile_model.dart';
-import 'package:wanmap/providers/follow_provider.dart';
-import 'package:wanmap/screens/profile/user_profile_screen.dart';
+import 'package:wanmap_v2/models/profile_model.dart';
+import 'package:wanmap_v2/providers/follow_provider.dart';
+import 'package:wanmap_v2/screens/profile/user_profile_screen.dart';
 
 class UserSearchScreen extends ConsumerStatefulWidget {
   const UserSearchScreen({super.key});

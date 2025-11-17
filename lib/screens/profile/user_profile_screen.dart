@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:wanmap/models/profile_model.dart';
-import 'package:wanmap/models/route_model.dart';
-import 'package:wanmap/providers/follow_provider.dart';
-import 'package:wanmap/services/profile_service.dart';
-import 'package:wanmap/services/route_service.dart';
-import 'package:wanmap/screens/routes/route_detail_screen.dart';
-import 'package:wanmap/screens/social/follow_list_screen.dart';
+import 'package:wanmap_v2/models/profile_model.dart';
+import 'package:wanmap_v2/models/route_model.dart';
+import 'package:wanmap_v2/providers/follow_provider.dart';
+import 'package:wanmap_v2/services/profile_service.dart';
+import 'package:wanmap_v2/services/route_service.dart';
+import 'package:wanmap_v2/screens/routes/route_detail_screen.dart';
+import 'package:wanmap_v2/screens/social/follow_list_screen.dart';
 
 // プロバイダー
 final userProfileProvider = FutureProvider.family<ProfileModel, String>((ref, userId) async {

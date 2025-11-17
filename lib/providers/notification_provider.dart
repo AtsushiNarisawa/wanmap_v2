@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wanmap/services/notification_service.dart';
+import 'package:wanmap_v2/services/notification_service.dart';
 
 /// 通知設定の状態
 class NotificationSettings {

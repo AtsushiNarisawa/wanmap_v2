@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wanmap/models/local_route_model.dart';
-import 'package:wanmap/models/route_model.dart';
-import 'package:wanmap/services/local_database_service.dart';
-import 'package:wanmap/services/route_service.dart';
-import 'package:wanmap/services/connectivity_service.dart';
+import 'package:wanmap_v2/models/local_route_model.dart';
+import 'package:wanmap_v2/models/route_model.dart';
+import 'package:wanmap_v2/services/local_database_service.dart';
+import 'package:wanmap_v2/services/route_service.dart';
+import 'package:wanmap_v2/services/connectivity_service.dart';
 import 'dart:convert';
 
 /// オフラインデータとSupabaseの同期サービス

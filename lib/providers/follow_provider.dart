@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wanmap/models/follow_model.dart';
-import 'package:wanmap/models/profile_model.dart';
-import 'package:wanmap/services/follow_service.dart';
+import 'package:wanmap_v2/models/follow_model.dart';
+import 'package:wanmap_v2/models/profile_model.dart';
+import 'package:wanmap_v2/services/follow_service.dart';
 
 final followServiceProvider = Provider((ref) => FollowService());
 

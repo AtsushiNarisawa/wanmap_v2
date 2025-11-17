@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wanmap/services/connectivity_service.dart';
-import 'package:wanmap/services/sync_service.dart';
-import 'package:wanmap/services/local_database_service.dart';
+import 'package:wanmap_v2/services/connectivity_service.dart';
+import 'package:wanmap_v2/services/sync_service.dart';
+import 'package:wanmap_v2/services/local_database_service.dart';
 
 /// 接続状態プロバイダー
 final connectivityServiceProvider = Provider((ref) => ConnectivityService());

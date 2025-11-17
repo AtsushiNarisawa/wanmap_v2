@@ -1,4 +1,4 @@
-import 'package:wanmap/models/profile_model.dart';
+import 'package:wanmap_v2/models/profile_model.dart';
 
 class FollowModel {
   final String id;

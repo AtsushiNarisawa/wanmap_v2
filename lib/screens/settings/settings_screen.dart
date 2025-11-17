@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wanmap/providers/theme_provider.dart';
-import 'package:wanmap/providers/notification_provider.dart';
+import 'package:wanmap_v2/providers/theme_provider.dart';
+import 'package:wanmap_v2/providers/notification_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});

@@ -184,7 +184,7 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
-        actions: [
+          actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('キャンセル'),
