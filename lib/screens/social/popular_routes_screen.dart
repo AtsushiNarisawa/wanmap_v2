@@ -40,7 +40,6 @@ class _PopularRoutesScreenState extends State<PopularRoutesScreen> {
     try {
       final routes = await _socialService.getPopularRoutes(
         limit: 50,
-        days: _selectedDays,
       );
       
       if (mounted) {

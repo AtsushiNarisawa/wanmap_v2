@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/connectivity_provider.dart';
-import '../providers/sync_provider.dart';
 
 /// オフライン状態を表示するバナーウィジェット
 class OfflineBanner extends ConsumerWidget {

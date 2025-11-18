@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/sync_provider.dart';
 import '../providers/connectivity_provider.dart';
 import '../services/sync_service.dart';
 

@@ -59,10 +59,7 @@ class _StatisticsDashboardScreenState
         _statisticsService.getTodayStatistics(),
         _statisticsService.getThisWeekStatistics(),
         _statisticsService.getThisMonthStatistics(),
-        _statisticsService.getMonthlyStatistics(
-          startMonth: DateTime.now().subtract(const Duration(days: 180)),
-          endMonth: DateTime.now(),
-        ),
+        _statisticsService.getMonthlyStatistics(months: 6),
         _statisticsService.getAreaStatistics(
           startDate: DateTime.now().subtract(const Duration(days: 90)),
           endDate: DateTime.now(),
@@ -346,14 +343,14 @@ class _StatisticsDashboardScreenState
                       ),
                       Expanded(
                         child: LinearProgressIndicator(
-                          value: stat.totalRoutes > 0
-                              ? (stat.totalRoutes / 30).clamp(0.0, 1.0)
+                          value: stat.routeCount > 0
+                              ? (stat.routeCount / 30).clamp(0.0, 1.0)
                               : 0,
                           backgroundColor: Colors.grey[200],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text('${stat.totalRoutes}回'),
+                      Text('${stat.routeCount}回'),
                     ],
                   ),
                 );
@@ -391,17 +388,11 @@ class _StatisticsDashboardScreenState
                 leading: CircleAvatar(
                   child: Text('${index + 1}'),
                 ),
-                title: Text(area.areaName),
+                title: Text(area.area),
                 subtitle: Text(
-                  '${area.totalRoutes}回 • ${area.formattedTotalDistance}',
+                  '${area.routeCount}回 • ${area.formattedDistance}',
                 ),
-                trailing: Text(
-                  area.lastVisitLabel,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                
               );
             },
           ),
