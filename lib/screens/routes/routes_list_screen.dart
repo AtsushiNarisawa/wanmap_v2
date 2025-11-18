@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/route_model.dart';
 import '../../services/route_service.dart';
+import '../../config/wanmap_colors.dart';
+import '../../config/wanmap_typography.dart';
+import '../../config/wanmap_spacing.dart';
+import '../../widgets/wanmap_widgets.dart';
 import 'route_detail_screen.dart';
 
 /// ユーザーのルート一覧を取得するProvider
@@ -20,10 +24,19 @@ class RoutesListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routesAsync = ref.watch(userRoutesProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark 
+          ? WanMapColors.backgroundDark 
+          : WanMapColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('ルート一覧'),
+        title: Text(
+          'マイルート',
+          style: WanMapTypography.headlineSmall,
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           // テストデータ作成ボタン（開発用）
           IconButton(
