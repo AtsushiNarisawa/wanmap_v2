@@ -6,6 +6,10 @@ import '../../models/route_model.dart';
 import '../../services/route_service.dart';
 import '../../services/favorite_service.dart';
 import '../../services/photo_service.dart';
+import '../../config/wanmap_colors.dart';
+import '../../config/wanmap_typography.dart';
+import '../../config/wanmap_spacing.dart';
+import '../../widgets/wanmap_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:wanmap_v2/providers/like_provider.dart';
 import 'route_edit_screen.dart';
@@ -318,84 +322,81 @@ ${_route!.title}
   Widget build(BuildContext context) {
     final currentUser = Supabase.instance.client.auth.currentUser;
     final isOwnRoute = _route != null && currentUser != null && _route!.userId == currentUser.id;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_route?.title ?? 'ルート詳細'),
-        actions: [
-          _isFavoriteLoading
-              ? const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : IconButton(
-                  icon: Icon(
-                    _isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: _isFavorite ? Colors.red : null,
-                  ),
-                  tooltip: _isFavorite ? 'お気に入りから削除' : 'お気に入りに追加',
-                  onPressed: _toggleFavorite,
-                ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: '共有',
-            onPressed: _shareRoute,
-          ),
-          if (isOwnRoute)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: '編集',
-              onPressed: () async {
-                final result = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => RouteEditScreen(route: _route!),
-                  ),
-                );
-                
-                if (result == true) {
-                  _loadRouteDetail();
-                }
-              },
-            ),
-          if (isOwnRoute)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: _route != null ? () => _showDeleteDialog() : null,
-            ),
-        ],
-      ),
+      backgroundColor: isDark 
+          ? WanMapColors.backgroundDark 
+          : WanMapColors.backgroundLight,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(WanMapColors.accent),
+              ),
+            )
           : _errorMessage != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text(_errorMessage!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
+                      Icon(Icons.error_outline, size: 64, color: WanMapColors.error),
+                      const SizedBox(height: WanMapSpacing.lg),
+                      Text(
+                        _errorMessage!,
+                        style: WanMapTypography.bodyLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: WanMapSpacing.lg),
+                      WanMapButton(
+                        text: '再読み込み',
+                        icon: Icons.refresh,
                         onPressed: _loadRouteDetail,
-                        child: const Text('再読み込み'),
                       ),
                     ],
                   ),
                 )
               : _route == null
                   ? const Center(child: Text('ルートが見つかりませんでした'))
-                  : SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 地図
-                          SizedBox(
-                            height: 300,
-                            child: FlutterMap(
+                  : _buildContent(context, isOwnRoute, isDark),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, bool isOwnRoute, bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        // ヒーロー画像＋マップ
+        SliverAppBar(
+          expandedHeight: 350,
+          pinned: true,
+          backgroundColor: isDark 
+              ? WanMapColors.surfaceDark 
+              : Colors.white,
+          leading: Container(
+            margin: const EdgeInsets.all(WanMapSpacing.sm),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: WanMapColors.primary),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          actions: _buildActions(context, isOwnRoute),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                // マップ背景
+                SizedBox(
+                  height: 350,
+                  child: FlutterMap(
                               mapController: _mapController,
                               options: MapOptions(
                                 initialCenter: _route!.points.isNotEmpty
