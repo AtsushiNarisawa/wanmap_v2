@@ -6,11 +6,75 @@
 // Purpose: Service layer for notification system
 // ==================================================
 
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/notification_model.dart';
 
+/// 通知IDの定数
+class NotificationIds {
+  static const String dailyWalkReminder = 'daily_walk_reminder';
+}
+
 class NotificationService {
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  // ==================================================
+  // ローカル通知機能（スタブ実装）
+  // ==================================================
+
+  /// 通知権限をリクエスト（スタブ実装）
+  Future<bool> requestPermission() async {
+    debugPrint('NotificationService.requestPermission() - stub');
+    // TODO: flutter_local_notifications等を使った実装が必要
+    return true;
+  }
+
+  /// 通知システムを初期化（スタブ実装）
+  Future<void> initialize() async {
+    debugPrint('NotificationService.initialize() - stub');
+    // TODO: flutter_local_notifications等を使った実装が必要
+  }
+
+  /// すべての通知をキャンセル（スタブ実装）
+  Future<void> cancelAllNotifications() async {
+    debugPrint('NotificationService.cancelAllNotifications() - stub');
+    // TODO: flutter_local_notifications等を使った実装が必要
+  }
+
+  /// 特定の通知をキャンセル（スタブ実装）
+  Future<void> cancelNotification(String id) async {
+    debugPrint('NotificationService.cancelNotification($id) - stub');
+    // TODO: flutter_local_notifications等を使った実装が必要
+  }
+
+  /// 毎日の通知をスケジュール（スタブ実装）
+  Future<void> scheduleDailyNotification({
+    required String id,
+    required String title,
+    required String body,
+    required TimeOfDay time,
+  }) async {
+    debugPrint('NotificationService.scheduleDailyNotification() - stub');
+    debugPrint('  id: $id, title: $title, time: ${time.hour}:${time.minute}');
+    // TODO: flutter_local_notifications等を使った実装が必要
+  }
+
+  /// 通知を表示（スタブ実装）
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    debugPrint('NotificationService.showNotification() - stub');
+    debugPrint('  id: $id, title: $title, body: $body');
+    // TODO: flutter_local_notifications等を使った実装が必要
+  }
+
+  /// リソースを解放（スタブ実装）
+  void dispose() {
+    debugPrint('NotificationService.dispose() - stub');
+    // TODO: 必要に応じてリソース解放処理を実装
+  }
 
   // ==================================================
   // 通知取得

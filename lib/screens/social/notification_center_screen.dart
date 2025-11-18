@@ -61,13 +61,15 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
 
   /// Realtime購読をセットアップ
   void _setupRealtimeSubscription() {
-    _notificationService.subscribeToNotifications((newNotification) {
-      if (mounted) {
-        setState(() {
-          _notifications.insert(0, newNotification);
-        });
-      }
-    });
+    _notificationService.subscribeToNotifications(
+      onNotification: (newNotification) {
+        if (mounted) {
+          setState(() {
+            _notifications.insert(0, newNotification);
+          });
+        }
+      },
+    );
   }
 
   /// 通知を既読にする
