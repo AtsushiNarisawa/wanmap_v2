@@ -91,3 +91,5 @@ lib/config/env_prod.dart
 # API Keys and Secrets
 **/secrets.dart
 **/api_keys.dart
+*.bak
+*.g.dart

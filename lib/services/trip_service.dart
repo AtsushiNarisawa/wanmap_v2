@@ -78,8 +78,8 @@ class TripService {
     return trip.copyWith(
       routes: routes,
       routeCount: routes.length,
-      totalDistance: routes.fold(0.0, (sum, r) => sum + (r.distance ?? 0.0)),
-      totalDuration: routes.fold(0, (sum, r) => sum + (r.duration ?? 0)),
+      totalDistance: routes.fold<double>(0.0, (sum, r) => sum + (r.distance ?? 0.0)),
+      totalDuration: routes.fold<int>(0, (sum, r) => sum + (r.duration ?? 0)),
     );
   }
 
