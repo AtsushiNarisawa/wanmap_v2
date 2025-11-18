@@ -103,8 +103,8 @@ class MapOptimizationService {
   ) {
     return routes.where((route) {
       // ルートの開始点が表示範囲内かチェック
-      if (route.startLatitude != null && route.startLongitude != null) {
-        final startPoint = LatLng(route.startLatitude!, route.startLongitude!);
+      if (route.points.isNotEmpty) {
+        final startPoint = LatLng(route.points.first.latitude, route.points.first.longitude);
         return bounds.contains(startPoint);
       }
       return false;

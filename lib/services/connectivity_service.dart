@@ -9,7 +9,7 @@ class ConnectivityService {
   ConnectivityService._internal();
 
   final Connectivity _connectivity = Connectivity();
-  StreamSubscription<List<ConnectivityResult>>? _subscription;
+  StreamSubscription<ConnectivityResult>? _subscription;
 
   bool _isOnline = true;
   bool get isOnline => _isOnline;
@@ -24,8 +24,8 @@ class ConnectivityService {
     await _checkConnectivity();
 
     // 接続状態の変更を監視
-    _subscription = _connectivity.onConnectivityChanged.listen((results) {
-      _updateConnectionStatus(results);
+    _subscription = _connectivity.onConnectivityChanged.listen((result) {
+      _updateConnectionStatus(result);
     });
 
     debugPrint('ConnectivityService initialized. Online: $_isOnline');
@@ -34,8 +34,8 @@ class ConnectivityService {
   /// 現在の接続状態を確認
   Future<void> _checkConnectivity() async {
     try {
-      final results = await _connectivity.checkConnectivity();
-      _updateConnectionStatus(results);
+      final result = await _connectivity.checkConnectivity();
+      _updateConnectionStatus(result);
     } catch (e) {
       debugPrint('接続状態確認エラー: $e');
       _isOnline = false;
@@ -43,14 +43,13 @@ class ConnectivityService {
   }
 
   /// 接続状態を更新
-  void _updateConnectionStatus(List<ConnectivityResult> results) {
+  void _updateConnectionStatus(ConnectivityResult result) {
     final wasOnline = _isOnline;
     
     // none以外の接続があればオンライン
-    _isOnline = results.isNotEmpty && 
-                !results.every((result) => result == ConnectivityResult.none);
+    _isOnline = result != ConnectivityResult.none;
 
-    debugPrint('Connectivity changed: $_isOnline (results: $results)');
+    debugPrint('Connectivity changed: $_isOnline (result: $result)');
 
     // 状態が変わった場合のみ通知
     if (wasOnline != _isOnline) {

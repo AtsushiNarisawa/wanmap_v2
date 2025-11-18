@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../models/app_exception.dart';
 
 /// グローバルなエラーハンドリングサービス
 class ErrorHandlerService {
   /// Supabase エラーをアプリケーション例外に変換
   static AppException handleSupabaseError(dynamic error, StackTrace stackTrace) {
-    if (error is AuthException) {
+    if (error is supabase.AuthException) {
       return AuthException(
         message: 'Authentication failed: ${error.message}',
         originalError: error,
@@ -14,7 +14,7 @@ class ErrorHandlerService {
       );
     }
 
-    if (error is PostgrestException) {
+    if (error is supabase.PostgrestException) {
       if (error.code == '23505') {
         return DatabaseException(
           message: 'Duplicate entry',
@@ -31,7 +31,7 @@ class ErrorHandlerService {
       );
     }
 
-    if (error is StorageException) {
+    if (error is supabase.StorageException) {
       return DatabaseException(
         message: 'Storage error: ${error.message}',
         code: 'STORAGE_ERROR',

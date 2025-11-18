@@ -32,14 +32,15 @@ class TripService {
           *,
           trip_routes(count)
         ''')
-        .eq('is_public', true)
-        .order('start_date', ascending: false);
+        .eq('is_public', true);
 
     if (destination != null) {
       query = query.eq('destination', destination);
     }
 
-    final response = await query;
+    final orderedQuery = query.order('start_date', ascending: false);
+
+    final response = await orderedQuery;
 
     return (response as List)
         .map((json) => TripModel.fromJson(json))
@@ -77,8 +78,8 @@ class TripService {
     return trip.copyWith(
       routes: routes,
       routeCount: routes.length,
-      totalDistance: routes.fold(0.0, (sum, r) => sum + r.distance),
-      totalDuration: routes.fold(0, (sum, r) => sum + r.duration),
+      totalDistance: routes.fold(0.0, (sum, r) => sum + (r.distance ?? 0.0)),
+      totalDuration: routes.fold(0, (sum, r) => sum + (r.duration ?? 0)),
     );
   }
 
