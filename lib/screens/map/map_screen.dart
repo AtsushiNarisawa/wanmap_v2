@@ -623,8 +623,7 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               // OpenStreetMapタイル
               TileLayer(
-                    ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
-                    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.doghub.wanmap',
               ),
               

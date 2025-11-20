@@ -134,6 +134,9 @@ class WanMapSpacing {
   /// 特大（32px） - 大きなボタン
   static const double radiusXL = 32.0;
   
+  /// 超特大（48px） - 超大きなボタン
+  static const double radiusXXL = 48.0;
+  
   /// 完全な円
   static const double radiusCircle = 9999.0;
   
