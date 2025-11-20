@@ -249,6 +249,9 @@ class _WanMapTagInputState extends State<WanMapTagInput> {
             runSpacing: WanMapSpacing.xs,
             children: widget.tags.map((tag) {
               return Chip(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                labelPadding: EdgeInsets.zero,
                 label: Text(
                   tag,
                   style: WanMapTypography.labelSmall.copyWith(
@@ -258,7 +261,7 @@ class _WanMapTagInputState extends State<WanMapTagInput> {
                 backgroundColor: WanMapColors.accent,
                 deleteIcon: const Icon(
                   Icons.close,
-                  size: 16,
+                  size: 14,
                   color: Colors.white,
                 ),
                 onDeleted: () => _removeTag(tag),

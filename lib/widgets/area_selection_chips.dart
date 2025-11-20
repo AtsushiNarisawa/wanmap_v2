@@ -14,98 +14,72 @@ class AreaSelectionChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          // 「全て」チップ
-          _buildChip(
-            context: context,
-            area: null,
-            label: '全て',
-            emoji: '🗺️',
-            isSelected: selectedArea == null,
-          ),
-          
-          const SizedBox(width: 8),
-          
-          // 各エリアチップ
-          ...AreaInfo.areas.map((area) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _buildChip(
-                context: context,
-                area: area,
-                label: area.displayName,
-                emoji: area.emoji,
-                isSelected: selectedArea == area.id,
-              ),
-            );
-          }),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: SizedBox(
+        height: 56,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: [
+            // 「全て」チップ
+            _buildChip(
+              context: context,
+              area: null,
+              emoji: '🗺️',
+              isSelected: selectedArea == null,
+            ),
+            
+            const SizedBox(width: 8),
+            
+            // 各エリアチップ
+            ...AreaInfo.areas.map((area) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _buildChip(
+                  context: context,
+                  area: area,
+                  emoji: area.emoji,
+                  isSelected: selectedArea == area.id,
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
 
-  /// チップを構築
+  /// チップを構築（絵文字のみ、シンプル版）
   Widget _buildChip({
     required BuildContext context,
     required AreaInfo? area,
-    required String label,
     required String emoji,
     required bool isSelected,
   }) {
-    return InkWell(
+    return GestureDetector(
       onTap: () => onAreaSelected(area?.id),
-      borderRadius: BorderRadius.circular(12),
       child: Container(
-        width: 70,
-        padding: const EdgeInsets.all(8),
+        width: 56,
+        height: 56,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected
               ? Theme.of(context).primaryColor
               : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          shape: BoxShape.circle,
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).primaryColor
                 : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
+            width: 2,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Theme.of(context).primaryColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? Colors.white : Colors.grey[800],
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+        child: RichText(
+          text: TextSpan(
+            text: emoji,
+            style: const TextStyle(fontSize: 24),
+          ),
         ),
       ),
     );

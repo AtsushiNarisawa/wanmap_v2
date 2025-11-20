@@ -58,20 +58,28 @@ class _PublicRoutesMapViewState extends State<PublicRoutesMapView> {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'マップビュー',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                Flexible(
+                  child: Text(
+                    'マップビュー',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  '${widget.routes.length}件のルート',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                Flexible(
+                  child: Text(
+                    '${widget.routes.length}件のルート',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const Spacer(),

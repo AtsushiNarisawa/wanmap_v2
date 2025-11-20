@@ -51,7 +51,7 @@ class WanMapButton extends StatelessWidget {
     switch (size) {
       case WanMapButtonSize.small:
         padding = const EdgeInsets.symmetric(
-          horizontal: WanMapSpacing.md,
+          horizontal: 6.0,
           vertical: WanMapSpacing.sm,
         );
         textStyle = WanMapTypography.titleSmall;
@@ -110,6 +110,7 @@ class WanMapButton extends StatelessWidget {
         break;
     }
 
+    
     Widget buttonChild = loading
         ? SizedBox(
             width: iconSize,
@@ -125,12 +126,13 @@ class WanMapButton extends StatelessWidget {
             children: [
               if (icon != null) ...[
                 Icon(icon, size: iconSize),
-                const SizedBox(width: WanMapSpacing.sm),
+                if (text.isNotEmpty) const SizedBox(width: 4.0),
               ],
-              Text(
-                text,
-                style: textStyle.copyWith(color: foregroundColor),
-              ),
+              if (text.isNotEmpty)
+                Text(
+                  text,
+                  style: textStyle.copyWith(color: foregroundColor),
+                ),
             ],
           );
 
@@ -140,21 +142,21 @@ class WanMapButton extends StatelessWidget {
         color: backgroundColor,
         elevation: elevation,
         borderRadius: WanMapSpacing.borderRadiusXL,
-        child: InkWell(
-          onTap: isDisabled ? null : onPressed,
-          borderRadius: WanMapSpacing.borderRadiusXL,
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              borderRadius: WanMapSpacing.borderRadiusXL,
-              border: borderColor != null
-                  ? Border.all(color: borderColor, width: 2)
-                  : null,
+          child: InkWell(
+            onTap: isDisabled ? null : onPressed,
+            borderRadius: WanMapSpacing.borderRadiusXL,
+            child: Container(
+              padding: padding,
+              decoration: BoxDecoration(
+                borderRadius: WanMapSpacing.borderRadiusXL,
+                border: borderColor != null
+                    ? Border.all(color: borderColor, width: 2)
+                    : null,
+              ),
+              child: buttonChild,
             ),
-            child: buttonChild,
           ),
-        ),
-      ),
+        );
     );
   }
 }

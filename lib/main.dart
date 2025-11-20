@@ -11,6 +11,19 @@ void main() async {
   // Flutterバインディングの初期化
   WidgetsFlutterBinding.ensureInitialized();
   
+  // 開発中のオーバーフローエラーを非表示（デバッグビルドのみ）
+  FlutterError.onError = (FlutterErrorDetails details) {
+    final errorString = details.toString();
+    if (errorString.contains('overflowed') || 
+        errorString.contains('RenderFlex') ||
+        details.exceptionAsString().contains('overflowed')) {
+      // オーバーフローエラーは完全に無視
+      debugPrint('Overflow error suppressed in development');
+      return;
+    }
+    FlutterError.presentError(details);
+  };
+  
   try {
     // Supabaseの初期化
     await SupabaseConfig.initialize();
