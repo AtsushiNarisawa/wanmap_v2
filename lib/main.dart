@@ -6,6 +6,7 @@ import 'config/wanmap_theme.dart';
 import 'config/wanmap_colors.dart';
 import 'config/env.dart';
 import 'providers/auth_provider.dart';
+import 'providers/dog_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'services/notification_service.dart';
@@ -54,6 +55,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => DogProvider()),
         // 他のProviderをここに追加
       ],
       child: const WanMapApp(),
