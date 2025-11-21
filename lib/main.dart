@@ -6,6 +6,7 @@ import 'config/wanmap_colors.dart';
 import 'providers/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   // Flutterバインディングの初期化
@@ -28,8 +29,13 @@ void main() async {
     // Supabaseの初期化
     await SupabaseConfig.initialize();
     print('✅ Supabase initialized successfully');
+    
+    // 通知システムの初期化
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    print('✅ Notification system initialized successfully');
   } catch (e) {
-    print('❌ Failed to initialize Supabase: $e');
+    print('❌ Failed to initialize: $e');
   }
   
   // アプリを起動

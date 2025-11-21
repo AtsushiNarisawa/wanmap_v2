@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import 'signup_screen.dart';
+import 'password_reset_screen.dart';
 import '../home/home_screen.dart';
 
 /// ログイン画面
@@ -233,10 +234,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // パスワードを忘れた場合
                   TextButton(
                     onPressed: () {
-                      // TODO: パスワードリセット画面へ遷移
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('パスワードリセット機能は未実装です'),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const PasswordResetScreen(),
                         ),
                       );
                     },

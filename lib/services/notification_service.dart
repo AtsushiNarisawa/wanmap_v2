@@ -9,6 +9,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/notification_model.dart';
+import 'local_notification_service.dart';
 
 /// 通知IDの定数
 class NotificationIds {
@@ -17,63 +18,99 @@ class NotificationIds {
 
 class NotificationService {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final LocalNotificationService _localNotificationService = LocalNotificationService();
 
   // ==================================================
-  // ローカル通知機能（スタブ実装）
+  // ローカル通知機能
   // ==================================================
 
-  /// 通知権限をリクエスト（スタブ実装）
+  /// 通知権限をリクエスト
   Future<bool> requestPermission() async {
-    debugPrint('NotificationService.requestPermission() - stub');
-    // TODO: flutter_local_notifications等を使った実装が必要
-    return true;
+    try {
+      return await _localNotificationService.requestPermission();
+    } catch (e) {
+      debugPrint('❌ NotificationService.requestPermission() failed: $e');
+      return false;
+    }
   }
 
-  /// 通知システムを初期化（スタブ実装）
+  /// 通知システムを初期化
   Future<void> initialize() async {
-    debugPrint('NotificationService.initialize() - stub');
-    // TODO: flutter_local_notifications等を使った実装が必要
+    try {
+      await _localNotificationService.initialize();
+      debugPrint('✅ NotificationService initialized successfully');
+    } catch (e) {
+      debugPrint('❌ NotificationService.initialize() failed: $e');
+      rethrow;
+    }
   }
 
-  /// すべての通知をキャンセル（スタブ実装）
+  /// すべての通知をキャンセル
   Future<void> cancelAllNotifications() async {
-    debugPrint('NotificationService.cancelAllNotifications() - stub');
-    // TODO: flutter_local_notifications等を使った実装が必要
+    try {
+      await _localNotificationService.cancelAllNotifications();
+      debugPrint('✅ All notifications cancelled');
+    } catch (e) {
+      debugPrint('❌ NotificationService.cancelAllNotifications() failed: $e');
+      rethrow;
+    }
   }
 
-  /// 特定の通知をキャンセル（スタブ実装）
+  /// 特定の通知をキャンセル
   Future<void> cancelNotification(String id) async {
-    debugPrint('NotificationService.cancelNotification($id) - stub');
-    // TODO: flutter_local_notifications等を使った実装が必要
+    try {
+      await _localNotificationService.cancelNotification(id);
+      debugPrint('✅ Notification cancelled: $id');
+    } catch (e) {
+      debugPrint('❌ NotificationService.cancelNotification() failed: $e');
+      rethrow;
+    }
   }
 
-  /// 毎日の通知をスケジュール（スタブ実装）
+  /// 毎日の通知をスケジュール
   Future<void> scheduleDailyNotification({
     required String id,
     required String title,
     required String body,
     required TimeOfDay time,
   }) async {
-    debugPrint('NotificationService.scheduleDailyNotification() - stub');
-    debugPrint('  id: $id, title: $title, time: ${time.hour}:${time.minute}');
-    // TODO: flutter_local_notifications等を使った実装が必要
+    try {
+      await _localNotificationService.scheduleDailyNotification(
+        id: id,
+        title: title,
+        body: body,
+        time: time,
+      );
+      debugPrint('✅ Daily notification scheduled: $id at ${time.hour}:${time.minute}');
+    } catch (e) {
+      debugPrint('❌ NotificationService.scheduleDailyNotification() failed: $e');
+      rethrow;
+    }
   }
 
-  /// 通知を表示（スタブ実装）
+  /// 通知を表示
   Future<void> showNotification({
     required int id,
     required String title,
     required String body,
   }) async {
-    debugPrint('NotificationService.showNotification() - stub');
-    debugPrint('  id: $id, title: $title, body: $body');
-    // TODO: flutter_local_notifications等を使った実装が必要
+    try {
+      await _localNotificationService.showNotification(
+        id: id,
+        title: title,
+        body: body,
+      );
+      debugPrint('✅ Notification shown: $id');
+    } catch (e) {
+      debugPrint('❌ NotificationService.showNotification() failed: $e');
+      rethrow;
+    }
   }
 
-  /// リソースを解放（スタブ実装）
+  /// リソースを解放
   void dispose() {
-    debugPrint('NotificationService.dispose() - stub');
-    // TODO: 必要に応じてリソース解放処理を実装
+    _localNotificationService.dispose();
+    debugPrint('NotificationService disposed');
   }
 
   // ==================================================
