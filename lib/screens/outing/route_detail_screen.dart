@@ -6,6 +6,7 @@ import '../../config/wanmap_spacing.dart';
 import '../../providers/official_route_provider.dart';
 import '../../providers/route_pin_provider.dart';
 import '../../models/official_route.dart';
+import 'walking_screen.dart';
 
 /// ルート詳細画面
 /// 公式ルートの詳細情報とピン一覧を表示
@@ -92,7 +93,7 @@ class RouteDetailScreen extends ConsumerWidget {
                       const SizedBox(height: WanMapSpacing.xl),
 
                       // 散歩を開始ボタン
-                      _buildStartButton(context, isDark),
+                      _buildStartButton(context, isDark, route),
 
                       const SizedBox(height: WanMapSpacing.xxxl),
 
@@ -193,15 +194,16 @@ class RouteDetailScreen extends ConsumerWidget {
   }
 
   /// 散歩を開始ボタン
-  Widget _buildStartButton(BuildContext context, bool isDark) {
+  Widget _buildStartButton(BuildContext context, bool isDark, OfficialRoute route) {
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('散歩開始機能は準備中です'),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WalkingScreen(route: route),
             ),
           );
         },
