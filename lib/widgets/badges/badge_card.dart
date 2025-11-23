@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/badge.dart';
-import '../../theme/app_colors.dart';
+import '../../config/wanmap_colors.dart';
 
 /// Badge Card Widget
 /// 

@@ -40,11 +40,11 @@ class NotificationService {
     try {
       final response = await _supabase
           .from('notifications')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('user_id', userId)
           .eq('is_read', false);
 
-      return (response as PostgrestList).count ?? 0;
+      return (response as List).length;
     } catch (e) {
       print('Error getting unread count: $e');
       return 0;

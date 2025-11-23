@@ -146,10 +146,10 @@ class SocialService {
     try {
       final response = await _supabase
           .from('user_follows')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('following_id', userId);
 
-      return (response as PostgrestList).count ?? 0;
+      return (response as List).length;
     } catch (e) {
       print('Error getting followers count: $e');
       return 0;
@@ -161,10 +161,10 @@ class SocialService {
     try {
       final response = await _supabase
           .from('user_follows')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('follower_id', userId);
 
-      return (response as PostgrestList).count ?? 0;
+      return (response as List).length;
     } catch (e) {
       print('Error getting following count: $e');
       return 0;

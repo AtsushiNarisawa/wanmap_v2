@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/route_model.dart';
@@ -274,11 +275,11 @@ class GpsNotifier extends StateNotifier<GpsState> {
     final deltaLat = (point2.latitude - point1.latitude) * (3.141592653589793 / 180);
     final deltaLon = (point2.longitude - point1.longitude) * (3.141592653589793 / 180);
     
-    final a = (deltaLat / 2).sin() * (deltaLat / 2).sin() +
-        lat1Rad.cos() * lat2Rad.cos() *
-        (deltaLon / 2).sin() * (deltaLon / 2).sin();
+    final a = math.pow(math.sin(deltaLat / 2), 2) +
+        math.cos(lat1Rad) * math.cos(lat2Rad) *
+        math.pow(math.sin(deltaLon / 2), 2);
     
-    final c = 2 * a.sqrt().asin();
+    final c = 2 * math.asin(math.sqrt(a));
     
     return earthRadius * c;
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/badge_provider.dart';
-import '../theme/app_colors.dart';
+import '../config/wanmap_colors.dart';
 
 /// Badge Unlock Helper
 /// 

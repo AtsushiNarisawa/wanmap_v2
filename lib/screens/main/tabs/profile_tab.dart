@@ -258,7 +258,7 @@ class ProfileTab extends ConsumerWidget {
             isDark: isDark,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FollowersScreen()),
+              MaterialPageRoute(builder: (_) => FollowersScreen(userId: profile.userId)),
             ),
           ),
         ),
@@ -271,7 +271,7 @@ class ProfileTab extends ConsumerWidget {
             isDark: isDark,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FollowingScreen()),
+              MaterialPageRoute(builder: (_) => FollowingScreen(userId: profile.userId)),
             ),
           ),
         ),

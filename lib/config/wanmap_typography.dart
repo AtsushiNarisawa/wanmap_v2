@@ -156,6 +156,9 @@ class WanMapTypography {
   /// 見出し3（headlineSmallのエイリアス）
   static const TextStyle heading3 = headlineSmall;
   
+  /// 見出し4（titleLargeのエイリアス）
+  static const TextStyle heading4 = titleLarge;
+  
   // ==================================================
   // 特殊スタイル（数値、統計表示）
   // ==================================================
