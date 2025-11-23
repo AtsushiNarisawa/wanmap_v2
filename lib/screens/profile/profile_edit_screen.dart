@@ -83,12 +83,13 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       }
 
       print('📝 ProfileEdit: Upserting profile data...');
-      await Supabase.instance.client.from('profiles').upsert({
-        'id': userId,
+      
+      // プロフィールを更新（emailは変更しない）
+      await Supabase.instance.client.from('profiles').update({
         'display_name': _nameController.text.trim(),
         'bio': _bioController.text.trim(),
         'updated_at': DateTime.now().toIso8601String(),
-      });
+      }).eq('id', userId);
 
       print('📝 ProfileEdit: Profile saved successfully');
       if (mounted) {
