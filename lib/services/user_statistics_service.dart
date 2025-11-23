@@ -21,9 +21,15 @@ class UserStatisticsService {
         return UserStatistics.empty;
       }
 
-      // RPC returns a single object, not a list
-      final data = response as Map<String, dynamic>;
-      return UserStatistics.fromMap(data);
+      // RPC returns a list with single object
+      if (response is List && response.isNotEmpty) {
+        final data = response[0] as Map<String, dynamic>;
+        return UserStatistics.fromMap(data);
+      } else if (response is Map<String, dynamic>) {
+        return UserStatistics.fromMap(response);
+      }
+      
+      return UserStatistics.empty;
     } catch (e) {
       print('Error getting user statistics: $e');
       return UserStatistics.empty;
