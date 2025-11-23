@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import '../home/home_screen.dart';
+import '../main/main_screen.dart';
 
 /// サインアップ（新規登録）画面
 class SignupScreen extends ConsumerStatefulWidget {
@@ -44,9 +44,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       );
 
       if (mounted) {
-        // サインアップ成功：ホーム画面へ遷移
+        // サインアップ成功：メイン画面へ遷移
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       }
     } catch (e) {

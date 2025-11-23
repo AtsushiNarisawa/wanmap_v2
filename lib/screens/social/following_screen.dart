@@ -57,7 +57,7 @@ class _FollowingScreenState extends ConsumerState<FollowingScreen> {
       limit: _pageSize,
       offset: _offset,
     );
-    final followingAsync = ref.watch(followingProvider(params));
+    final followingAsync = ref.watch(socialFollowingProvider(params));
 
     return Scaffold(
       backgroundColor: isDark
@@ -82,7 +82,7 @@ class _FollowingScreenState extends ConsumerState<FollowingScreen> {
               setState(() {
                 _offset = 0;
               });
-              ref.invalidate(followingProvider);
+              ref.invalidate(socialFollowingProvider);
             },
             child: ListView.builder(
               controller: _scrollController,

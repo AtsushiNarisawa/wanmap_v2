@@ -9,8 +9,8 @@ final socialServiceProvider = Provider<SocialService>((ref) {
   return SocialService(Supabase.instance.client);
 });
 
-/// フォロー状態プロバイダー
-final isFollowingProvider = FutureProvider.family<bool, String>(
+/// フォロー状態プロバイダー（Social Service用）
+final socialIsFollowingProvider = FutureProvider.family<bool, String>(
   (ref, targetUserId) async {
     final currentUser = ref.watch(currentUserProvider);
     if (currentUser == null) return false;
@@ -48,7 +48,7 @@ class FollowersParams {
   int get hashCode => Object.hash(userId, limit, offset);
 }
 
-final followersProvider = FutureProvider.family<
+final socialFollowersProvider = FutureProvider.family<
     List<UserProfile>,
     FollowersParams>((ref, params) async {
   final service = ref.read(socialServiceProvider);
@@ -84,7 +84,7 @@ class FollowingParams {
   int get hashCode => Object.hash(userId, limit, offset);
 }
 
-final followingProvider = FutureProvider.family<
+final socialFollowingProvider = FutureProvider.family<
     List<UserProfile>,
     FollowingParams>((ref, params) async {
   final service = ref.read(socialServiceProvider);

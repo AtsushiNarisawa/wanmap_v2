@@ -25,7 +25,7 @@ class UserProfileScreen extends ConsumerWidget {
     final isOwnProfile = currentUser?.id == userId;
     
     final statisticsAsync = ref.watch(userStatisticsProvider(userId));
-    final isFollowingAsync = ref.watch(isFollowingProvider(userId));
+    final isFollowingAsync = ref.watch(socialIsFollowingProvider(userId));
 
     return Scaffold(
       backgroundColor: isDark
@@ -176,7 +176,7 @@ class UserProfileScreen extends ConsumerWidget {
                       );
                       
                       // プロバイダーを無効化して再取得
-                      ref.invalidate(isFollowingProvider);
+                      ref.invalidate(socialIsFollowingProvider);
                       ref.invalidate(userStatisticsProvider);
                     },
                     style: ElevatedButton.styleFrom(
