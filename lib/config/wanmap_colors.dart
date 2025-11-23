@@ -33,10 +33,12 @@ class WanMapColors {
   /// 背景色 - ライトモード
   static const Color backgroundLight = Color(0xFFF7FAFC);
   static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color cardLight = Color(0xFFFFFFFF);
   
   /// 背景色 - ダークモード
   static const Color backgroundDark = Color(0xFF1A202C);
   static const Color surfaceDark = Color(0xFF2D3748);
+  static const Color cardDark = Color(0xFF2D3748);
   
   /// テキストカラー - ライトモード
   static const Color textPrimaryLight = Color(0xFF1A202C);

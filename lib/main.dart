@@ -40,7 +40,7 @@ void main() async {
     print('✅ Supabase initialized successfully');
     
     // 通知システムの初期化
-    final notificationService = NotificationService();
+    final notificationService = NotificationService(Supabase.instance.client);
     await notificationService.initialize();
     print('✅ Notification system initialized successfully');
   } catch (e) {
@@ -207,4 +207,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
         ),
-      )
+      ),
+    );
+  }
+}

@@ -141,6 +141,22 @@ class WanMapTypography {
   );
   
   // ==================================================
+  // 互換性エイリアス（後方互換性のため）
+  // ==================================================
+  
+  /// キャプション（labelMediumのエイリアス）
+  static const TextStyle caption = labelMedium;
+  
+  /// 本文（bodyMediumのエイリアス）
+  static const TextStyle body = bodyMedium;
+  
+  /// 見出し2（headlineMediumのエイリアス）
+  static const TextStyle heading2 = headlineMedium;
+  
+  /// 見出し3（headlineSmallのエイリアス）
+  static const TextStyle heading3 = headlineSmall;
+  
+  // ==================================================
   // 特殊スタイル（数値、統計表示）
   // ==================================================
   

@@ -32,6 +32,22 @@ class WanMapSpacing {
   static const double xxxl = 64.0;
   
   // ==================================================
+  // 互換性エイリアス（後方互換性のため）
+  // ==================================================
+  
+  /// tiny（xxsのエイリアス）
+  static const double tiny = xxs;
+  
+  /// small（xsのエイリアス）
+  static const double small = xs;
+  
+  /// medium（mdのエイリアス）
+  static const double medium = md;
+  
+  /// large（lgのエイリアス）
+  static const double large = lg;
+  
+  // ==================================================
   // EdgeInsetsヘルパー
   // ==================================================
   
