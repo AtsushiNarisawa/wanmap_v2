@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../config/wanmap_colors.dart';
 import '../../../config/wanmap_typography.dart';
 import '../../../config/wanmap_spacing.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/user_statistics_provider.dart';
 import '../../auth/login_screen.dart';
 import '../../notifications/notifications_screen.dart';

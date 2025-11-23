@@ -5,6 +5,7 @@ import '../../../config/wanmap_typography.dart';
 import '../../../config/wanmap_spacing.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/badge_provider.dart';
+import '../../../providers/user_statistics_provider.dart';
 import '../../daily/daily_walking_screen.dart';
 import '../../history/walk_history_screen.dart';
 

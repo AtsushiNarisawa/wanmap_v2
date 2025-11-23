@@ -101,7 +101,7 @@ class UserListItem extends ConsumerWidget {
     final currentUser = ref.watch(currentUserProvider);
     if (currentUser == null) return const SizedBox.shrink();
 
-    final isFollowingAsync = ref.watch(isFollowingProvider(user.id));
+    final isFollowingAsync = ref.watch(socialIsFollowingProvider(user.id));
 
     return isFollowingAsync.when(
       data: (isFollowing) {
@@ -115,7 +115,7 @@ class UserListItem extends ConsumerWidget {
                 followingId: user.id,
                 isFollowing: isFollowing,
               );
-              ref.invalidate(isFollowingProvider);
+              ref.invalidate(socialIsFollowingProvider);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: isFollowing

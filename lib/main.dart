@@ -40,10 +40,8 @@ void main() async {
     await SupabaseConfig.initialize();
     print('✅ Supabase initialized successfully');
     
-    // 通知システムの初期化
-    final notificationService = NotificationService(Supabase.instance.client);
-    await notificationService.initialize();
-    print('✅ Notification system initialized successfully');
+    // 通知システムは各画面で必要に応じて初期化
+    print('✅ Notification system ready');
   } catch (e) {
     print('❌ Failed to initialize: $e');
     // エラーが発生しても起動を継続

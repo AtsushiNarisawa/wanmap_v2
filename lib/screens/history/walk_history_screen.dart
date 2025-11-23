@@ -7,7 +7,6 @@ import '../../providers/walk_history_provider.dart';
 import '../../widgets/history/outing_walk_history_card.dart';
 import '../../widgets/history/daily_walk_history_card.dart';
 import '../../models/walk_history.dart';
-import 'walk_detail_screen.dart';
 
 /// 散歩履歴画面
 /// - タブ切り替え（お出かけ/日常/すべて）
@@ -193,13 +192,8 @@ class _WalkHistoryScreenState extends ConsumerState<WalkHistoryScreen>
               return OutingWalkHistoryCard(
                 history: history,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WalkDetailScreen(
-                        walkId: history.walkId,
-                      ),
-                    ),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('散歩詳細画面は準備中です')),
                   );
                 },
               );
@@ -359,13 +353,8 @@ class _WalkHistoryScreenState extends ConsumerState<WalkHistoryScreen>
                 return OutingWalkHistoryCard(
                   history: outing,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WalkDetailScreen(
-                          walkId: outing.walkId,
-                        ),
-                      ),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('散歩詳細画面は準備中です')),
                     );
                   },
                 );
