@@ -12,7 +12,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final themeMode = ref.watch(themeModeProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return Scaffold(
       backgroundColor: isDark
@@ -191,7 +191,7 @@ class SettingsScreen extends ConsumerWidget {
               groupValue: currentMode,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(themeModeProvider.notifier).setThemeMode(value);
+                  ref.read(themeProvider.notifier).setThemeMode(value);
                   Navigator.of(context).pop();
                 }
               },
@@ -202,7 +202,7 @@ class SettingsScreen extends ConsumerWidget {
               groupValue: currentMode,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(themeModeProvider.notifier).setThemeMode(value);
+                  ref.read(themeProvider.notifier).setThemeMode(value);
                   Navigator.of(context).pop();
                 }
               },
@@ -213,7 +213,7 @@ class SettingsScreen extends ConsumerWidget {
               groupValue: currentMode,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(themeModeProvider.notifier).setThemeMode(value);
+                  ref.read(themeProvider.notifier).setThemeMode(value);
                   Navigator.of(context).pop();
                 }
               },

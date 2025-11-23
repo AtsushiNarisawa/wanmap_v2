@@ -41,7 +41,7 @@ class WalkSaveService {
         'walk_type': 'daily',
         'route_id': null,
         'start_time': route.startedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
-        'end_time': route.finishedAt?.toIso8601String(),
+        'end_time': route.endedAt?.toIso8601String(),
         'distance_km': route.distance / 1000.0,
         'duration_minutes': (route.duration / 60).ceil(),
         'path_geojson': pathGeoJson,
@@ -93,7 +93,7 @@ class WalkSaveService {
         'walk_type': 'outing',
         'route_id': officialRouteId,
         'start_time': route.startedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
-        'end_time': route.finishedAt?.toIso8601String(),
+        'end_time': route.endedAt?.toIso8601String(),
         'distance_km': route.distance / 1000.0,
         'duration_minutes': (route.duration / 60).ceil(),
         'path_geojson': pathGeoJson,
@@ -189,21 +189,21 @@ class WalkSaveService {
       print('🔵 散歩履歴取得: userId=$userId, mode=${walkMode?.value}');
 
       // walks テーブルから履歴を取得
-      var query = _supabase
+      var queryBuilder = _supabase
           .from('walks')
           .select('*, routes(name, distance_km)')
-          .eq('user_id', userId)
-          .order('start_time', ascending: false)
-          .limit(limit);
+          .eq('user_id', userId);
 
       // walk_mode でフィルター
       if (walkMode == WalkMode.daily) {
-        query = query.eq('walk_type', 'daily');
+        queryBuilder = queryBuilder.eq('walk_type', 'daily');
       } else if (walkMode == WalkMode.outing) {
-        query = query.eq('walk_type', 'outing');
+        queryBuilder = queryBuilder.eq('walk_type', 'outing');
       }
 
-      final walks = await query;
+      final walks = await queryBuilder
+          .order('start_time', ascending: false)
+          .limit(limit);
       print('✅ 散歩履歴取得: ${(walks as List).length}件');
       return List<Map<String, dynamic>>.from(walks);
     } catch (e) {

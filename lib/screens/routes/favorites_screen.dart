@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/route_model.dart';
 import '../../services/route_service.dart';
 import '../../services/favorite_service.dart';
-import 'route_detail_screen.dart';
+import '../outing/route_detail_screen.dart';
 
 /// お気に入りルート一覧を取得するProvider
 final favoriteRoutesProvider = FutureProvider<List<RouteModel>>((ref) async {

@@ -147,7 +147,7 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
     if (confirmed != true) return;
 
     try {
-      await ref.read(dogProvider.notifier).deleteDog(widget.dog!.id!);
+      await ref.read(dogProvider.notifier).deleteDog(widget.dog!.id!, widget.userId);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
