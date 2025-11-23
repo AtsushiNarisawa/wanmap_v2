@@ -8,23 +8,35 @@ import '../../providers/dog_provider.dart';
 import 'dog_edit_screen.dart';
 
 /// 愛犬一覧画面
-class DogListScreen extends ConsumerWidget {
+class DogListScreen extends ConsumerStatefulWidget {
   const DogListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    print('🐕 DogListScreen: build() called');
+  ConsumerState<DogListScreen> createState() => _DogListScreenState();
+}
+
+class _DogListScreenState extends ConsumerState<DogListScreen> {
+  bool _hasLoadedDogs = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 初回のみ犬一覧を読み込み
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = ref.read(currentUserIdProvider);
+      if (userId != null && !_hasLoadedDogs) {
+        _hasLoadedDogs = true;
+        print('🐕 DogListScreen: Loading dogs for user $userId');
+        ref.read(dogProvider.notifier).loadUserDogs(userId);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userId = ref.watch(currentUserIdProvider);
     final dogState = ref.watch(dogProvider);
-    print('🐕 DogListScreen: userId=$userId, dogsCount=${dogState.dogs.length}, isLoading=${dogState.isLoading}, errorMessage=${dogState.errorMessage}');
-
-    // ユーザーIDが取得できたら犬一覧を読み込み（初回のみ）
-    // エラーがある場合は再読み込みしない
-    if (userId != null && dogState.dogs.isEmpty && !dogState.isLoading && dogState.errorMessage == null) {
-      print('🐕 DogListScreen: Triggering loadUserDogs (userId=$userId, isEmpty=${dogState.dogs.isEmpty}, isLoading=${dogState.isLoading}, hasError=${dogState.errorMessage != null})');
-      Future.microtask(() => ref.read(dogProvider.notifier).loadUserDogs(userId));
-    }
 
     return Scaffold(
       backgroundColor: isDark
