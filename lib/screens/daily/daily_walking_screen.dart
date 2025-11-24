@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
+import '../../config/env.dart';
 import '../../models/walk_mode.dart';
 import '../../providers/gps_provider_riverpod.dart';
 import '../../services/profile_service.dart';
@@ -223,7 +224,7 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
       ),
       children: [
         TileLayer(
-          urlTemplate: 'https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=8c3872c6b1d5471a0e8c88cc69ed4f',
+          urlTemplate: 'https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=${Environment.thunderforestApiKey}',
           userAgentPackageName: 'com.doghub.wanmap',
         ),
         // 歩いたルートを表示
