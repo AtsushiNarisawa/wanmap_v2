@@ -6,6 +6,9 @@ import '../../../config/wanmap_spacing.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/badge_provider.dart';
 import '../../../providers/user_statistics_provider.dart';
+import '../../../providers/walk_history_provider.dart';
+import '../../../services/photo_service.dart';
+import '../../../widgets/walk_photo_grid.dart';
 import '../../daily/daily_walking_screen.dart';
 import '../../history/walk_history_screen.dart';
 
@@ -260,29 +263,157 @@ class RecordsTab extends ConsumerWidget {
 
   /// 最近の散歩
   Widget _buildRecentWalks(BuildContext context, bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer(
+      builder: (context, ref, child) {
+        final userId = ref.watch(currentUserIdProvider);
+        if (userId == null) {
+          return _buildEmptyCard(isDark, 'ログインして散歩記録を確認しましょう');
+        }
+
+        final historyAsync = ref.watch(allWalkHistoryProvider(AllHistoryParams(userId: userId, limit: 5)));
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '最近の散歩',
-              style: WanMapTypography.headlineSmall.copyWith(
-                color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '最近の散歩',
+                  style: WanMapTypography.headlineSmall.copyWith(
+                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WalkHistoryScreen())),
+                  child: const Text('すべて見る'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WalkHistoryScreen())),
-              child: const Text('すべて見る'),
+            const SizedBox(height: WanMapSpacing.md),
+            historyAsync.when(
+              data: (walks) {
+                if (walks.isEmpty) {
+                  return _buildEmptyCard(isDark, 'まだ散歩の記録がありません');
+                }
+                return Column(
+                  children: walks.map((walk) => _buildWalkHistoryCard(context, isDark, walk, userId)).toList(),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 散歩履歴カード（写真表示機能付き - Phase 3拡張）
+  Widget _buildWalkHistoryCard(BuildContext context, bool isDark, dynamic walk, String userId) {
+    // 散歩タイプを判定
+    final isOuting = walk.walkType == 'outing';
+    final walkId = walk.walkId;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: WanMapSpacing.md),
+      color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(WanMapSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ヘッダー（タイプアイコン + タイトル）
+            Row(
+              children: [
+                Icon(
+                  isOuting ? Icons.explore : Icons.directions_walk,
+                  color: isOuting ? Colors.orange : WanMapColors.accent,
+                  size: 24,
+                ),
+                const SizedBox(width: WanMapSpacing.sm),
+                Expanded(
+                  child: Text(
+                    isOuting ? (walk.routeTitle ?? 'おでかけ散歩') : '日常散歩',
+                    style: WanMapTypography.bodyLarge.copyWith(
+                      color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: WanMapSpacing.sm),
+            
+            // 統計情報
+            Row(
+              children: [
+                Icon(Icons.straighten, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '${(walk.distanceMeters / 1000).toStringAsFixed(2)} km',
+                  style: WanMapTypography.bodySmall.copyWith(
+                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                  ),
+                ),
+                const SizedBox(width: WanMapSpacing.md),
+                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '${(walk.durationSeconds / 60).ceil()} 分',
+                  style: WanMapTypography.bodySmall.copyWith(
+                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                  ),
+                ),
+                const SizedBox(width: WanMapSpacing.md),
+                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  _formatDate(walk.walkedAt),
+                  style: WanMapTypography.bodySmall.copyWith(
+                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                  ),
+                ),
+              ],
+            ),
+
+            // 写真グリッド（Phase 3拡張機能）
+            FutureBuilder<List<WalkPhoto>>(
+              future: PhotoService().getWalkPhotos(walkId),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  return Column(
+                    children: [
+                      const SizedBox(height: WanMapSpacing.md),
+                      WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ],
         ),
-        const SizedBox(height: WanMapSpacing.md),
-        _buildEmptyCard(isDark, 'まだ散歩の記録がありません'),
-      ],
+      ),
     );
+  }
+
+  /// 日付フォーマット
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inDays == 0) {
+      return '今日';
+    } else if (diff.inDays == 1) {
+      return '昨日';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays}日前';
+    } else {
+      return '${date.month}/${date.day}';
+    }
   }
 
   Widget _buildEmptyCard(bool isDark, String message) {

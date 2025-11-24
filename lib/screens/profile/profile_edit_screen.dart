@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
@@ -18,8 +20,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
+  final _picker = ImagePicker();
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isUploadingAvatar = false;
+  String? _avatarUrl;
 
   @override
   void initState() {
@@ -43,13 +48,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
       final response = await Supabase.instance.client
           .from('profiles')
-          .select('display_name, bio')
+          .select('display_name, bio, avatar_url')
           .eq('id', userId)
           .maybeSingle();
 
       if (response != null) {
         _nameController.text = response['display_name'] ?? '';
         _bioController.text = response['bio'] ?? '';
+        _avatarUrl = response['avatar_url'];
       }
     } catch (e) {
       if (mounted) {
@@ -88,6 +94,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       await Supabase.instance.client.from('profiles').update({
         'display_name': _nameController.text.trim(),
         'bio': _bioController.text.trim(),
+        'avatar_url': _avatarUrl,
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', userId);
 
@@ -108,6 +115,97 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  /// アバター写真を変更
+  Future<void> _changeAvatar() async {
+    try {
+      print('📸 アバター変更開始...');
+      
+      // 画像ソースを選択
+      final source = await showDialog<ImageSource>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('アバター画像を選択'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('カメラで撮影'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('ギャラリーから選択'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (source == null) return;
+
+      // 画像を選択
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 85,
+      );
+
+      if (image == null) {
+        print('❌ 画像選択がキャンセルされました');
+        return;
+      }
+
+      setState(() => _isUploadingAvatar = true);
+
+      final userId = ref.read(currentUserIdProvider);
+      if (userId == null) {
+        print('❌ userId is null');
+        return;
+      }
+
+      print('📤 アバターをアップロード中...');
+
+      // Supabase Storageにアップロード
+      final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = '$userId/$fileName';
+
+      await Supabase.instance.client.storage
+          .from('profile-avatars')
+          .upload(filePath, File(image.path));
+
+      // 公開URLを取得
+      final publicUrl = Supabase.instance.client.storage
+          .from('profile-avatars')
+          .getPublicUrl(filePath);
+
+      print('✅ アバターアップロード成功: $publicUrl');
+
+      setState(() {
+        _avatarUrl = publicUrl;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('アバター画像を変更しました')),
+        );
+      }
+    } catch (e) {
+      print('❌ アバター変更エラー: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('アバター変更に失敗しました: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingAvatar = false);
       }
     }
   }
@@ -163,32 +261,45 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // アバター編集（将来実装）
+                      // アバター編集（Phase 6実装済み）
                       Center(
                         child: Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: WanMapColors.accent.withOpacity(0.2),
-                              child: Icon(
-                                Icons.person,
-                                size: 60,
-                                color: WanMapColors.accent,
-                              ),
-                            ),
+                            _isUploadingAvatar
+                                ? const CircleAvatar(
+                                    radius: 60,
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : _avatarUrl != null
+                                    ? CircleAvatar(
+                                        radius: 60,
+                                        backgroundImage: NetworkImage(_avatarUrl!),
+                                      )
+                                    : CircleAvatar(
+                                        radius: 60,
+                                        backgroundColor: WanMapColors.accent.withOpacity(0.2),
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 60,
+                                          color: WanMapColors.accent,
+                                        ),
+                                      ),
                             Positioned(
                               right: 0,
                               bottom: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: WanMapColors.accent,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  size: 20,
-                                  color: Colors.white,
+                              child: GestureDetector(
+                                onTap: _isUploadingAvatar ? null : _changeAvatar,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: WanMapColors.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
