@@ -11,6 +11,7 @@ import '../../models/walk_mode.dart';
 import '../../providers/gps_provider_riverpod.dart';
 import '../../services/profile_service.dart';
 import '../../services/walk_save_service.dart';
+import '../../services/photo_service.dart';
 
 /// 日常散歩中画面
 /// - リアルタイムGPS追跡
@@ -26,6 +27,9 @@ class DailyWalkingScreen extends ConsumerStatefulWidget {
 class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   final MapController _mapController = MapController();
   bool _isFollowingUser = true;
+  final PhotoService _photoService = PhotoService();
+  final List<String> _photoUrls = []; // 撮影した写真のURL一覧
+  String? _currentWalkId; // 現在の散歩ID（保存時に設定）
 
   @override
   void initState() {
@@ -137,7 +141,10 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
           return;
         }
 
-        print('✅ 日常散歩記録保存成功: walkId=$walkId');
+        // 散歩IDを保存（写真アップロード用）
+        _currentWalkId = walkId;
+
+        print('✅ 日常散歩記録保存成功: walkId=$walkId, 写真数=${_photoUrls.length}枚');
 
         // 2. プロフィールを自動更新
         final profileService = ProfileService();
@@ -176,6 +183,98 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   /// 記録を再開
   void _resumeRecording() {
     ref.read(gpsProviderRiverpod.notifier).resumeRecording();
+  }
+
+  /// 写真を撮影（Phase 3新機能）
+  Future<void> _takePhoto() async {
+    try {
+      print('📷 写真撮影開始...');
+      
+      // カメラで写真を撮影
+      final file = await _photoService.takePhoto();
+      
+      if (file == null) {
+        print('❌ 写真撮影がキャンセルされました');
+        return;
+      }
+
+      print('✅ 写真撮影成功: ${file.path}');
+
+      // ユーザーIDを取得
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ユーザー情報が取得できませんでした'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // 一時的なwalkIDを生成（散歩終了時に実際のIDに置き換える）
+      // ※注意: 現在の実装では写真アップロードは散歩終了後に行う方が確実
+      // 散歩中にアップロードする場合、walk_id が確定していないため
+      // 後でwalk_idを更新する処理が必要
+      final tempWalkId = _currentWalkId ?? 'temp_${DateTime.now().millisecondsSinceEpoch}';
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('写真をアップロード中...'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // 写真をアップロード（walk-photos バケット）
+      final photoUrl = await _photoService.uploadWalkPhoto(
+        file: file,
+        walkId: tempWalkId,
+        userId: userId,
+        displayOrder: _photoUrls.length + 1,
+      );
+
+      if (photoUrl != null) {
+        setState(() {
+          _photoUrls.add(photoUrl);
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('写真をアップロードしました（${_photoUrls.length}枚）'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+
+        print('✅ 写真アップロード成功: $photoUrl');
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('写真のアップロードに失敗しました'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        print('❌ 写真アップロード失敗');
+      }
+    } catch (e) {
+      print('❌ 写真撮影エラー: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('エラー: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -378,17 +477,36 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
 
               // 写真撮影ボタン
               Center(
-                child: IconButton(
-                  onPressed: () {
-                    // TODO: Phase 3で実装予定
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('写真撮影機能は準備中です')),
-                    );
-                  },
-                  icon: const Icon(Icons.camera_alt),
-                  iconSize: 32,
-                  color: WanMapColors.accent,
-                  tooltip: '写真を撮影',
+                child: Stack(
+                  children: [
+                    IconButton(
+                      onPressed: _takePhoto,
+                      icon: const Icon(Icons.camera_alt),
+                      iconSize: 32,
+                      color: WanMapColors.accent,
+                      tooltip: '写真を撮影',
+                    ),
+                    if (_photoUrls.isNotEmpty)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: WanMapColors.accent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${_photoUrls.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
 
