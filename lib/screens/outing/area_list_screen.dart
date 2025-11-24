@@ -14,8 +14,11 @@ class AreaListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('🟢 AreaListScreen.build() called');
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    print('🟢 About to watch areasProvider...');
     final areasAsync = ref.watch(areasProvider);
+    print('🟢 areasAsync state: ${areasAsync.runtimeType}');
 
     return Scaffold(
       backgroundColor: isDark
