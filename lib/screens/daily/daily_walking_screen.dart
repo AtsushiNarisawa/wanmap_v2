@@ -374,7 +374,25 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
                 ],
               ),
 
-              const SizedBox(height: WanMapSpacing.lg),
+              const SizedBox(height: WanMapSpacing.md),
+
+              // 写真撮影ボタン
+              Center(
+                child: IconButton(
+                  onPressed: () {
+                    // TODO: Phase 3で実装予定
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('写真撮影機能は準備中です')),
+                    );
+                  },
+                  icon: const Icon(Icons.camera_alt),
+                  iconSize: 32,
+                  color: WanMapColors.accent,
+                  tooltip: '写真を撮影',
+                ),
+              ),
+
+              const SizedBox(height: WanMapSpacing.md),
 
               // コントロールボタン
               Row(
