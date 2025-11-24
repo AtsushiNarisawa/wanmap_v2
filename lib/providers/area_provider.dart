@@ -11,7 +11,7 @@ final areasProvider = FutureProvider.autoDispose<List<Area>>((ref) async {
   try {
     print('🔵 Querying Supabase areas table...');
     final response = await _supabase
-        .rpc('get_areas_with_coordinates');
+        .rpc('get_areas_simple');
 
     print('🔵 Response received: ${response.runtimeType}');
     print('🔵 Response data: $response');
