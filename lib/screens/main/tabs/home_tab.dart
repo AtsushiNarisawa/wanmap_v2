@@ -62,6 +62,11 @@ class HomeTab extends ConsumerWidget {
           children: [
             const SizedBox(height: WanMapSpacing.md),
             
+            // クイックアクション（最優先で表示）
+            _buildQuickActions(context, isDark),
+            
+            const SizedBox(height: WanMapSpacing.xxxl),
+            
             // おすすめエリア
             _buildRecommendedAreas(context, isDark, areasAsync),
             
@@ -69,11 +74,6 @@ class HomeTab extends ConsumerWidget {
             
             // 人気の公式ルート
             _buildPopularRoutes(context, isDark),
-            
-            const SizedBox(height: WanMapSpacing.xxxl),
-            
-            // クイックアクション
-            _buildQuickActions(context, isDark),
             
             const SizedBox(height: WanMapSpacing.xxxl),
           ],
