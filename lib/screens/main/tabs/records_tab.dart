@@ -273,10 +273,6 @@ class RecordsTab extends ConsumerWidget {
 
         final historyAsync = ref.watch(allWalkHistoryProvider(AllHistoryParams(userId: userId, limit: 5)));
 
-        print('🔵 Records Tab - Recent Walks:');
-        print('   userId: $userId');
-        print('   historyAsync state: ${historyAsync.runtimeType}');
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -299,24 +295,15 @@ class RecordsTab extends ConsumerWidget {
             const SizedBox(height: WanMapSpacing.md),
             historyAsync.when(
               data: (walks) {
-                print('   ✅ Data loaded: ${walks.length} walks');
                 if (walks.isEmpty) {
-                  print('   ⚠️ No walks found, showing empty card');
                   return _buildEmptyCard(isDark, 'まだ散歩の記録がありません');
                 }
-                print('   📋 Building ${walks.length} walk cards');
                 return Column(
                   children: walks.map((walk) => _buildWalkHistoryCard(context, isDark, walk, userId)).toList(),
                 );
               },
-              loading: () {
-                print('   ⏳ Loading walks...');
-                return const Center(child: CircularProgressIndicator());
-              },
-              error: (error, stack) {
-                print('   ❌ Error loading walks: $error');
-                return _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました');
-              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました'),
             ),
           ],
         );
@@ -397,33 +384,13 @@ class RecordsTab extends ConsumerWidget {
             FutureBuilder<List<WalkPhoto>>(
               future: PhotoService().getWalkPhotos(walkId),
               builder: (context, snapshot) {
-                print('📸 Records Tab - Photo FutureBuilder:');
-                print('   walkId: $walkId');
-                print('   connectionState: ${snapshot.connectionState}');
-                print('   hasData: ${snapshot.hasData}');
-                print('   hasError: ${snapshot.hasError}');
-                if (snapshot.hasError) {
-                  print('   ❌ Error: ${snapshot.error}');
-                }
-                if (snapshot.hasData) {
-                  print('   📊 Photos count: ${snapshot.data!.length}');
-                  if (snapshot.data!.isNotEmpty) {
-                    print('   ✅ Showing photo grid');
-                    return Container(
-                      color: Colors.pink.withOpacity(0.3), // デバッグ用：ピンク背景
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('📸 写真グリッド（デバッグ）', style: TextStyle(fontSize: 10)),
-                          const SizedBox(height: WanMapSpacing.md),
-                          WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
-                        ],
-                      ),
-                    );
-                  } else {
-                    print('   ⚠️ No photos found');
-                  }
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  return Column(
+                    children: [
+                      const SizedBox(height: WanMapSpacing.md),
+                      WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
+                    ],
+                  );
                 }
                 return const SizedBox.shrink();
               },

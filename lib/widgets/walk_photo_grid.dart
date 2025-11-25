@@ -15,21 +15,12 @@ class WalkPhotoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🖼️ WalkPhotoGrid.build() called');
-    print('   photos.length: ${photos.length}');
-    print('   maxPhotosToShow: $maxPhotosToShow');
-    
     if (photos.isEmpty) {
-      print('   ⚠️ photos is empty, returning SizedBox.shrink()');
       return const SizedBox.shrink();
     }
 
     final displayPhotos = photos.take(maxPhotosToShow).toList();
     final remainingCount = photos.length - maxPhotosToShow;
-    
-    print('   displayPhotos.length: ${displayPhotos.length}');
-    print('   remainingCount: $remainingCount');
-    print('   Building horizontal ListView with height=80');
 
     return SizedBox(
       height: 80,
@@ -40,8 +31,6 @@ class WalkPhotoGrid extends StatelessWidget {
           final photo = displayPhotos[index];
           final isLast = index == displayPhotos.length - 1;
           final showMoreIndicator = isLast && remainingCount > 0;
-          
-          print('   🖼️ Building photo item $index: ${photo.publicUrl}');
 
           return Padding(
             padding: const EdgeInsets.only(right: 8.0),
