@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -176,11 +177,15 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
         // 散歩IDを保存（写真アップロード用）
         _currentWalkId = walkId;
 
-        print('✅ 日常散歩記録保存成功: walkId=$walkId, 写真数=${_photoFiles.length}枚');
+        if (kDebugMode) {
+          print('✅ 日常散歩記録保存成功: walkId=$walkId, 写真数=${_photoFiles.length}枚');
+        }
 
         // 2. 散歩中に撮影した写真をアップロード
         if (_photoFiles.isNotEmpty) {
-          print('📸 写真アップロード開始: ${_photoFiles.length}枚');
+          if (kDebugMode) {
+            print('📸 写真アップロード開始: ${_photoFiles.length}枚');
+          }
           for (int i = 0; i < _photoFiles.length; i++) {
             final file = _photoFiles[i];
             final photoUrl = await _photoService.uploadWalkPhoto(
@@ -190,9 +195,13 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
               displayOrder: i + 1,
             );
             if (photoUrl != null) {
-              print('✅ 写真${i + 1}/${_photoFiles.length}アップロード成功');
+              if (kDebugMode) {
+                print('✅ 写真${i + 1}/${_photoFiles.length}アップロード成功');
+              }
             } else {
-              print('❌ 写真${i + 1}/${_photoFiles.length}アップロード失敗');
+              if (kDebugMode) {
+                print('❌ 写真${i + 1}/${_photoFiles.length}アップロード失敗');
+              }
             }
           }
         }
@@ -239,26 +248,36 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   /// 写真を選択（散歩終了時）
   Future<void> _selectPhotos() async {
     try {
-      print('📷 写真選択開始...');
+      if (kDebugMode) {
+        print('📷 写真選択開始...');
+      }
       
       // ギャラリーから写真を選択
       final file = await _photoService.pickImageFromGallery();
       
       if (file == null) {
-        print('❌ 写真選択がキャンセルされました');
+        if (kDebugMode) {
+          print('❌ 写真選択がキャンセルされました');
+        }
         return;
       }
 
-      print('✅ 写真選択成功: ${file.path}');
+      if (kDebugMode) {
+        print('✅ 写真選択成功: ${file.path}');
+      }
 
       // 写真をローカルリストに追加
       setState(() {
         _photoFiles.add(file);
       });
 
-      print('✅ 写真追加成功: ${_photoFiles.length}枚');
+      if (kDebugMode) {
+        print('✅ 写真追加成功: ${_photoFiles.length}枚');
+      }
     } catch (e) {
-      print('❌ 写真選択エラー: $e');
+      if (kDebugMode) {
+        print('❌ 写真選択エラー: $e');
+      }
     }
   }
 

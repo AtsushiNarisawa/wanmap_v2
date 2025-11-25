@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/route_pin.dart';
@@ -39,7 +40,9 @@ final pinsByRouteProvider = FutureProvider.family<List<RoutePin>, String>(
           final index = pins.indexOf(pin);
           pins[index] = pin.copyWith(photoUrls: photoUrls);
         } catch (e) {
-          print('Failed to fetch photos for pin ${pin.id}: $e');
+          if (kDebugMode) {
+            print('Failed to fetch photos for pin ${pin.id}: $e');
+          }
         }
       }
 
@@ -78,7 +81,9 @@ final pinByIdProvider = FutureProvider.family<RoutePin?, String>(
 
         return pin.copyWith(photoUrls: photoUrls);
       } catch (e) {
-        print('Failed to fetch photos for pin $pinId: $e');
+        if (kDebugMode) {
+          print('Failed to fetch photos for pin $pinId: $e');
+        }
         return pin;
       }
     } catch (e) {
@@ -105,7 +110,9 @@ class CreatePinUseCase {
     List<String>? photoFilePaths, // ローカルファイルパス
   }) async {
     try {
-      print('🔵 ピン作成開始: routeId=$routeId, userId=$userId');
+      if (kDebugMode) {
+        print('🔵 ピン作成開始: routeId=$routeId, userId=$userId');
+      }
       
       // 1. ピンレコードを作成
       final pinResponse = await _supabase.from('route_pins').insert({
@@ -117,13 +124,17 @@ class CreatePinUseCase {
         'comment': comment,
       }).select().single();
 
-      print('✅ ピンレコード作成成功: ${pinResponse['id']}');
+      if (kDebugMode) {
+        print('✅ ピンレコード作成成功: ${pinResponse['id']}');
+      }
 
       final pin = RoutePin.fromJson(pinResponse);
 
       // 2. 写真があればアップロード
       if (photoFilePaths != null && photoFilePaths.isNotEmpty) {
-        print('🔵 写真アップロード開始: ${photoFilePaths.length}枚');
+        if (kDebugMode) {
+          print('🔵 写真アップロード開始: ${photoFilePaths.length}枚');
+        }
         
         final photoUrls = await _storageService.uploadMultiplePinPhotos(
           filePaths: photoFilePaths,
@@ -131,7 +142,9 @@ class CreatePinUseCase {
           pinId: pin.id,
         );
 
-        print('✅ 写真アップロード完了: ${photoUrls.length}枚');
+        if (kDebugMode) {
+          print('✅ 写真アップロード完了: ${photoUrls.length}枚');
+        }
 
         // 3. route_pin_photosテーブルに登録
         for (var i = 0; i < photoUrls.length; i++) {
@@ -141,19 +154,27 @@ class CreatePinUseCase {
               'photo_url': photoUrls[i],
               'display_order': i + 1,
             });
-            print('✅ 写真レコード登録成功: ${i + 1}枚目');
+            if (kDebugMode) {
+              print('✅ 写真レコード登録成功: ${i + 1}枚目');
+            }
           } catch (e) {
-            print('❌ 写真レコード登録失敗: $e');
+            if (kDebugMode) {
+              print('❌ 写真レコード登録失敗: $e');
+            }
           }
         }
 
         return pin.copyWith(photoUrls: photoUrls);
       }
 
-      print('✅ ピン作成完了（写真なし）');
+      if (kDebugMode) {
+        print('✅ ピン作成完了（写真なし）');
+      }
       return pin;
     } catch (e) {
-      print('❌ ピン作成エラー: $e');
+      if (kDebugMode) {
+        print('❌ ピン作成エラー: $e');
+      }
       throw Exception('Failed to create pin: $e');
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,10 +72,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   }
 
   Future<void> _saveProfile() async {
-    print('📝 ProfileEdit: Save button pressed');
+    if (kDebugMode) {
+      print('📝 ProfileEdit: Save button pressed');
+    }
     
     if (!_formKey.currentState!.validate()) {
-      print('📝 ProfileEdit: Validation failed');
+      if (kDebugMode) {
+        print('📝 ProfileEdit: Validation failed');
+      }
       return;
     }
 
@@ -82,13 +87,19 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
     try {
       final userId = ref.read(currentUserIdProvider);
-      print('📝 ProfileEdit: userId=$userId');
+      if (kDebugMode) {
+        print('📝 ProfileEdit: userId=$userId');
+      }
       if (userId == null) {
-        print('📝 ProfileEdit: userId is null, aborting');
+        if (kDebugMode) {
+          print('📝 ProfileEdit: userId is null, aborting');
+        }
         return;
       }
 
-      print('📝 ProfileEdit: Upserting profile data...');
+      if (kDebugMode) {
+        print('📝 ProfileEdit: Upserting profile data...');
+      }
       
       // プロフィールを作成または更新（UPSERT）
       final currentUser = Supabase.instance.client.auth.currentUser;
@@ -101,7 +112,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         'updated_at': DateTime.now().toIso8601String(),
       });
 
-      print('📝 ProfileEdit: Profile saved successfully');
+      if (kDebugMode) {
+        print('📝 ProfileEdit: Profile saved successfully');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('プロフィールを更新しました')),
@@ -109,7 +122,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         Navigator.of(context).pop(true); // 更新成功を通知
       }
     } catch (e) {
-      print('📝 ProfileEdit: Error saving profile: $e');
+      if (kDebugMode) {
+        print('📝 ProfileEdit: Error saving profile: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('更新に失敗しました: $e')),
@@ -125,7 +140,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   /// アバター写真を変更
   Future<void> _changeAvatar() async {
     try {
-      print('📸 アバター変更開始...');
+      if (kDebugMode) {
+        print('📸 アバター変更開始...');
+      }
       
       // 画像ソースを選択
       final source = await showDialog<ImageSource>(
@@ -161,7 +178,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       );
 
       if (image == null) {
-        print('❌ 画像選択がキャンセルされました');
+        if (kDebugMode) {
+          print('❌ 画像選択がキャンセルされました');
+        }
         return;
       }
 
@@ -169,11 +188,15 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
       final userId = ref.read(currentUserIdProvider);
       if (userId == null) {
-        print('❌ userId is null');
+        if (kDebugMode) {
+          print('❌ userId is null');
+        }
         return;
       }
 
-      print('📤 アバターをアップロード中...');
+      if (kDebugMode) {
+        print('📤 アバターをアップロード中...');
+      }
 
       // Supabase Storageにアップロード
       final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -188,7 +211,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           .from('profile-avatars')
           .getPublicUrl(filePath);
 
-      print('✅ アバターアップロード成功: $publicUrl');
+      if (kDebugMode) {
+        print('✅ アバターアップロード成功: $publicUrl');
+      }
 
       setState(() {
         _avatarUrl = publicUrl;
@@ -200,7 +225,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         );
       }
     } catch (e) {
-      print('❌ アバター変更エラー: $e');
+      if (kDebugMode) {
+        print('❌ アバター変更エラー: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('アバター変更に失敗しました: $e')),

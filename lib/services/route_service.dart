@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/route_model.dart';
@@ -35,7 +36,9 @@ class RouteService {
 
       return routeId;
     } catch (e) {
-      print('ルート保存エラー: $e');
+      if (kDebugMode) {
+        print('ルート保存エラー: $e');
+      }
       rethrow;
     }
   }
@@ -62,7 +65,9 @@ class RouteService {
         );
       }).toList();
     } catch (e) {
-      print('ルート一覧取得エラー: $e');
+      if (kDebugMode) {
+        print('ルート一覧取得エラー: $e');
+      }
       rethrow;
     }
   }
@@ -93,7 +98,9 @@ class RouteService {
         points: points,
       );
     } catch (e) {
-      print('ルート詳細取得エラー: $e');
+      if (kDebugMode) {
+        print('ルート詳細取得エラー: $e');
+      }
       return null;
     }
   }
@@ -103,7 +110,9 @@ class RouteService {
       await _supabase.from('routes').delete().eq('id', routeId).eq('user_id', userId);
       return true;
     } catch (e) {
-      print('ルート削除エラー: $e');
+      if (kDebugMode) {
+        print('ルート削除エラー: $e');
+      }
       return false;
     }
   }
@@ -215,7 +224,9 @@ class RouteService {
               );
             }).toList();
           } catch (e) {
-            print('ポイント取得エラー (route_id: $routeId): $e');
+            if (kDebugMode) {
+              print('ポイント取得エラー (route_id: $routeId): $e');
+            }
             // ポイント取得失敗してもルート自体は返す
           }
         }
@@ -239,7 +250,9 @@ class RouteService {
       
       return routes;
     } catch (e) {
-      print('公開ルート一覧取得エラー: $e');
+      if (kDebugMode) {
+        print('公開ルート一覧取得エラー: $e');
+      }
       rethrow;
     }
   }
@@ -264,7 +277,9 @@ class RouteService {
 
       return true;
     } catch (e) {
-      print('ルート更新エラー: $e');
+      if (kDebugMode) {
+        print('ルート更新エラー: $e');
+      }
       return false;
     }
   }

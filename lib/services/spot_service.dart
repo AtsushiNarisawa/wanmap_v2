@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,7 +23,9 @@ class SpotService {
       if (image == null) return null;
       return File(image.path);
     } catch (e) {
-      print('画像選択エラー: $e');
+      if (kDebugMode) {
+        print('画像選択エラー: $e');
+      }
       return null;
     }
   }
@@ -40,7 +43,9 @@ class SpotService {
       if (image == null) return null;
       return File(image.path);
     } catch (e) {
-      print('カメラ撮影エラー: $e');
+      if (kDebugMode) {
+        print('カメラ撮影エラー: $e');
+      }
       return null;
     }
   }
@@ -67,7 +72,9 @@ class SpotService {
 
       return publicUrl;
     } catch (e) {
-      print('スポット写真アップロードエラー: $e');
+      if (kDebugMode) {
+        print('スポット写真アップロードエラー: $e');
+      }
       return null;
     }
   }
@@ -83,7 +90,9 @@ class SpotService {
 
       return SpotModel.fromJson(response);
     } catch (e) {
-      print('スポット作成エラー: $e');
+      if (kDebugMode) {
+        print('スポット作成エラー: $e');
+      }
       return null;
     }
   }
@@ -114,7 +123,9 @@ class SpotService {
           .map((json) => SpotModel.fromJson(json))
           .toList();
     } catch (e) {
-      print('スポット重複チェックエラー: $e');
+      if (kDebugMode) {
+        print('スポット重複チェックエラー: $e');
+      }
       return [];
     }
   }
@@ -145,7 +156,9 @@ class SpotService {
           .map((json) => SpotModel.fromJson(json))
           .toList();
     } catch (e) {
-      print('近隣スポット検索エラー: $e');
+      if (kDebugMode) {
+        print('近隣スポット検索エラー: $e');
+      }
       return [];
     }
   }
@@ -172,7 +185,9 @@ class SpotService {
           .map((json) => SpotModel.fromJson(json))
           .toList();
     } catch (e) {
-      print('スポット一覧取得エラー: $e');
+      if (kDebugMode) {
+        print('スポット一覧取得エラー: $e');
+      }
       return [];
     }
   }
@@ -188,7 +203,9 @@ class SpotService {
 
       return SpotModel.fromJson(response);
     } catch (e) {
-      print('スポット詳細取得エラー: $e');
+      if (kDebugMode) {
+        print('スポット詳細取得エラー: $e');
+      }
       return null;
     }
   }
@@ -208,7 +225,9 @@ class SpotService {
 
       return SpotModel.fromJson(response);
     } catch (e) {
-      print('スポット更新エラー: $e');
+      if (kDebugMode) {
+        print('スポット更新エラー: $e');
+      }
       return null;
     }
   }
@@ -224,7 +243,9 @@ class SpotService {
 
       return true;
     } catch (e) {
-      print('スポット削除エラー: $e');
+      if (kDebugMode) {
+        print('スポット削除エラー: $e');
+      }
       return false;
     }
   }
@@ -260,7 +281,9 @@ class SpotService {
         return true;
       }
     } catch (e) {
-      print('スポットupvoteエラー: $e');
+      if (kDebugMode) {
+        print('スポットupvoteエラー: $e');
+      }
       return false;
     }
   }
@@ -280,7 +303,9 @@ class SpotService {
 
       return response != null;
     } catch (e) {
-      print('upvoteチェックエラー: $e');
+      if (kDebugMode) {
+        print('upvoteチェックエラー: $e');
+      }
       return false;
     }
   }
@@ -295,7 +320,9 @@ class SpotService {
 
       return response.count ?? 0;
     } catch (e) {
-      print('upvote数取得エラー: $e');
+      if (kDebugMode) {
+        print('upvote数取得エラー: $e');
+      }
       return 0;
     }
   }

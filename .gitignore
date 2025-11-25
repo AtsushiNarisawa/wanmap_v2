@@ -92,3 +92,7 @@ lib/config/env_prod.dart
 **/api_keys.dart
 *.bak
 *.g.dart
+# Backup files
+*.backup
+*.backup2
+*.old

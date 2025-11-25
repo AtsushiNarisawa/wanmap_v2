@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -48,7 +49,9 @@ class GpsService {
     try {
       final hasPermission = await checkPermission();
       if (!hasPermission) {
-        print('位置情報の権限がありません');
+        if (kDebugMode) {
+          print('位置情報の権限がありません');
+        }
         return null;
       }
 
@@ -58,7 +61,9 @@ class GpsService {
 
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      print('位置情報の取得に失敗しました: $e');
+      if (kDebugMode) {
+        print('位置情報の取得に失敗しました: $e');
+      }
       return null;
     }
   }
@@ -66,13 +71,17 @@ class GpsService {
   /// ルート記録を開始
   Future<bool> startRecording() async {
     if (_isRecording) {
-      print('既に記録中です');
+      if (kDebugMode) {
+        print('既に記録中です');
+      }
       return false;
     }
 
     final hasPermission = await checkPermission();
     if (!hasPermission) {
-      print('位置情報の権限がありません');
+      if (kDebugMode) {
+        print('位置情報の権限がありません');
+      }
       return false;
     }
 
@@ -93,7 +102,9 @@ class GpsService {
       _addRoutePoint(position);
     });
 
-    print('ルート記録を開始しました');
+    if (kDebugMode) {
+      print('ルート記録を開始しました');
+    }
     return true;
   }
 
@@ -105,10 +116,14 @@ class GpsService {
     String? dogId,
     bool isPublic = false,
   }) {
-    print('🔵 stopRecording 呼び出し: isRecording=$_isRecording, points=${_currentRoutePoints.length}');
+    if (kDebugMode) {
+      print('🔵 stopRecording 呼び出し: isRecording=$_isRecording, points=${_currentRoutePoints.length}');
+    }
     
     if (!_isRecording) {
-      print('❌ 記録していません');
+      if (kDebugMode) {
+        print('❌ 記録していません');
+      }
       return null;
     }
 
@@ -117,16 +132,22 @@ class GpsService {
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
 
-    print('🔵 記録されたポイント数: ${_currentRoutePoints.length}');
+    if (kDebugMode) {
+      print('🔵 記録されたポイント数: ${_currentRoutePoints.length}');
+    }
     
     if (_currentRoutePoints.isEmpty) {
-      print('❌ 記録されたポイントがありません');
+      if (kDebugMode) {
+        print('❌ 記録されたポイントがありません');
+      }
       return null;
     }
     
     // テスト用：最低1ポイントあればOK（本番では2ポイント以上推奨）
     if (_currentRoutePoints.length < 1) {
-      print('❌ ポイントが不足しています（最低1ポイント必要）');
+      if (kDebugMode) {
+        print('❌ ポイントが不足しています（最低1ポイント必要）');
+      }
       return null;
     }
 
@@ -135,7 +156,9 @@ class GpsService {
         ? DateTime.now().difference(_startTime!).inSeconds
         : 0;
 
-    print('🔵 ルートモデル作成中: userId=$userId, title=$title, points=${_currentRoutePoints.length}');
+    if (kDebugMode) {
+      print('🔵 ルートモデル作成中: userId=$userId, title=$title, points=${_currentRoutePoints.length}');
+    }
 
     // 終了時刻
     final endTime = DateTime.now();
@@ -155,7 +178,9 @@ class GpsService {
 
     // 距離を計算
     final distance = route.calculateDistance();
-    print('🔵 計算された距離: $distance meters');
+    if (kDebugMode) {
+      print('🔵 計算された距離: $distance meters');
+    }
 
     final completedRoute = route.copyWith(distance: distance);
 
@@ -163,30 +188,40 @@ class GpsService {
     _currentRoutePoints.clear();
     _startTime = null;
 
-    print('✅ ルート記録を停止しました: ${completedRoute.formatDistance()}, ${completedRoute.formatDuration()}');
+    if (kDebugMode) {
+      print('✅ ルート記録を停止しました: ${completedRoute.formatDistance()}, ${completedRoute.formatDuration()}');
+    }
     return completedRoute;
   }
 
   /// 記録を一時停止
   void pauseRecording() {
     if (!_isRecording || _isPaused) {
-      print('一時停止できません: isRecording=$_isRecording, isPaused=$_isPaused');
+      if (kDebugMode) {
+        print('一時停止できません: isRecording=$_isRecording, isPaused=$_isPaused');
+      }
       return;
     }
 
     _isPaused = true;
-    print('✅ GPS記録を一時停止しました');
+    if (kDebugMode) {
+      print('✅ GPS記録を一時停止しました');
+    }
   }
 
   /// 記録を再開
   void resumeRecording() {
     if (!_isRecording || !_isPaused) {
-      print('再開できません: isRecording=$_isRecording, isPaused=$_isPaused');
+      if (kDebugMode) {
+        print('再開できません: isRecording=$_isRecording, isPaused=$_isPaused');
+      }
       return;
     }
 
     _isPaused = false;
-    print('✅ GPS記録を再開しました');
+    if (kDebugMode) {
+      print('✅ GPS記録を再開しました');
+    }
   }
 
   /// ポイントを追加
@@ -201,7 +236,9 @@ class GpsService {
     );
 
     _currentRoutePoints.add(point);
-    print('ポイント追加: ${point.latLng.latitude}, ${point.latLng.longitude}');
+    if (kDebugMode) {
+      print('ポイント追加: ${point.latLng.latitude}, ${point.latLng.longitude}');
+    }
   }
 
   /// 記録中かどうか

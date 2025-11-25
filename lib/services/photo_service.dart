@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,7 +21,9 @@ class PhotoService {
       if (image == null) return null;
       return File(image.path);
     } catch (e) {
-      print('画像選択エラー: $e');
+      if (kDebugMode) {
+        print('画像選択エラー: $e');
+      }
       return null;
     }
   }
@@ -42,7 +45,9 @@ class PhotoService {
       if (image == null) return null;
       return File(image.path);
     } catch (e) {
-      print('カメラ撮影エラー: $e');
+      if (kDebugMode) {
+        print('カメラ撮影エラー: $e');
+      }
       return null;
     }
   }
@@ -59,14 +64,18 @@ class PhotoService {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       final filePath = '$userId/$walkId/$fileName';
 
-      print('📸 散歩写真アップロード開始: $filePath');
+      if (kDebugMode) {
+        print('📸 散歩写真アップロード開始: $filePath');
+      }
 
       // Supabase Storageにアップロード (walk-photos バケット)
       await _supabase.storage
           .from('walk-photos')
           .upload(filePath, file);
 
-      print('✅ Storage アップロード成功');
+      if (kDebugMode) {
+        print('✅ Storage アップロード成功');
+      }
 
       // walk_photosテーブルに記録
       await _supabase.from('walk_photos').insert({
@@ -77,18 +86,24 @@ class PhotoService {
         'display_order': displayOrder,
       });
 
-      print('✅ データベース記録成功');
+      if (kDebugMode) {
+        print('✅ データベース記録成功');
+      }
 
       // 公開URLを取得
       final publicUrl = _supabase.storage
           .from('walk-photos')
           .getPublicUrl(filePath);
 
-      print('🌐 公開URL: $publicUrl');
+      if (kDebugMode) {
+        print('🌐 公開URL: $publicUrl');
+      }
 
       return publicUrl;
     } catch (e) {
-      print('❌ 散歩写真アップロードエラー: $e');
+      if (kDebugMode) {
+        print('❌ 散歩写真アップロードエラー: $e');
+      }
       return null;
     }
   }
@@ -118,7 +133,9 @@ class PhotoService {
 
       return filePath;
     } catch (e) {
-      print('写真アップロードエラー: $e');
+      if (kDebugMode) {
+        print('写真アップロードエラー: $e');
+      }
       return null;
     }
   }
@@ -150,7 +167,9 @@ class PhotoService {
         );
       }).toList();
     } catch (e) {
-      print('散歩写真一覧取得エラー: $e');
+      if (kDebugMode) {
+        print('散歩写真一覧取得エラー: $e');
+      }
       return [];
     }
   }
@@ -183,7 +202,9 @@ class PhotoService {
         );
       }).toList();
     } catch (e) {
-      print('写真一覧取得エラー: $e');
+      if (kDebugMode) {
+        print('写真一覧取得エラー: $e');
+      }
       return [];
     }
   }
@@ -209,7 +230,9 @@ class PhotoService {
 
       return true;
     } catch (e) {
-      print('散歩写真削除エラー: $e');
+      if (kDebugMode) {
+        print('散歩写真削除エラー: $e');
+      }
       return false;
     }
   }
@@ -236,7 +259,9 @@ class PhotoService {
 
       return true;
     } catch (e) {
-      print('写真削除エラー: $e');
+      if (kDebugMode) {
+        print('写真削除エラー: $e');
+      }
       return false;
     }
   }

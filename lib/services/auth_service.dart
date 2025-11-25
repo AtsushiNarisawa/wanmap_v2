@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
 
@@ -32,12 +33,20 @@ class AuthService {
     required String password,
     required String displayName,
   }) async {
-    print('🔵 [AuthService] signUp開始');
-    print('🔵 [AuthService] email: $email');
-    print('🔵 [AuthService] displayName: $displayName');
+    if (kDebugMode) {
+      print('🔵 [AuthService] signUp開始');
+    }
+    if (kDebugMode) {
+      print('🔵 [AuthService] email: $email');
+    }
+    if (kDebugMode) {
+      print('🔵 [AuthService] displayName: $displayName');
+    }
     
     try {
-      print('🔵 [AuthService] Supabase signUp呼び出し中...');
+      if (kDebugMode) {
+        print('🔵 [AuthService] Supabase signUp呼び出し中...');
+      }
       
       // Supabase Authでサインアップ
       final response = await _supabase.auth.signUp(
@@ -48,9 +57,15 @@ class AuthService {
         },
       );
 
-      print('🟢 [AuthService] signUp成功！');
-      print('🟢 [AuthService] user.id: ${response.user?.id}');
-      print('🟢 [AuthService] user.email: ${response.user?.email}');
+      if (kDebugMode) {
+        print('🟢 [AuthService] signUp成功！');
+      }
+      if (kDebugMode) {
+        print('🟢 [AuthService] user.id: ${response.user?.id}');
+      }
+      if (kDebugMode) {
+        print('🟢 [AuthService] user.email: ${response.user?.email}');
+      }
 
       // サインアップ成功時、usersテーブルにプロフィール作成
       
@@ -65,12 +80,20 @@ class AuthService {
 
       return response;
     } on AuthException catch (e) {
-      print('🔴 [AuthService] AuthException: ${e.message}');
-      print('🔴 [AuthService] statusCode: ${e.statusCode}');
+      if (kDebugMode) {
+        print('🔴 [AuthService] AuthException: ${e.message}');
+      }
+      if (kDebugMode) {
+        print('🔴 [AuthService] statusCode: ${e.statusCode}');
+      }
       throw AuthException(e.message);
     } catch (e) {
-      print('🔴 [AuthService] Exception: $e');
-      print('🔴 [AuthService] Type: ${e.runtimeType}');
+      if (kDebugMode) {
+        print('🔴 [AuthService] Exception: $e');
+      }
+      if (kDebugMode) {
+        print('🔴 [AuthService] Type: ${e.runtimeType}');
+      }
       throw Exception('サインアップに失敗しました: $e');
     }
   }
@@ -86,27 +109,43 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    print('🔵 [AuthService] signIn開始');
-    print('🔵 [AuthService] email: $email');
+    if (kDebugMode) {
+      print('🔵 [AuthService] signIn開始');
+    }
+    if (kDebugMode) {
+      print('🔵 [AuthService] email: $email');
+    }
     
     try {
-      print('🔵 [AuthService] Supabase signIn呼び出し中...');
+      if (kDebugMode) {
+        print('🔵 [AuthService] Supabase signIn呼び出し中...');
+      }
       
       final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
       
-      print('🟢 [AuthService] signIn成功！');
-      print('🟢 [AuthService] user.id: ${response.user?.id}');
+      if (kDebugMode) {
+        print('🟢 [AuthService] signIn成功！');
+      }
+      if (kDebugMode) {
+        print('🟢 [AuthService] user.id: ${response.user?.id}');
+      }
       
       return response;
     } on AuthException catch (e) {
-      print('🔴 [AuthService] AuthException: ${e.message}');
-      print('🔴 [AuthService] statusCode: ${e.statusCode}');
+      if (kDebugMode) {
+        print('🔴 [AuthService] AuthException: ${e.message}');
+      }
+      if (kDebugMode) {
+        print('🔴 [AuthService] statusCode: ${e.statusCode}');
+      }
       throw AuthException(e.message);
     } catch (e) {
-      print('🔴 [AuthService] Exception: $e');
+      if (kDebugMode) {
+        print('🔴 [AuthService] Exception: $e');
+      }
       throw Exception('ログインに失敗しました: $e');
     }
   }
@@ -157,7 +196,9 @@ class AuthService {
 
       return response;
     } catch (e) {
-      print('ユーザープロフィール取得エラー: $e');
+      if (kDebugMode) {
+        print('ユーザープロフィール取得エラー: $e');
+      }
       return null;
     }
   }

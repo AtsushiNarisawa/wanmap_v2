@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/area.dart';
@@ -7,21 +8,35 @@ final _supabase = Supabase.instance.client;
 
 /// エリア一覧を取得するProvider
 final areasProvider = FutureProvider.autoDispose<List<Area>>((ref) async {
-  print('🔵 areasProvider: Starting to fetch areas...');
+  if (kDebugMode) {
+    print('🔵 areasProvider: Starting to fetch areas...');
+  }
   try {
-    print('🔵 Querying Supabase areas table...');
+    if (kDebugMode) {
+      print('🔵 Querying Supabase areas table...');
+    }
     final response = await _supabase
         .rpc('get_areas_simple');
 
-    print('🔵 Response received: ${response.runtimeType}');
-    print('🔵 Response data: $response');
+    if (kDebugMode) {
+      print('🔵 Response received: ${response.runtimeType}');
+    }
+    if (kDebugMode) {
+      print('🔵 Response data: $response');
+    }
     
     final areas = (response as List).map((json) => Area.fromJson(json)).toList();
-    print('✅ Successfully fetched ${areas.length} areas');
+    if (kDebugMode) {
+      print('✅ Successfully fetched ${areas.length} areas');
+    }
     return areas;
   } catch (e, stackTrace) {
-    print('❌ Failed to fetch areas: $e');
-    print('❌ Stack trace: $stackTrace');
+    if (kDebugMode) {
+      print('❌ Failed to fetch areas: $e');
+    }
+    if (kDebugMode) {
+      print('❌ Stack trace: $stackTrace');
+    }
     throw Exception('Failed to fetch areas: $e');
   }
 });

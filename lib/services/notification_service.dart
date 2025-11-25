@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_statistics.dart';
 
@@ -30,7 +31,9 @@ class NotificationService {
           .map((item) => NotificationModel.fromMap(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      print('Error getting notifications: $e');
+      if (kDebugMode) {
+        print('Error getting notifications: $e');
+      }
       return [];
     }
   }
@@ -46,7 +49,9 @@ class NotificationService {
 
       return (response as List).length;
     } catch (e) {
-      print('Error getting unread count: $e');
+      if (kDebugMode) {
+        print('Error getting unread count: $e');
+      }
       return 0;
     }
   }
@@ -63,7 +68,9 @@ class NotificationService {
           .eq('id', notificationId)
           .eq('user_id', userId);
     } catch (e) {
-      print('Error marking notification as read: $e');
+      if (kDebugMode) {
+        print('Error marking notification as read: $e');
+      }
       rethrow;
     }
   }
@@ -77,7 +84,9 @@ class NotificationService {
           .eq('user_id', userId)
           .eq('is_read', false);
     } catch (e) {
-      print('Error marking all notifications as read: $e');
+      if (kDebugMode) {
+        print('Error marking all notifications as read: $e');
+      }
       rethrow;
     }
   }
@@ -94,7 +103,9 @@ class NotificationService {
           .eq('id', notificationId)
           .eq('user_id', userId);
     } catch (e) {
-      print('Error deleting notification: $e');
+      if (kDebugMode) {
+        print('Error deleting notification: $e');
+      }
       rethrow;
     }
   }
@@ -108,7 +119,9 @@ class NotificationService {
           .eq('user_id', userId)
           .eq('is_read', true);
     } catch (e) {
-      print('Error deleting all read notifications: $e');
+      if (kDebugMode) {
+        print('Error deleting all read notifications: $e');
+      }
       rethrow;
     }
   }
@@ -137,7 +150,9 @@ class NotificationService {
               );
               onNotification(notification);
             } catch (e) {
-              print('Error processing notification: $e');
+              if (kDebugMode) {
+                print('Error processing notification: $e');
+              }
             }
           },
         )

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 
@@ -32,7 +33,9 @@ class SocialService {
         body: 'があなたをフォローしました',
       );
     } catch (e) {
-      print('Error following user: $e');
+      if (kDebugMode) {
+        print('Error following user: $e');
+      }
       rethrow;
     }
   }
@@ -49,7 +52,9 @@ class SocialService {
           .eq('follower_id', followerId)
           .eq('following_id', followingId);
     } catch (e) {
-      print('Error unfollowing user: $e');
+      if (kDebugMode) {
+        print('Error unfollowing user: $e');
+      }
       rethrow;
     }
   }
@@ -82,7 +87,9 @@ class SocialService {
 
       return response != null;
     } catch (e) {
-      print('Error checking follow status: $e');
+      if (kDebugMode) {
+        print('Error checking follow status: $e');
+      }
       return false;
     }
   }
@@ -109,7 +116,9 @@ class SocialService {
         return UserProfile.fromMap(followerData);
       }).toList();
     } catch (e) {
-      print('Error getting followers: $e');
+      if (kDebugMode) {
+        print('Error getting followers: $e');
+      }
       return [];
     }
   }
@@ -136,7 +145,9 @@ class SocialService {
         return UserProfile.fromMap(followingData);
       }).toList();
     } catch (e) {
-      print('Error getting following: $e');
+      if (kDebugMode) {
+        print('Error getting following: $e');
+      }
       return [];
     }
   }
@@ -151,7 +162,9 @@ class SocialService {
 
       return (response as List).length;
     } catch (e) {
-      print('Error getting followers count: $e');
+      if (kDebugMode) {
+        print('Error getting followers count: $e');
+      }
       return 0;
     }
   }
@@ -166,7 +179,9 @@ class SocialService {
 
       return (response as List).length;
     } catch (e) {
-      print('Error getting following count: $e');
+      if (kDebugMode) {
+        print('Error getting following count: $e');
+      }
       return 0;
     }
   }
@@ -193,7 +208,9 @@ class SocialService {
           .map((item) => item as Map<String, dynamic>)
           .toList();
     } catch (e) {
-      print('Error getting following timeline: $e');
+      if (kDebugMode) {
+        print('Error getting following timeline: $e');
+      }
       return [];
     }
   }
@@ -218,7 +235,9 @@ class SocialService {
         'is_read': false,
       });
     } catch (e) {
-      print('Error creating notification: $e');
+      if (kDebugMode) {
+        print('Error creating notification: $e');
+      }
       // 通知作成失敗は致命的ではないのでエラーを投げない
     }
   }

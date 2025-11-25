@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -211,12 +212,16 @@ class _MapScreenState extends State<MapScreen> {
 
   /// ルート記録停止（ダイアログ表示のみ）
   void _stopRecording() {
-    print('🔵 _stopRecording が呼ばれました');
+    if (kDebugMode) {
+      print('🔵 _stopRecording が呼ばれました');
+    }
     
     final userId = SupabaseConfig.userId;
     
     if (userId == null) {
-      print('❌ userId が null です');
+      if (kDebugMode) {
+        print('❌ userId が null です');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('ログインしてください'),
@@ -226,10 +231,14 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
-    print('🔵 記録中かどうか: ${_gpsService.isRecording}');
+    if (kDebugMode) {
+      print('🔵 記録中かどうか: ${_gpsService.isRecording}');
+    }
     
     if (!_gpsService.isRecording) {
-      print('❌ 記録していません');
+      if (kDebugMode) {
+        print('❌ 記録していません');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('記録していません'),
@@ -239,7 +248,9 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
-    print('🔵 ダイアログを表示します（記録はまだ停止していません）');
+    if (kDebugMode) {
+      print('🔵 ダイアログを表示します（記録はまだ停止していません）');
+    }
     // タイトル入力ダイアログを表示（記録は続行中）
     _showSaveRouteDialog(userId);
   }
@@ -482,11 +493,17 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Supabase にルートを保存
   Future<void> _saveRouteToSupabase(RouteModel route) async {
-    print('🔵 保存処理開始');
-    print('🔵 ルート情報: title=${route.title}, points=${route.points.length}, distance=${route.distance}');
+    if (kDebugMode) {
+      print('🔵 保存処理開始');
+    }
+    if (kDebugMode) {
+      print('🔵 ルート情報: title=${route.title}, points=${route.points.length}, distance=${route.distance}');
+    }
     
     try {
-      print('🔵 routesテーブルに保存中...');
+      if (kDebugMode) {
+        print('🔵 routesテーブルに保存中...');
+      }
       
       // routes テーブルに保存
       final routeData = await SupabaseConfig.client.from('routes').insert({
@@ -502,10 +519,14 @@ class _MapScreenState extends State<MapScreen> {
       }).select().single();
 
       final routeId = routeData['id'];
-      print('🟢 routesテーブルに保存成功: routeId=$routeId');
+      if (kDebugMode) {
+        print('🟢 routesテーブルに保存成功: routeId=$routeId');
+      }
 
       // route_points テーブルにポイントを保存
-      print('🔵 route_pointsテーブルに${route.points.length}件保存中...');
+      if (kDebugMode) {
+        print('🔵 route_pointsテーブルに${route.points.length}件保存中...');
+      }
       
       final pointsData = route.points.asMap().entries.map((entry) {
         final point = entry.value;
@@ -520,7 +541,9 @@ class _MapScreenState extends State<MapScreen> {
       }).toList();
 
       await SupabaseConfig.client.from('route_points').insert(pointsData);
-      print('🟢 route_pointsテーブルに保存成功');
+      if (kDebugMode) {
+        print('🟢 route_pointsテーブルに保存成功');
+      }
 
       if (mounted) {
         setState(() {
@@ -542,10 +565,16 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
 
-      print('✅ ルートをSupabaseに保存しました: $routeId');
+      if (kDebugMode) {
+        print('✅ ルートをSupabaseに保存しました: $routeId');
+      }
     } catch (e, stackTrace) {
-      print('❌ ルート保存エラー: $e');
-      print('❌ スタックトレース: $stackTrace');
+      if (kDebugMode) {
+        print('❌ ルート保存エラー: $e');
+      }
+      if (kDebugMode) {
+        print('❌ スタックトレース: $stackTrace');
+      }
       
       if (mounted) {
         setState(() {
