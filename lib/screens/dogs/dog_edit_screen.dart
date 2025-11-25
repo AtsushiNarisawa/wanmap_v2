@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/wanmap_colors.dart';
@@ -30,6 +31,8 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
   DateTime? _birthDate;
   DogSize? _selectedSize;
   bool _isSaving = false;
+  bool _isUploadingPhoto = false;
+  String? _localPhotoPath;
 
   bool get isEditMode => widget.dog != null;
 
@@ -119,6 +122,108 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
         setState(() => _isSaving = false);
       }
     }
+  }
+
+  Future<void> _changePhoto() async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('写真を選択'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('ギャラリーから選択'),
+              onTap: () => Navigator.of(context).pop('gallery'),
+            ),
+            if (widget.dog?.photoUrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('写真を削除', style: TextStyle(color: Colors.red)),
+                onTap: () => Navigator.of(context).pop('delete'),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (choice == null) return;
+
+    if (choice == 'delete') {
+      setState(() {
+        _localPhotoPath = null;
+      });
+      if (isEditMode && widget.dog?.photoUrl != null) {
+        try {
+          await ref.read(dogProvider.notifier).updateDog(
+            widget.dog!.id!,
+            {'photo_url': null},
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('写真を削除しました')),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('削除に失敗しました: $e')),
+            );
+          }
+        }
+      }
+      return;
+    }
+
+    setState(() => _isUploadingPhoto = true);
+
+    try {
+      final photoFile = await ref.read(dogProvider.notifier).pickImageFromGallery();
+      
+      if (photoFile != null) {
+        setState(() => _localPhotoPath = photoFile.path);
+
+        if (isEditMode && widget.dog?.id != null) {
+          final photoUrl = await ref.read(dogProvider.notifier).uploadDogPhoto(
+            file: photoFile,
+            userId: widget.userId,
+            dogId: widget.dog!.id!,
+          );
+
+          await ref.read(dogProvider.notifier).updateDog(
+            widget.dog!.id!,
+            {'photo_url': photoUrl},
+          );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('写真を更新しました')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('写真のアップロードに失敗しました: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingPhoto = false);
+      }
+    }
+  }
+
+  ImageProvider? _getAvatarImage() {
+    if (_localPhotoPath != null) {
+      return FileImage(File(_localPhotoPath!));
+    }
+    if (widget.dog?.photoUrl != null) {
+      return NetworkImage(widget.dog!.photoUrl!);
+    }
+    return null;
   }
 
   Future<void> _deleteDog() async {
@@ -217,36 +322,52 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 写真（将来実装）
+                // 写真
                 Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundColor: WanMapColors.accent.withOpacity(0.2),
-                        child: Icon(
-                          Icons.pets,
-                          size: 60,
-                          color: WanMapColors.accent,
+                  child: GestureDetector(
+                    onTap: _isUploadingPhoto ? null : _changePhoto,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: WanMapColors.accent.withOpacity(0.2),
+                          backgroundImage: _getAvatarImage(),
+                          child: _getAvatarImage() == null
+                              ? Icon(
+                                  Icons.pets,
+                                  size: 60,
+                                  color: WanMapColors.accent,
+                                )
+                              : null,
                         ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: WanMapColors.accent,
-                            shape: BoxShape.circle,
+                        if (_isUploadingPhoto)
+                          Positioned.fill(
+                            child: CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.black.withOpacity(0.5),
+                              child: const CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            size: 20,
-                            color: Colors.white,
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: WanMapColors.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              size: 20,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: WanMapSpacing.large),
@@ -299,15 +420,20 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
                   children: DogSize.values.map((size) {
                     final isSelected = _selectedSize == size;
                     return ChoiceChip(
-                      label: Text(size.displayName),
+                      label: Text(
+                        size.displayName,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
                       selected: isSelected,
                       onSelected: (selected) {
                         setState(() => _selectedSize = selected ? size : null);
                       },
                       selectedColor: WanMapColors.accent,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : null,
-                      ),
+                      backgroundColor: isDark ? WanMapColors.cardDark : Colors.grey[200],
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     );
                   }).toList(),
                 ),
