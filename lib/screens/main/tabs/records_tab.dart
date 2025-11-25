@@ -396,11 +396,17 @@ class RecordsTab extends ConsumerWidget {
                   print('   📊 Photos count: ${snapshot.data!.length}');
                   if (snapshot.data!.isNotEmpty) {
                     print('   ✅ Showing photo grid');
-                    return Column(
-                      children: [
-                        const SizedBox(height: WanMapSpacing.md),
-                        WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
-                      ],
+                    return Container(
+                      color: Colors.pink.withOpacity(0.3), // デバッグ用：ピンク背景
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('📸 写真グリッド（デバッグ）', style: TextStyle(fontSize: 10)),
+                          const SizedBox(height: WanMapSpacing.md),
+                          WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
+                        ],
+                      ),
                     );
                   } else {
                     print('   ⚠️ No photos found');
