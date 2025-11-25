@@ -41,7 +41,6 @@ class RouteDetailScreen extends ConsumerWidget {
             return const Center(child: Text('ルートが見つかりません'));
           }
           return SingleChildScrollView(
-          return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -52,7 +51,6 @@ class RouteDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                children: [
                   // ルート名
                   Text(
                     route.name,
