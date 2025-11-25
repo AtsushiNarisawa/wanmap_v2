@@ -460,43 +460,6 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
 
               const SizedBox(height: WanMapSpacing.md),
 
-              // 写真撮影ボタン
-              Center(
-                child: Stack(
-                  children: [
-                    IconButton(
-                      onPressed: _takePhoto,
-                      icon: const Icon(Icons.camera_alt),
-                      iconSize: 32,
-                      color: WanMapColors.accent,
-                      tooltip: '写真を撮影',
-                    ),
-                    if (_photoUrls.isNotEmpty)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: WanMapColors.accent,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            '${_photoUrls.length}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: WanMapSpacing.md),
-
               // コントロールボタン
               Row(
                 children: [
