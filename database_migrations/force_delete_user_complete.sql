@@ -36,7 +36,7 @@ BEGIN
   RAISE NOTICE '✓ walks 削除完了';
   
   -- 3. dogs を削除
-  DELETE FROM dogs WHERE owner_id = target_user_id;
+  DELETE FROM dogs WHERE user_id = target_user_id;
   RAISE NOTICE '✓ dogs 削除完了';
   
   -- 4. pins を削除 (存在する場合)

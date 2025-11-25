@@ -38,7 +38,7 @@ BEGIN
   RAISE NOTICE 'walk_photos: % 件', row_count;
   
   -- 3. dogs
-  SELECT COUNT(*) INTO row_count FROM dogs WHERE owner_id = target_user_id;
+  SELECT COUNT(*) INTO row_count FROM dogs WHERE user_id = target_user_id;
   RAISE NOTICE 'dogs: % 件', row_count;
   
   -- 4. users (public.users)
