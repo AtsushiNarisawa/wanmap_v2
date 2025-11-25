@@ -384,13 +384,27 @@ class RecordsTab extends ConsumerWidget {
             FutureBuilder<List<WalkPhoto>>(
               future: PhotoService().getWalkPhotos(walkId),
               builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  return Column(
-                    children: [
-                      const SizedBox(height: WanMapSpacing.md),
-                      WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
-                    ],
-                  );
+                print('📸 Records Tab - Photo FutureBuilder:');
+                print('   walkId: $walkId');
+                print('   connectionState: ${snapshot.connectionState}');
+                print('   hasData: ${snapshot.hasData}');
+                print('   hasError: ${snapshot.hasError}');
+                if (snapshot.hasError) {
+                  print('   ❌ Error: ${snapshot.error}');
+                }
+                if (snapshot.hasData) {
+                  print('   📊 Photos count: ${snapshot.data!.length}');
+                  if (snapshot.data!.isNotEmpty) {
+                    print('   ✅ Showing photo grid');
+                    return Column(
+                      children: [
+                        const SizedBox(height: WanMapSpacing.md),
+                        WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
+                      ],
+                    );
+                  } else {
+                    print('   ⚠️ No photos found');
+                  }
                 }
                 return const SizedBox.shrink();
               },

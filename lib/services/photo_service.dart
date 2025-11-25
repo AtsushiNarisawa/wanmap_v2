@@ -126,17 +126,25 @@ class PhotoService {
   /// 散歩の写真一覧を取得（Phase 3新機能）
   Future<List<WalkPhoto>> getWalkPhotos(String walkId) async {
     try {
+      print('📸 PhotoService.getWalkPhotos() called');
+      print('   walkId: $walkId');
+      
       final response = await _supabase
           .from('walk_photos')
           .select()
           .eq('walk_id', walkId)
           .order('display_order', ascending: true);
 
-      return (response as List).map((json) {
+      print('   📊 Response: ${response.toString()}');
+      print('   📊 Response length: ${(response as List).length}');
+
+      final photos = (response as List).map((json) {
         final photoUrl = json['photo_url'] as String;
         final publicUrl = _supabase.storage
             .from('walk-photos')
             .getPublicUrl(photoUrl);
+
+        print('   🖼️ Photo: id=${json['id']}, url=$publicUrl');
 
         return WalkPhoto(
           id: json['id'] as String,
@@ -149,8 +157,11 @@ class PhotoService {
           createdAt: DateTime.parse(json['created_at'] as String),
         );
       }).toList();
+      
+      print('   ✅ Returning ${photos.length} photos');
+      return photos;
     } catch (e) {
-      print('散歩写真一覧取得エラー: $e');
+      print('   ❌ 散歩写真一覧取得エラー: $e');
       return [];
     }
   }
