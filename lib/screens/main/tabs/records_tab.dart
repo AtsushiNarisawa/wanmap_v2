@@ -273,6 +273,10 @@ class RecordsTab extends ConsumerWidget {
 
         final historyAsync = ref.watch(allWalkHistoryProvider(AllHistoryParams(userId: userId, limit: 5)));
 
+        print('🔵 Records Tab - Recent Walks:');
+        print('   userId: $userId');
+        print('   historyAsync state: ${historyAsync.runtimeType}');
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -295,15 +299,24 @@ class RecordsTab extends ConsumerWidget {
             const SizedBox(height: WanMapSpacing.md),
             historyAsync.when(
               data: (walks) {
+                print('   ✅ Data loaded: ${walks.length} walks');
                 if (walks.isEmpty) {
+                  print('   ⚠️ No walks found, showing empty card');
                   return _buildEmptyCard(isDark, 'まだ散歩の記録がありません');
                 }
+                print('   📋 Building ${walks.length} walk cards');
                 return Column(
                   children: walks.map((walk) => _buildWalkHistoryCard(context, isDark, walk, userId)).toList(),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました'),
+              loading: () {
+                print('   ⏳ Loading walks...');
+                return const Center(child: CircularProgressIndicator());
+              },
+              error: (error, stack) {
+                print('   ❌ Error loading walks: $error');
+                return _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました');
+              },
             ),
           ],
         );
