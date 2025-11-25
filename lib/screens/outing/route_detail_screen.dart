@@ -185,12 +185,12 @@ class RouteDetailScreen extends ConsumerWidget {
   /// ルートの距離に基づいてズームレベルを計算
   double _calculateZoom(OfficialRoute route) {
     final distance = route.distanceMeters;
-    if (distance < 500) return 16.0;
-    if (distance < 1000) return 15.0;
-    if (distance < 2000) return 14.5;
-    if (distance < 5000) return 13.5;
-    if (distance < 10000) return 12.5;
-    return 11.0;
+    if (distance < 500) return 18.0;
+    if (distance < 1000) return 17.0;
+    if (distance < 2000) return 16.5;
+    if (distance < 5000) return 15.5;
+    if (distance < 10000) return 14.5;
+    return 13.0;
   }
 
 
