@@ -170,7 +170,6 @@ class _MapTabState extends ConsumerState<MapTab> {
       ),
     );
   }
-}
 
   /// 全エリアのルートマーカーを構築
   Widget _buildAllRoutesMarkers(BuildContext context, WidgetRef ref, List<Area> areas) {
