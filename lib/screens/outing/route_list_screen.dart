@@ -160,13 +160,42 @@ class _RouteCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ルート名と難易度バッジ
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            // サムネイル画像
+            if (route.thumbnailUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  route.thumbnailUrl!,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
+                      child: Icon(
+                        Icons.image_not_supported,
+                        color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            if (route.thumbnailUrl != null)
+              const SizedBox(width: WanMapSpacing.md),
+            // ルート情報
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ルート名と難易度バッジ
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 Expanded(
                   child: Text(
                     route.name,
@@ -234,6 +263,10 @@ class _RouteCard extends StatelessWidget {
               ],
             ),
           ],
+        ),
+              ),
+            ],
+          ),
         ),
       ),
     );

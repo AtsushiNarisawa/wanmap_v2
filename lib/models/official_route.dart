@@ -39,6 +39,8 @@ class OfficialRoute {
   final int estimatedMinutes;
   final DifficultyLevel difficultyLevel;
   final int totalPins; // このルートに投稿されたピンの総数
+  final String? thumbnailUrl; // ルート一覧用のサムネイル画像
+  final List<String>? galleryImages; // ルート詳細用のギャラリー画像（3枚）
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -54,6 +56,8 @@ class OfficialRoute {
     required this.estimatedMinutes,
     required this.difficultyLevel,
     this.totalPins = 0,
+    this.thumbnailUrl,
+    this.galleryImages,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -78,6 +82,10 @@ class OfficialRoute {
         json['difficulty_level'] as String? ?? 'easy',
       ),
       totalPins: json['total_pins'] as int? ?? 0,
+      thumbnailUrl: json['thumbnail_url'] as String?,
+      galleryImages: json['gallery_images'] != null
+          ? (json['gallery_images'] as List).map((e) => e as String).toList()
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -180,6 +188,8 @@ class OfficialRoute {
       'estimated_minutes': estimatedMinutes,
       'difficulty_level': difficultyLevel.value,
       'total_pins': totalPins,
+      'thumbnail_url': thumbnailUrl,
+      'gallery_images': galleryImages,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -218,6 +228,8 @@ class OfficialRoute {
     int? estimatedMinutes,
     DifficultyLevel? difficultyLevel,
     int? totalPins,
+    String? thumbnailUrl,
+    List<String>? galleryImages,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -233,6 +245,8 @@ class OfficialRoute {
       estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
       difficultyLevel: difficultyLevel ?? this.difficultyLevel,
       totalPins: totalPins ?? this.totalPins,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      galleryImages: galleryImages ?? this.galleryImages,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
