@@ -98,13 +98,7 @@ class RouteDetailScreen extends ConsumerWidget {
 
   /// 地図セクション
   Widget _buildMapSection(OfficialRoute route, AsyncValue pinsAsync, bool isDark) {
-    print('🗺️ Building map for route: ${route.name}');
-    print('🗺️ Route line points: ${route.routeLine?.length ?? 0}');
     if (route.routeLine != null) {
-      print('🗺️ First point: ${route.routeLine!.first}');
-      print('🗺️ Last point: ${route.routeLine!.last}');
-    print('🗺️ Start location: ${route.startLocation}');
-    print('🗺️ End location: ${route.endLocation}');
     }
     return Container(
       height: 300,
@@ -138,8 +132,6 @@ class RouteDetailScreen extends ConsumerWidget {
       ),
     );
   }
-
-
   /// ルートの中心点を計算
   LatLng _calculateCenter(OfficialRoute route) {
     if (route.routeLine == null || route.routeLine!.isEmpty) {
@@ -190,13 +182,8 @@ class RouteDetailScreen extends ConsumerWidget {
     if (maxDiff > 0.005) return 15.5; // 約500m
     return 16.5; // 500m未満
   }
-
-
   /// マーカーを構築（スタート=ゴールの場合は特別表示）
   List<Marker> _buildMarkers(OfficialRoute route) {
-    print('🎯 Building markers for route: ${route.name}');
-    print('🎯 Start: ${route.startLocation}');
-    print('🎯 End: ${route.endLocation}');
     
     // route_lineが存在する場合は、その最初と最後の点を使用
     final actualStart = route.routeLine != null && route.routeLine!.isNotEmpty
@@ -206,8 +193,6 @@ class RouteDetailScreen extends ConsumerWidget {
         ? route.routeLine!.last
         : route.endLocation;
     
-    print('🎯 Actual start (from route line): $actualStart');
-    print('🎯 Actual end (from route line): $actualEnd');
     
     final isSameLocation = actualStart.latitude == actualEnd.latitude &&
                            actualStart.longitude == actualEnd.longitude;
@@ -263,7 +248,6 @@ class RouteDetailScreen extends ConsumerWidget {
     }
 
     // スタート≠ゴールの場合：別々のマーカー
-    print('🎯 Creating separate start and goal markers');
     return [
       // スタートマーカー
       Marker(
@@ -297,8 +281,6 @@ class RouteDetailScreen extends ConsumerWidget {
       ),
     ];
   }
-
-
   /// 統計情報
   Widget _buildStats(OfficialRoute route, bool isDark) {
     return Row(
