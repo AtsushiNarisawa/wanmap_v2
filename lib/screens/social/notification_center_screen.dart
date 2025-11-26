@@ -9,6 +9,8 @@
 import 'package:flutter/material.dart';
 import '../../models/notification_model.dart';
 import '../../services/notification_service.dart';
+import '../outing/route_detail_screen.dart';
+import '../profile/user_profile_screen.dart';
 
 class NotificationCenterScreen extends StatefulWidget {
   const NotificationCenterScreen({super.key});
@@ -153,19 +155,23 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     switch (notification.type) {
       case NotificationType.follow:
         if (notification.followerId != null) {
-          // TODO: ユーザープロフィール画面に遷移
-          // Navigator.push(context, MaterialPageRoute(
-          //   builder: (context) => UserProfileScreen(userId: notification.followerId!),
-          // ));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UserProfileScreen(userId: notification.followerId!),
+            ),
+          );
         }
         break;
       
       case NotificationType.like:
         if (notification.routeId != null) {
-          // TODO: ルート詳細画面に遷移
-          // Navigator.push(context, MaterialPageRoute(
-          //   builder: (context) => RouteDetailScreen(routeId: notification.routeId!),
-          // ));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RouteDetailScreen(routeId: notification.routeId!),
+            ),
+          );
         }
         break;
       

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../models/social_model.dart';
 import '../../services/social_service.dart';
 import '../../widgets/social/like_button.dart';
+import '../outing/route_detail_screen.dart';
 
 class TimelineScreen extends StatefulWidget {
   const TimelineScreen({super.key});
@@ -232,7 +233,12 @@ class _TimelineScreenState extends State<TimelineScreen> {
               ),
               TextButton.icon(
                 onPressed: () {
-                  // TODO: ルート詳細画面に遷移
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RouteDetailScreen(routeId: item.routeId),
+                    ),
+                  );
                 },
                 icon: const Icon(Icons.comment_outlined),
                 label: const Text('詳細'),

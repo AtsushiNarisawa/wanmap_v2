@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../models/social_model.dart';
 import '../../services/social_service.dart';
 import '../../widgets/social/like_button.dart';
+import '../outing/route_detail_screen.dart';
 
 class PopularRoutesScreen extends StatefulWidget {
   const PopularRoutesScreen({super.key});
@@ -244,7 +245,12 @@ class _PopularRoutesScreenState extends State<PopularRoutesScreen> {
               ),
               TextButton.icon(
                 onPressed: () {
-                  // TODO: ルート詳細画面に遷移
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RouteDetailScreen(routeId: route.routeId),
+                    ),
+                  );
                 },
                 icon: const Icon(Icons.map_outlined),
                 label: const Text('詳細'),
