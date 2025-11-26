@@ -7,6 +7,7 @@ import '../../models/route_search_params.dart';
 import '../outing/route_detail_screen.dart';
 import '../../providers/route_search_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/gps_provider_riverpod.dart';
 import '../../widgets/search/search_route_card.dart';
 import '../../widgets/search/route_filter_bottom_sheet.dart';
 
@@ -26,6 +27,16 @@ class _RouteSearchScreenState extends ConsumerState<RouteSearchScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // 現在地情報を設定
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final gpsState = ref.read(gpsProviderRiverpod);
+      if (gpsState.currentLocation != null) {
+        ref.read(routeSearchStateProvider.notifier).updateUserLocation(
+          gpsState.currentLocation!.latitude,
+          gpsState.currentLocation!.longitude,
+        );
+      }
+    });
   }
 
   @override
@@ -71,8 +82,12 @@ class _RouteSearchScreenState extends ConsumerState<RouteSearchScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final searchParams = ref.watch(routeSearchStateProvider);
+    final gpsState = ref.watch(gpsProviderRiverpod);
     final searchResults = ref.watch(routeSearchResultsProvider(searchParams));
     final user = ref.watch(currentUserProvider);
+
+    // 現在地情報を表示
+    final hasLocation = gpsState.currentLocation != null;
 
     return Scaffold(
       backgroundColor: isDark
@@ -81,9 +96,21 @@ class _RouteSearchScreenState extends ConsumerState<RouteSearchScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? WanMapColors.cardDark : Colors.white,
         elevation: 0,
-        title: Text(
-          'ルート検索',
-          style: WanMapTypography.heading2,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ルート検索',
+              style: WanMapTypography.heading2,
+            ),
+            if (hasLocation)
+              Text(
+                '現在地から検索',
+                style: WanMapTypography.caption.copyWith(
+                  color: WanMapColors.accent,
+                ),
+              ),
+          ],
         ),
         actions: [
           if (searchParams.hasFilters)

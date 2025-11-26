@@ -106,10 +106,26 @@ class SearchRouteCard extends ConsumerWidget {
                   // ピン数と散歩回数
                   Row(
                     children: [
+                      if (route.distanceFromUserLabel != null) ...[
+                        Icon(
+                          Icons.near_me,
+                          size: 16,
+                          color: WanMapColors.accent,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          route.distanceFromUserLabel!,
+                          style: WanMapTypography.caption.copyWith(
+                            color: WanMapColors.accent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: WanMapSpacing.medium),
+                      ],
                       Icon(
                         Icons.location_on,
                         size: 16,
-                        color: WanMapColors.accent,
+                        color: isDark ? Colors.white70 : Colors.black54,
                       ),
                       const SizedBox(width: 4),
                       Text(

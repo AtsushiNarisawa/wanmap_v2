@@ -12,6 +12,8 @@ class RouteSearchParams {
   final RouteSortBy sortBy; // ソート順
   final int limit; // 取得件数
   final int offset; // オフセット
+  final double? userLat; // ユーザーの緯度
+  final double? userLon; // ユーザーの経度
 
   const RouteSearchParams({
     this.query,
@@ -23,9 +25,11 @@ class RouteSearchParams {
     this.maxDurationMin,
     this.features,
     this.bestSeasons,
-    this.sortBy = RouteSortBy.popularity,
+    this.sortBy = RouteSortBy.nearbyFirst,
     this.limit = 20,
     this.offset = 0,
+    this.userLat,
+    this.userLon,
   });
 
   /// フィルターが適用されているかどうか
@@ -58,6 +62,8 @@ class RouteSearchParams {
     RouteSortBy? sortBy,
     int? limit,
     int? offset,
+    double? userLat,
+    double? userLon,
   }) {
     return RouteSearchParams(
       query: query ?? this.query,
@@ -72,6 +78,8 @@ class RouteSearchParams {
       sortBy: sortBy ?? this.sortBy,
       limit: limit ?? this.limit,
       offset: offset ?? this.offset,
+      userLat: userLat ?? this.userLat,
+      userLon: userLon ?? this.userLon,
     );
   }
 
@@ -91,7 +99,9 @@ class RouteSearchParams {
       'p_sort_by': sortBy.value,
       'p_limit': limit,
       'p_offset': offset,
-    };
+      if (userLat != null) 'p_user_lat': userLat,
+      if (userLon != null) 'p_user_lon': userLon,
+    );
   }
 
   @override
@@ -110,7 +120,9 @@ class RouteSearchParams {
         _listEquals(other.bestSeasons, bestSeasons) &&
         other.sortBy == sortBy &&
         other.limit == limit &&
-        other.offset == offset;
+        other.offset == offset &&
+        other.userLat == userLat &&
+        other.userLon == userLon;
   }
 
   @override
@@ -128,6 +140,8 @@ class RouteSearchParams {
       sortBy,
       limit,
       offset,
+      userLat,
+      userLon,
     );
   }
 
@@ -144,6 +158,7 @@ class RouteSearchParams {
 
 /// ソート順
 enum RouteSortBy {
+  nearbyFirst('nearby_first', '近い順'),
   popularity('popularity', '人気順'),
   distanceAsc('distance_asc', '距離が短い順'),
   distanceDesc('distance_desc', '距離が長い順'),
@@ -175,6 +190,7 @@ class SearchRouteResult {
   final String? thumbnailUrl;
   final double startLat;
   final double startLon;
+  final double? distanceFromUser; // ユーザーからの距離（km）
 
   SearchRouteResult({
     required this.routeId,
@@ -195,6 +211,7 @@ class SearchRouteResult {
     this.thumbnailUrl,
     required this.startLat,
     required this.startLon,
+    this.distanceFromUser,
   });
 
   factory SearchRouteResult.fromMap(Map<String, dynamic> map) {
@@ -225,6 +242,7 @@ class SearchRouteResult {
       thumbnailUrl: map['thumbnail_url'] as String?,
       startLat: startLat,
       startLon: startLon,
+      distanceFromUser: (map['distance_from_user_km'] as num?)?.toDouble(),
     );
   }
 
@@ -259,5 +277,14 @@ class SearchRouteResult {
   String? get elevationGainLabel {
     if (elevationGainM == null) return null;
     return '↑ ${elevationGainM}m';
+  }
+
+  /// ユーザーからの距離ラベル
+  String? get distanceFromUserLabel {
+    if (distanceFromUser == null) return null;
+    if (distanceFromUser! < 1.0) {
+      return '${(distanceFromUser! * 1000).toStringAsFixed(0)}m';
+    }
+    return '${distanceFromUser!.toStringAsFixed(1)}km';
   }
 }

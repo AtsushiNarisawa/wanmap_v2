@@ -99,6 +99,11 @@ class RouteSearchStateNotifier extends StateNotifier<RouteSearchParams> {
   void resetPagination() {
     state = state.copyWith(offset: 0);
   }
+
+  /// ユーザー位置を更新
+  void updateUserLocation(double lat, double lon) {
+    state = state.copyWith(userLat: lat, userLon: lon);
+  }
 }
 
 /// 検索パラメータステートプロバイダー
