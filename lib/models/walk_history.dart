@@ -27,14 +27,14 @@ class OutingWalkHistory {
   factory OutingWalkHistory.fromJson(Map<String, dynamic> json) {
     return OutingWalkHistory(
       walkId: json['walk_id'] as String,
-      routeId: json['route_id'] as String,
-      routeName: json['route_name'] as String,
-      areaName: json['area_name'] as String,
+      routeId: (json['route_id'] as String?) ?? '',
+      routeName: (json['route_title'] as String?) ?? json['route_name'] as String? ?? '不明なルート',
+      areaName: (json['route_area'] as String?) ?? json['area_name'] as String? ?? '不明なエリア',
       walkedAt: DateTime.parse(json['walked_at'] as String),
       distanceMeters: (json['distance_meters'] as num?)?.toDouble() ?? 0.0,
-      durationSeconds: json['duration_seconds'] as int? ?? 0,
-      photoCount: json['photo_count'] as int? ?? 0,
-      pinCount: json['pin_count'] as int? ?? 0,
+      durationSeconds: (json['duration_seconds'] as int?) ?? 0,
+      photoCount: (json['photo_count'] as int?) ?? 0,
+      pinCount: (json['pin_count'] as int?) ?? 0,
       photoUrls: (json['photo_urls'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
