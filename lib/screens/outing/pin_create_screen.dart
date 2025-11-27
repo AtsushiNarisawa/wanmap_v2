@@ -80,6 +80,45 @@ class _PinCreateScreenState extends ConsumerState<PinCreateScreen> {
     }
   }
 
+  /// カメラで写真を撮影
+  Future<void> _takePhoto() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      if (_selectedImages.length >= 5) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('写真は最大5枚まで選択できます'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      setState(() {
+        _selectedImages.add(image);
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('写真の撮影に失敗しました: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// 写真を削除
   void _removeImage(int index) {
     setState(() {
@@ -347,8 +386,8 @@ class _PinCreateScreenState extends ConsumerState<PinCreateScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '写真（最大5枚）',
@@ -359,10 +398,41 @@ class _PinCreateScreenState extends ConsumerState<PinCreateScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            TextButton.icon(
-              onPressed: _selectedImages.length < 5 ? _pickImages : null,
-              icon: const Icon(Icons.add_photo_alternate),
-              label: const Text('写真を追加'),
+            const SizedBox(height: WanMapSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _selectedImages.length < 5 ? _takePhoto : null,
+                    icon: const Icon(Icons.camera_alt, size: 20),
+                    label: const Text('カメラ'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(
+                        color: _selectedImages.length < 5 
+                            ? WanMapColors.accent 
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: WanMapSpacing.sm),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _selectedImages.length < 5 ? _pickImages : null,
+                    icon: const Icon(Icons.photo_library, size: 20),
+                    label: const Text('ギャラリー'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(
+                        color: _selectedImages.length < 5 
+                            ? WanMapColors.accent 
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -217,7 +217,7 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
         print('📷 写真撮影開始...');
       }
       
-      final file = await _photoService.pickImageFromGallery();
+      final file = await _photoService.takePhoto();
       
       if (file == null) {
         if (kDebugMode) {
