@@ -15,7 +15,6 @@ import '../../daily/daily_walking_screen.dart';
 import '../../history/walk_history_screen.dart';
 import '../../outing/route_detail_screen.dart';
 import '../../notifications/notifications_screen.dart';
-import '../../favorites/favorite_routes_screen.dart';
 
 /// HomeTab - ビジュアル重視のホーム画面
 /// 
