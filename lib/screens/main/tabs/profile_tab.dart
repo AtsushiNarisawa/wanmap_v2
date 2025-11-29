@@ -14,7 +14,7 @@ import '../../legal/terms_of_service_screen.dart';
 import '../../legal/privacy_policy_screen.dart';
 import '../../social/followers_screen.dart';
 import '../../social/following_screen.dart';
-import '../../routes/favorites_screen.dart';
+
 import '../../profile/profile_edit_screen.dart';
 import '../../dogs/dog_list_screen.dart';
 import '../../settings/settings_screen.dart';
@@ -327,18 +327,7 @@ class ProfileTab extends ConsumerWidget {
               );
             },
           ),
-          const Divider(height: 1),
-          _MenuItem(
-            icon: Icons.favorite_outline,
-            label: 'お気に入り',
-            isDark: isDark,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FavoritesScreen()),
-              );
-            },
-          ),
+
           const Divider(height: 1),
           _MenuItem(
             icon: Icons.notifications_outlined,
