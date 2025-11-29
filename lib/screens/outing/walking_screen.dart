@@ -269,7 +269,9 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
 
   /// ピンを投稿
   Future<void> _createPin() async {
-    final currentLocation = ref.read(gpsProviderRiverpod).currentLocation;
+    print('🔵 _createPin メソッド呼び出し');
+    final currentLocation = ref.watch(gpsProviderRiverpod).currentLocation;
+    print('🔵 currentLocation: $currentLocation');
     
     if (currentLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -314,6 +316,7 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final gpsState = ref.watch(gpsProviderRiverpod);
+    print('🟡 WalkingScreen.build() - currentLocation: ${gpsState.currentLocation}');
 
     return Scaffold(
       backgroundColor: isDark

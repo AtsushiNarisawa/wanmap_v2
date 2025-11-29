@@ -249,8 +249,12 @@ class GpsNotifier extends StateNotifier<GpsState> {
             ? DateTime.now().difference(state.startTime!).inSeconds
             : 0;
         
+        // 最新の位置情報をcurrentLocationに設定
+        final currentLoc = points.isNotEmpty ? points.last.latLng : null;
+        
         state = state.copyWith(
           currentRoutePoints: points,
+          currentLocation: currentLoc,
           distance: totalDistance,
           elapsedSeconds: elapsed,
         );

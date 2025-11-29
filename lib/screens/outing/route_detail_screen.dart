@@ -464,7 +464,7 @@ class RouteDetailScreen extends ConsumerWidget {
               );
             }
             return Column(
-              children: pins.map((pin) {
+              children: pins.map<Widget>((pin) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: WanMapSpacing.md),
                   child: Container(
