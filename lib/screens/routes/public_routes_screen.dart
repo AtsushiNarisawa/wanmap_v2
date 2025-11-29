@@ -5,7 +5,7 @@ import '../../services/route_service.dart';
 import '../../widgets/area_selection_chips.dart';
 import '../../widgets/public_routes_map_view.dart';
 import '../../widgets/photo_route_card.dart';
-import 'route_detail_screen.dart';
+import '../outing/route_detail_screen.dart';
 
 /// 選択エリアを管理するProvider
 final selectedAreaProvider = StateProvider<String?>((ref) => null);
