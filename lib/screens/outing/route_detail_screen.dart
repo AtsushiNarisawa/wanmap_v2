@@ -35,18 +35,7 @@ class RouteDetailScreen extends ConsumerWidget {
         title: const Text('ルート詳細'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-        ],
+
       ),
       body: routeAsync.when(
         data: (route) {
