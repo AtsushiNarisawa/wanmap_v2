@@ -16,6 +16,8 @@ import '../../history/walk_history_screen.dart';
 import '../../outing/route_detail_screen.dart';
 import '../../notifications/notifications_screen.dart';
 import '../../routes/public_routes_screen.dart';
+import '../../outing/route_list_screen.dart';
+import '../../../models/area.dart';
 
 /// HomeTab - ビジュアル重視のホーム画面
 /// 
@@ -223,6 +225,7 @@ class HomeTab extends ConsumerWidget {
   }
 
   /// おすすめエリア（3枚 + 一覧を見るボタン）
+  /// おすすめエリア（箱根大きく + 2枚 + 一覧ボタン）
   Widget _buildRecommendedAreas(BuildContext context, bool isDark, AsyncValue<dynamic> areasAsync) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
@@ -242,48 +245,96 @@ class HomeTab extends ConsumerWidget {
               if (areas.isEmpty) {
                 return _buildEmptyCard(isDark, 'エリアが登録されていません');
               }
-              final displayAreas = areas.take(3).toList();
+              
+              // 箱根を最優先、その他はそのまま
+              Area? hakoneArea;
+              try {
+                hakoneArea = areas.firstWhere((area) => area.name == '箱根');
+              } catch (e) {
+                hakoneArea = areas.isNotEmpty ? areas.first : null;
+              }
+              
+              if (hakoneArea == null) {
+                return _buildEmptyCard(isDark, 'エリアが登録されていません');
+              }
+              
+              final otherAreas = areas.where((area) => area.name != '箱根').take(2).toList();
+              
               return Column(
                 children: [
-                  ...displayAreas.map((area) => Padding(
+                  // 箱根カード（大きく目立つ）
+                  Padding(
                     padding: const EdgeInsets.only(bottom: WanMapSpacing.md),
-                    child: _AreaCard(
-                      name: area.name,
+                    child: _FeaturedAreaCard(
+                      area: hakoneArea!,
                       isDark: isDark,
-                      isHorizontal: true,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const AreaListScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => RouteListScreen(
+                            areaId: hakoneArea!.id,
+                            areaName: hakoneArea!.name,
+                          ),
+                        ),
                       ),
                     ),
-                  )),
-                  if (areas.length > 3)
-                    OutlinedButton.icon(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AreaListScreen()),
-                      ),
-                      icon: const Icon(Icons.list),
-                      label: Text('一覧を見る（${areas.length}エリア）'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: WanMapColors.accent,
-                        side: BorderSide(color: WanMapColors.accent),
-                        minimumSize: const Size(double.infinity, 48),
-                      ),
+                  ),
+                  // その他2エリア（横2列）
+                  Row(
+                    children: otherAreas.asMap().entries.map<Widget>((entry) {
+                      final index = entry.key;
+                      final area = entry.value;
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: index == 0 ? WanMapSpacing.sm / 2 : 0,
+                            left: index == 1 ? WanMapSpacing.sm / 2 : 0,
+                          ),
+                          child: _AreaCard(
+                            name: area.name,
+                            prefecture: area.prefecture,
+                            isDark: isDark,
+                            isHorizontal: false,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => RouteListScreen(
+                                  areaId: area.id,
+                                  areaName: area.name,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: WanMapSpacing.md),
+                  // 一覧を見るボタン
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AreaListScreen()),
                     ),
+                    icon: const Icon(Icons.list),
+                    label: Text('一覧を見る（${areas.length}エリア）'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: WanMapColors.accent,
+                      side: BorderSide(color: WanMapColors.accent),
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  ),
                 ],
               );
             },
-            loading: () => const SizedBox(
-              height: 140,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, __) => _buildEmptyCard(isDark, 'エリアの読み込みに失敗しました'),
+            loading: () => const SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
+            error: (error, _) => _buildEmptyCard(isDark, 'エリアの読み込みに失敗しました'),
           ),
         ],
       ),
     );
   }
+
 
   /// 人気の公式ルート（3枚 + 一覧ボタン）
   Widget _buildPopularRoutes(BuildContext context, bool isDark) {
@@ -403,12 +454,14 @@ class HomeTab extends ConsumerWidget {
 
 class _AreaCard extends StatelessWidget {
   final String name;
+  final String prefecture;
   final bool isDark;
   final bool isHorizontal;
   final VoidCallback onTap;
 
   const _AreaCard({
     required this.name,
+    required this.prefecture,
     required this.isDark,
     this.isHorizontal = false,
     required this.onTap,
@@ -732,6 +785,85 @@ class _PopularRouteCard extends StatelessWidget {
         Icons.route,
         size: 32,
         color: WanMapColors.accent,
+      ),
+    );
+  }
+}
+
+/// 特集エリアカード（箱根専用・大きく表示）
+class _FeaturedAreaCard extends StatelessWidget {
+  final dynamic area;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _FeaturedAreaCard({
+    required this.area,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 160,
+        padding: const EdgeInsets.all(WanMapSpacing.xl),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFFF6B35),
+              const Color(0xFFFF8C42),
+              WanMapColors.accent,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF6B35).withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.pets, color: Colors.white, size: 48),
+                const SizedBox(width: WanMapSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        area.name,
+                        style: WanMapTypography.headlineMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        area.prefecture,
+                        style: WanMapTypography.bodyLarge.copyWith(
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 24),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
