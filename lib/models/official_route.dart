@@ -1,5 +1,57 @@
 import 'package:latlong2/latlong.dart';
 
+/// 愛犬家向け情報
+class PetInfo {
+  final String? parking; // 駐車場情報（例：「あり（20台・無料）」「なし」）
+  final String? surface; // 道の状態（例：「コンクリート 70% / 土 30%」）
+  final String? waterStation; // 水飲み場（例：「あり（スタート地点・中間地点）」）
+  final String? restroom; // トイレ（例：「あり（スタート地点のみ）」）
+  final String? petFacilities; // ペット施設（例：「ドッグラン、ペット同伴カフェあり」）
+  final String? others; // その他（例：「リード着用必須」「大型犬が多い」）
+
+  const PetInfo({
+    this.parking,
+    this.surface,
+    this.waterStation,
+    this.restroom,
+    this.petFacilities,
+    this.others,
+  });
+
+  /// JSONから変換
+  factory PetInfo.fromJson(Map<String, dynamic> json) {
+    return PetInfo(
+      parking: json['parking'] as String?,
+      surface: json['surface'] as String?,
+      waterStation: json['water_station'] as String?,
+      restroom: json['restroom'] as String?,
+      petFacilities: json['pet_facilities'] as String?,
+      others: json['others'] as String?,
+    );
+  }
+
+  /// JSONに変換
+  Map<String, dynamic> toJson() {
+    return {
+      'parking': parking,
+      'surface': surface,
+      'water_station': waterStation,
+      'restroom': restroom,
+      'pet_facilities': petFacilities,
+      'others': others,
+    };
+  }
+
+  /// 情報が1つでもあるかどうか
+  bool get hasAnyInfo =>
+      parking != null ||
+      surface != null ||
+      waterStation != null ||
+      restroom != null ||
+      petFacilities != null ||
+      others != null;
+}
+
 /// 難易度レベル
 enum DifficultyLevel {
   easy('easy', '初級', '平坦で歩きやすい'),
@@ -41,6 +93,7 @@ class OfficialRoute {
   final int totalPins; // このルートに投稿されたピンの総数
   final String? thumbnailUrl; // ルート一覧用のサムネイル画像
   final List<String>? galleryImages; // ルート詳細用のギャラリー画像（3枚）
+  final PetInfo? petInfo; // 愛犬家向け情報
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -85,6 +138,9 @@ class OfficialRoute {
       thumbnailUrl: json['thumbnail_url'] as String?,
       galleryImages: json['gallery_images'] != null
           ? (json['gallery_images'] as List).map((e) => e as String).toList()
+          : null,
+      petInfo: json['pet_info'] != null
+          ? PetInfo.fromJson(json['pet_info'] as Map<String, dynamic>)
           : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -190,6 +246,7 @@ class OfficialRoute {
       'total_pins': totalPins,
       'thumbnail_url': thumbnailUrl,
       'gallery_images': galleryImages,
+      'pet_info': petInfo?.toJson(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -230,6 +287,7 @@ class OfficialRoute {
     int? totalPins,
     String? thumbnailUrl,
     List<String>? galleryImages,
+    PetInfo? petInfo,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -247,6 +305,7 @@ class OfficialRoute {
       totalPins: totalPins ?? this.totalPins,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       galleryImages: galleryImages ?? this.galleryImages,
+      petInfo: petInfo ?? this.petInfo,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
