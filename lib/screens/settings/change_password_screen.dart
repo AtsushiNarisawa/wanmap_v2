@@ -41,7 +41,19 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Supabase Auth でパスワードを変更
+      // 現在のユーザーのメールアドレスを取得
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser == null || currentUser.email == null) {
+        throw Exception('ユーザー情報が取得できません');
+      }
+
+      // 1. 現在のパスワードで再認証（現在のパスワードが正しいか確認）
+      await Supabase.instance.client.auth.signInWithPassword(
+        email: currentUser.email!,
+        password: _currentPasswordController.text,
+      );
+
+      // 2. パスワードを変更
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(
           password: _newPasswordController.text,
@@ -59,9 +71,18 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       }
     } on AuthException catch (e) {
       if (mounted) {
+        String errorMessage = 'パスワード変更に失敗しました: ${e.message}';
+        
+        // エラーメッセージをより分かりやすく
+        if (e.message.contains('Invalid login credentials')) {
+          errorMessage = '現在のパスワードが正しくありません';
+        } else if (e.message.contains('should be different')) {
+          errorMessage = '新しいパスワードは現在のパスワードと異なるものを設定してください';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('パスワード変更に失敗しました: ${e.message}'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
