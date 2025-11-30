@@ -65,15 +65,15 @@ class PublicRoutesScreen extends ConsumerWidget {
       },
       child: CustomScrollView(
         slivers: [
-          // エリア選択チップ
-          SliverToBoxAdapter(
-            child: AreaSelectionChips(
-              selectedArea: selectedArea,
-              onAreaSelected: (area) {
-                ref.read(selectedAreaProvider.notifier).state = area;
-              },
-            ),
-          ),
+          // エリア選択チップ（人気ルート一覧では不要のため非表示）
+          // SliverToBoxAdapter(
+          //   child: AreaSelectionChips(
+          //     selectedArea: selectedArea,
+          //     onAreaSelected: (area) {
+          //       ref.read(selectedAreaProvider.notifier).state = area;
+          //     },
+          //   ),
+          // ),
 
           // マップビュー（人気ルート一覧ではさまざまなエリアが混在するため非表示）
           // if (routesWithPoints.isNotEmpty)
