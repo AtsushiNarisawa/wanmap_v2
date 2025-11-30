@@ -289,7 +289,7 @@ class HelpScreen extends ConsumerWidget {
               const SizedBox(width: WanMapSpacing.small),
               Text(
                 'WanMap',
-                style: WanMapTypography.heading1.copyWith(
+                style: WanMapTypography.headlineLarge.copyWith(
                   color: WanMapColors.accent,
                   fontWeight: FontWeight.bold,
                 ),
