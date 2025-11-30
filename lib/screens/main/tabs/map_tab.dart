@@ -73,12 +73,18 @@ class _MapTabState extends ConsumerState<MapTab> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          'マップ',
-          style: WanMapTypography.headlineMedium.copyWith(
-            color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Icon(Icons.explore, color: WanMapColors.accent, size: 28),
+            const SizedBox(width: WanMapSpacing.sm),
+            Text(
+              'マップ',
+              style: WanMapTypography.headlineMedium.copyWith(
+                color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
