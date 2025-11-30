@@ -496,62 +496,103 @@ class RouteDetailScreen extends ConsumerWidget {
               children: pins.map<Widget>((pin) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: WanMapSpacing.md),
-                  child: Container(
-                    padding: const EdgeInsets.all(WanMapSpacing.md),
-                    decoration: BoxDecoration(
-                      color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          pin.title,
-                          style: WanMapTypography.bodyMedium.copyWith(
-                            color: isDark
-                                ? WanMapColors.textPrimaryDark
-                                : WanMapColors.textPrimaryLight,
-                            fontWeight: FontWeight.bold,
+                  child: GestureDetector(
+                    onTap: () {
+                      // TODO: ピン詳細画面へ遷移（次の修正で実装）
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                        const SizedBox(height: WanMapSpacing.xs),
-                        Text(
-                          pin.comment,
-                          style: WanMapTypography.caption.copyWith(
-                            color: isDark
-                                ? WanMapColors.textSecondaryDark
-                                : WanMapColors.textSecondaryLight,
-                          ),
-                        ),
-                        const SizedBox(height: WanMapSpacing.sm),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.favorite,
-                              size: 16,
-                              color: Colors.red,
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // サムネイル画像
+                          ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              bottomLeft: Radius.circular(16),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${pin.likesCount}',
-                              style: WanMapTypography.caption.copyWith(
-                                color: isDark
-                                    ? WanMapColors.textSecondaryDark
-                                    : WanMapColors.textSecondaryLight,
+                            child: pin.hasPhotos
+                                ? Image.network(
+                                    pin.photoUrls.first,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => _buildDefaultPinImage(),
+                                  )
+                                : _buildDefaultPinImage(),
+                          ),
+                          // テキスト情報
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(WanMapSpacing.md),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // タイトル
+                                  Text(
+                                    pin.title,
+                                    style: WanMapTypography.bodyMedium.copyWith(
+                                      color: isDark
+                                          ? WanMapColors.textPrimaryDark
+                                          : WanMapColors.textPrimaryLight,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: WanMapSpacing.xs),
+                                  // コメント
+                                  Text(
+                                    pin.comment,
+                                    style: WanMapTypography.bodySmall.copyWith(
+                                      color: isDark
+                                          ? WanMapColors.textSecondaryDark
+                                          : WanMapColors.textSecondaryLight,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: WanMapSpacing.sm),
+                                  // いいね数・相対時間
+                                  Row(
+                                    children: [
+                                      Icon(Icons.favorite, size: 14, color: Colors.red[300]),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${pin.likesCount}',
+                                        style: WanMapTypography.caption.copyWith(
+                                          color: isDark
+                                              ? WanMapColors.textSecondaryDark
+                                              : WanMapColors.textSecondaryLight,
+                                        ),
+                                      ),
+                                      const SizedBox(width: WanMapSpacing.sm),
+                                      Text(
+                                        pin.relativeTime,
+                                        style: WanMapTypography.caption.copyWith(
+                                          color: isDark
+                                              ? WanMapColors.textSecondaryDark
+                                              : WanMapColors.textSecondaryLight,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: WanMapSpacing.md),
-                            Text(
-                              pin.relativeTime,
-                              style: WanMapTypography.caption.copyWith(
-                                color: isDark
-                                    ? WanMapColors.textSecondaryDark
-                                    : WanMapColors.textSecondaryLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -562,6 +603,22 @@ class RouteDetailScreen extends ConsumerWidget {
           error: (error, stack) => Text('エラー: $error'),
         ),
       ],
+    );
+  }
+
+  /// デフォルトピン画像
+  Widget _buildDefaultPinImage() {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        color: WanMapColors.accent.withOpacity(0.2),
+      ),
+      child: Icon(
+        Icons.photo,
+        size: 40,
+        color: WanMapColors.accent,
+      ),
     );
   }
 
