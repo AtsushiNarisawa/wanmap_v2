@@ -33,15 +33,22 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   final PhotoService _photoService = PhotoService();
   final List<File> _photoFiles = []; // 散歩中の写真を一時保存（散歩終了時にアップロード）
   String? _currentWalkId; // 現在の散歩ID（保存時に設定）
+  bool _isReady = false; // GPS準備完了フラグ
 
   @override
   void initState() {
     super.initState();
-    _startWalking();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _prepareWalking();
+    });
   }
 
-  /// 散歩を開始
-  Future<void> _startWalking() async {
+  /// GPS準備（権限チェック・初期位置取得）
+  Future<void> _prepareWalking() async {
+    if (kDebugMode) {
+      print('📍 DailyWalkingScreen: GPS準備開始');
+    }
+    
     final gpsNotifier = ref.read(gpsProviderRiverpod.notifier);
     
     // GPS権限チェック
@@ -59,18 +66,35 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
       return;
     }
 
+    // 現在位置を取得
+    await gpsNotifier.getCurrentLocation();
+    
+    setState(() {
+      _isReady = true;
+    });
+
+    if (kDebugMode) {
+      print('✅ DailyWalkingScreen: GPS準備完了');
+    }
+  }
+
+  /// 散歩を開始（スタートボタン押下時）
+  Future<void> _startWalking() async {
+    if (kDebugMode) {
+      print('🟢 DailyWalkingScreen: スタートボタン押下 - GPS記録開始');
+    }
+    
+    final gpsNotifier = ref.read(gpsProviderRiverpod.notifier);
+    
     // GPS記録開始
     final success = await gpsNotifier.startRecording();
-    if (!success) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('GPS記録の開始に失敗しました'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        Navigator.of(context).pop();
-      }
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('GPS記録の開始に失敗しました'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -312,11 +336,16 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
           // 上部オーバーレイ
           _buildTopOverlay(isDark),
 
-          // 下部オーバーレイ（統計情報）
-          _buildBottomOverlay(isDark, gpsState),
+          // 下部オーバーレイ（統計情報） - 記録中のみ表示
+          if (gpsState.isRecording)
+            _buildBottomOverlay(isDark, gpsState),
 
           // フローティングボタン（現在位置追従）
           _buildFloatingButton(gpsState),
+
+          // 中央ボタン（スタートボタン） - 記録前のみ表示
+          if (_isReady && !gpsState.isRecording)
+            _buildCenterButton(isDark, gpsState),
         ],
       ),
     );
@@ -560,7 +589,7 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   Widget _buildFloatingButton(GpsState gpsState) {
     return Positioned(
       right: WanMapSpacing.lg,
-      bottom: 280,
+      bottom: gpsState.isRecording ? 280 : 120,
       child: FloatingActionButton(
         onPressed: () {
           if (gpsState.currentLocation != null) {
@@ -574,6 +603,96 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
         child: Icon(
           _isFollowingUser ? Icons.my_location : Icons.location_searching,
           color: WanMapColors.accent,
+        ),
+      ),
+    );
+  }
+
+  /// 中央ボタン（スタートボタン）
+  Widget _buildCenterButton(bool isDark, GpsState gpsState) {
+    return Positioned(
+      left: WanMapSpacing.lg,
+      right: WanMapSpacing.lg,
+      bottom: WanMapSpacing.xl,
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 統計情報（記録前も表示）
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: WanMapSpacing.lg,
+                vertical: WanMapSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatItem(
+                    icon: Icons.straighten,
+                    label: '距離',
+                    value: gpsState.formattedDistance,
+                    isDark: isDark,
+                  ),
+                  _StatItem(
+                    icon: Icons.timer,
+                    label: '時間',
+                    value: gpsState.formattedDuration,
+                    isDark: isDark,
+                  ),
+                  _StatItem(
+                    icon: Icons.location_on,
+                    label: 'ポイント',
+                    value: '${gpsState.currentPointCount}',
+                    isDark: isDark,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: WanMapSpacing.md),
+            // スタートボタン
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _startWalking,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 8,
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.play_arrow, size: 28),
+                    SizedBox(width: WanMapSpacing.sm),
+                    Text(
+                      'スタート',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
