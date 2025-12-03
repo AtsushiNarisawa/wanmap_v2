@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/area.dart';
-import '../services/supabase_service.dart';
+import '../config/supabase_config.dart';
 
 /// ソートオプション
 enum AreaSortOption {
@@ -25,7 +25,7 @@ final areaSortOptionProvider = StateProvider<AreaSortOption>((ref) => AreaSortOp
 /// 都道府県一覧プロバイダー
 final prefecturesProvider = FutureProvider<List<String>>((ref) async {
   try {
-    final supabase = SupabaseService.client;
+    final supabase = SupabaseConfig.client;
     
     final response = await supabase
         .from('areas')
@@ -52,7 +52,7 @@ final filteredAreasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
   final sortOption = ref.watch(areaSortOptionProvider);
 
   try {
-    final supabase = SupabaseService.client;
+    final supabase = SupabaseConfig.client;
     
     // 1. エリア一覧と公式ルート数を取得
     var query = supabase.rpc(
