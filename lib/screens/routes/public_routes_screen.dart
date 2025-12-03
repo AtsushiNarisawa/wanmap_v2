@@ -121,76 +121,75 @@ class _PublicRoutesScreenState extends ConsumerState<PublicRoutesScreen> {
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.md),
-      child: Row(
+      child: Column(
         children: [
           // エリアフィルタ
-          Expanded(
-            child: areasAsync.when(
-              data: (areas) {
-                return DropdownButtonFormField<String?>(
-                  value: selectedAreaId,
-                  decoration: InputDecoration(
-                    labelText: 'エリア',
-                    prefixIcon: const Icon(Icons.location_on),
-                    filled: true,
-                    fillColor: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          areasAsync.when(
+            data: (areas) {
+              return DropdownButtonFormField<String?>(
+                value: selectedAreaId,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'エリア',
+                  prefixIcon: const Icon(Icons.location_on, size: 20),
+                  filled: true,
+                  fillColor: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
-                  items: [
-                    const DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('すべてのエリア'),
-                    ),
-                    ...areas.map<DropdownMenuItem<String?>>((area) {
-                      return DropdownMenuItem<String?>(
-                        value: area.id,
-                        child: Text(area.name),
-                      );
-                    }).toList(),
-                  ],
-                  onChanged: (value) {
-                    ref.read(selectedAreaIdProviderForPublicRoutes.notifier).state = value;
-                  },
-                );
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const SizedBox(),
-            ),
-          ),
-          const SizedBox(width: WanMapSpacing.sm),
-          // ソート順
-          Expanded(
-            child: DropdownButtonFormField<RouteSortOption>(
-              value: sortOption,
-              decoration: InputDecoration(
-                labelText: 'ソート',
-                prefixIcon: const Icon(Icons.sort),
-                filled: true,
-                fillColor: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('すべて', overflow: TextOverflow.ellipsis),
+                  ),
+                  ...areas.map<DropdownMenuItem<String?>>((area) {
+                    return DropdownMenuItem<String?>(
+                      value: area.id,
+                      child: Text(area.name, overflow: TextOverflow.ellipsis),
+                    );
+                  }).toList(),
+                ],
+                onChanged: (value) {
+                  ref.read(selectedAreaIdProviderForPublicRoutes.notifier).state = value;
+                },
+              );
+            },
+            loading: () => const CircularProgressIndicator(),
+            error: (_, __) => const SizedBox(),
+          ),
+          const SizedBox(height: WanMapSpacing.sm),
+          // ソート順
+          DropdownButtonFormField<RouteSortOption>(
+            value: sortOption,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: 'ソート',
+              prefixIcon: const Icon(Icons.sort, size: 20),
+              filled: true,
+              fillColor: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
-              items: RouteSortOption.values.map((option) {
-                return DropdownMenuItem<RouteSortOption>(
-                  value: option,
-                  child: Text(option.label, overflow: TextOverflow.ellipsis),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(sortOptionProvider.notifier).state = value;
-                }
-              },
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
+            items: RouteSortOption.values.map((option) {
+              return DropdownMenuItem<RouteSortOption>(
+                value: option,
+                child: Text(option.label, overflow: TextOverflow.ellipsis),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(sortOptionProvider.notifier).state = value;
+              }
+            },
           ),
         ],
+        ),
       ),
     );
   }
