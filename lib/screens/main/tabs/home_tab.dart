@@ -16,6 +16,7 @@ import '../../notifications/notifications_screen.dart';
 import '../../routes/public_routes_screen.dart';
 import '../../outing/route_list_screen.dart';
 import '../../../models/area.dart';
+import '../../../widgets/shimmer/wanmap_shimmer.dart';
 
 /// HomeTab - ビジュアル重視のホーム画面
 /// 
@@ -220,9 +221,9 @@ class HomeTab extends ConsumerWidget {
                     }).toList(),
                   );
                 },
-                loading: () => const SizedBox(
+                loading: () => const ImageCardShimmer(
+                  count: 2,
                   height: 180,
-                  child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (error, _) {
                   if (kDebugMode) {
@@ -341,7 +342,12 @@ class HomeTab extends ConsumerWidget {
                 ],
               );
             },
-            loading: () => const SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
+            loading: () => Column(
+              children: const [
+                AreaCardShimmer(count: 1, isFeatured: true),
+                AreaCardShimmer(count: 2),
+              ],
+            ),
             error: (error, _) => _buildEmptyCard(isDark, 'エリアの読み込みに失敗しました'),
           ),
         ],
@@ -430,7 +436,7 @@ class HomeTab extends ConsumerWidget {
                     ],
                   );
                 },
-                loading: () => const SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
+                loading: () => const RouteCardShimmer(count: 3),
                 error: (error, _) {
                   if (kDebugMode) {
                     print('❌ 人気ルート読み込みエラー: $error');

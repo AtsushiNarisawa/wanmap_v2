@@ -10,6 +10,7 @@ import '../../../providers/user_statistics_provider.dart';
 import '../../../providers/walk_history_provider.dart';
 import '../../../services/photo_service.dart';
 import '../../../widgets/walk_photo_grid.dart';
+import '../../../widgets/shimmer/wanmap_shimmer.dart';
 import '../../daily/daily_walking_screen.dart';
 import '../../history/walk_history_screen.dart';
 
@@ -75,7 +76,10 @@ class RecordsTab extends ConsumerWidget {
               // 総合統計
               statisticsAsync.when(
                 data: (stats) => _buildOverallStats(context, isDark, stats),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+                  child: CardShimmer(count: 2, height: 100),
+                ),
                 error: (_, __) => _buildEmptyCard(isDark, '統計の読み込みに失敗しました'),
               ),
               
@@ -84,7 +88,10 @@ class RecordsTab extends ConsumerWidget {
               // バッジコレクション
               badgeStatsAsync.when(
                 data: (badgeStats) => _buildBadgeSummary(context, isDark, badgeStats),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+                  child: CardShimmer(count: 1, height: 150),
+                ),
                 error: (_, __) => const SizedBox.shrink(),
               ),
               
@@ -302,7 +309,7 @@ class RecordsTab extends ConsumerWidget {
                   children: walks.map((walk) => _buildWalkHistoryCard(context, isDark, walk, userId)).toList(),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const ListTileShimmer(count: 3),
               error: (error, stack) => _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました'),
             ),
           ],
