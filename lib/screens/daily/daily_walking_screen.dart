@@ -13,6 +13,7 @@ import '../../config/wanmap_spacing.dart';
 import '../../config/env.dart';
 import '../../models/walk_mode.dart';
 import '../../providers/gps_provider_riverpod.dart';
+import '../../providers/active_walk_provider.dart';
 import '../../services/profile_service.dart';
 import '../../services/walk_save_service.dart';
 import '../../services/photo_service.dart';
@@ -116,7 +117,9 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
     }
     
     final gpsNotifier = ref.read(gpsProviderRiverpod.notifier);
+    final activeWalkNotifier = ref.read(activeWalkProvider.notifier);
     
+    // GPS記録開始
     // GPS記録開始
     final success = await gpsNotifier.startRecording();
     if (!success && mounted) {
@@ -287,6 +290,9 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
             duration: const Duration(seconds: 3),
           ),
         );
+        
+        // 散歩状態をクリア
+        ref.read(activeWalkProvider.notifier).endWalk();
         Navigator.of(context).pop(route);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -345,12 +351,57 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
     }
   }
 
+  /// 散歩中に戻るボタンを押した時の処理
+  Future<bool> _onWillPop() async {
+    final gpsState = ref.read(gpsProviderRiverpod);
+    
+    // 記録中でなければ普通に戻る
+    if (!gpsState.isRecording) {
+      return true;
+    }
+
+    // 記録中の場合は確認ダイアログを表示
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('散歩記録中'),
+        content: const Text('散歩の記録は継続します。\nホーム画面に戻りますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop('end'),
+            child: const Text('散歩を終了'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop('continue'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: WanMapColors.accent,
+            ),
+            child: const Text('継続して戻る'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == 'continue') {
+      // 散歩を継続してホームに戻る
+      return true;
+    } else if (result == 'end') {
+      // 散歩を終了
+      await _finishWalking();
+      return false; // 終了処理内でpopするのでfalse
+    }
+    
+    return false; // キャンセル
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final gpsState = ref.watch(gpsProviderRiverpod);
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
       backgroundColor: isDark
           ? WanMapColors.backgroundDark
           : WanMapColors.backgroundLight,
