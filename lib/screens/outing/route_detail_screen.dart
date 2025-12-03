@@ -7,10 +7,13 @@ import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
 import '../../providers/official_route_provider.dart';
 import '../../providers/route_pin_provider.dart';
+import '../../providers/gps_provider_riverpod.dart';
 
 import '../../models/official_route.dart';
+import '../../models/walk_mode.dart';
 import 'walking_screen.dart';
 import 'pin_detail_screen.dart';
+import '../daily/daily_walking_screen.dart';
 
 /// ルート詳細画面
 /// 公式ルートの詳細情報とピン一覧を表示
@@ -413,36 +416,50 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
     );
   }
 
-  /// 散歩を開始ボタン
+  /// 散歩を開始ボタン（散歩中の場合は「進行中の散歩に戻る」ボタンに変更）
   Widget _buildStartButton(BuildContext context, bool isDark, OfficialRoute route) {
+    final gpsState = ref.watch(gpsProviderRiverpod);
+    final isRecording = gpsState.isRecording;
+    
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WalkingScreen(route: route),
-            ),
-          );
+          if (isRecording) {
+            // 散歩中の場合：進行中の散歩画面へ遷移
+            _navigateToActiveWalk(context, gpsState);
+          } else {
+            // 散歩中でない場合：新しい散歩を開始
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WalkingScreen(route: route),
+              ),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: WanMapColors.accent,
+          backgroundColor: isRecording 
+              ? WanMapColors.secondary  // 散歩中は異なる色
+              : WanMapColors.accent,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           elevation: 8,
-          shadowColor: WanMapColors.accent.withOpacity(0.4),
+          shadowColor: (isRecording ? WanMapColors.secondary : WanMapColors.accent).withOpacity(0.4),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.directions_walk, size: 28),
+            Icon(
+              isRecording ? Icons.my_location : Icons.directions_walk, 
+              size: 28,
+            ),
             const SizedBox(width: WanMapSpacing.sm),
             Text(
-              'このルートを歩く',
+              isRecording ? '進行中の散歩に戻る' : 'このルートを歩く',
               style: WanMapTypography.bodyLarge.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -452,6 +469,28 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         ),
       ),
     );
+  }
+
+  /// 進行中の散歩画面へ遷移
+  void _navigateToActiveWalk(BuildContext context, GpsState gpsState) {
+    if (gpsState.walkMode == WalkMode.daily) {
+      // Daily Walk画面へ遷移
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DailyWalkingScreen(),
+        ),
+      );
+    } else {
+      // Outing Walk: マップタブから確認する案内
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('別のルートを散歩中です。画面下部のバナーから確認してください。'),
+          backgroundColor: WanMapColors.secondary,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   /// 愛犬家向け情報セクション
