@@ -259,15 +259,14 @@ class OfficialRoute {
   }
 
   /// 16進数文字列を32bit整数に変換（リトルエンディアン）
+  /// 例: "05000000" → 5
   static int _hexToInt32(String hex) {
-    final bytes = <int>[];
-    for (int i = hex.length - 2; i >= 0; i -= 2) {
-      bytes.add(int.parse(hex.substring(i, i + 2), radix: 16));
-    }
-    
+    // リトルエンディアン: 下位バイトから順に並ぶ
+    // "05000000" = 05 00 00 00 (bytes) → 0x00000005 = 5
     final byteData = ByteData(4);
     for (int i = 0; i < 4; i++) {
-      byteData.setUint8(i, bytes[i]);
+      final byteHex = hex.substring(i * 2, i * 2 + 2);
+      byteData.setUint8(i, int.parse(byteHex, radix: 16));
     }
     return byteData.getInt32(0, Endian.little);
   }
