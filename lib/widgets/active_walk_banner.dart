@@ -1,26 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../config/app_colors.dart';
-import '../config/app_spacing.dart';
-import '../config/app_typography.dart';
+import '../config/wanmap_colors.dart';
+import '../config/wanmap_spacing.dart';
+import '../config/wanmap_typography.dart';
 import '../providers/gps_provider_riverpod.dart';
 import '../models/walk_mode.dart';
-import '../screens/daily/daily_walking_screen.dart';
-import '../screens/outing/walking_screen.dart';
-import '../models/official_route.dart';
 
 /// 散歩中バナーウィジェット
 /// 
 /// 散歩記録中の場合、画面下部に固定表示され、
 /// タップすると散歩中画面へ遷移する
+/// 
+/// 注意: Outing Walkの場合、ルート情報が必要なため、
+/// バナーからの遷移は実装していません。
+/// Daily Walk専用の機能です。
 class ActiveWalkBanner extends ConsumerWidget {
-  /// 現在のルート情報（Outing Walkの場合のみ必要）
-  final OfficialRoute? currentRoute;
-
-  const ActiveWalkBanner({
-    super.key,
-    this.currentRoute,
-  });
+  const ActiveWalkBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,19 +28,19 @@ class ActiveWalkBanner extends ConsumerWidget {
 
     return Material(
       elevation: 8,
-      color: AppColors.primary,
+      color: WanMapColors.primary,
       child: InkWell(
         onTap: () => _navigateToWalkingScreen(context, gpsState),
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            horizontal: WanMapSpacing.md,
+            vertical: WanMapSpacing.sm,
           ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.primary,
-                AppColors.primary.withOpacity(0.8),
+                WanMapColors.primary,
+                WanMapColors.primary.withOpacity(0.8),
               ],
             ),
           ),
@@ -70,7 +65,7 @@ class ActiveWalkBanner extends ConsumerWidget {
                     );
                   },
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: WanMapSpacing.sm),
                 // 散歩情報
                 Expanded(
                   child: Column(
@@ -81,7 +76,7 @@ class ActiveWalkBanner extends ConsumerWidget {
                         gpsState.isPaused 
                             ? '散歩を一時停止中'
                             : '散歩を記録中',
-                        style: AppTypography.labelMedium.copyWith(
+                        style: WanMapTypography.labelMedium.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -91,37 +86,37 @@ class ActiveWalkBanner extends ConsumerWidget {
                         children: [
                           Text(
                             gpsState.formattedDistance,
-                            style: AppTypography.bodySmall.copyWith(
+                            style: WanMapTypography.bodySmall.copyWith(
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: WanMapSpacing.sm),
                           Text(
                             '•',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: WanMapSpacing.sm),
                           Text(
                             gpsState.formattedDuration,
-                            style: AppTypography.bodySmall.copyWith(
+                            style: WanMapTypography.bodySmall.copyWith(
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: WanMapSpacing.sm),
                           Text(
                             '•',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: WanMapSpacing.sm),
                           Text(
                             gpsState.walkMode == WalkMode.daily
                                 ? '日常散歩'
                                 : 'おでかけ散歩',
-                            style: AppTypography.bodySmall.copyWith(
+                            style: WanMapTypography.bodySmall.copyWith(
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
@@ -148,28 +143,22 @@ class ActiveWalkBanner extends ConsumerWidget {
   void _navigateToWalkingScreen(BuildContext context, GpsState gpsState) {
     if (gpsState.walkMode == WalkMode.daily) {
       // Daily Walk画面へ遷移
-      Navigator.of(context).pushReplacement(
+      // 注意: push（戻るボタンで戻れる）を使用
+      Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => const DailyWalkingScreen(),
         ),
       );
     } else {
-      // Outing Walk画面へ遷移
-      if (currentRoute != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => WalkingScreen(route: currentRoute!),
-          ),
-        );
-      } else {
-        // currentRouteがない場合は、エラーメッセージを表示
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('散歩中のルート情報が見つかりません'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // Outing Walk画面は、ルート情報が必要なため、
+      // バナーからの遷移は未対応
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('おでかけ散歩中です。マップタブから確認してください。'),
+          backgroundColor: WanMapColors.accent,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 }
