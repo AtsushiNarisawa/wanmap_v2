@@ -5,6 +5,7 @@ import '../config/wanmap_spacing.dart';
 import '../config/wanmap_typography.dart';
 import '../providers/gps_provider_riverpod.dart';
 import '../models/walk_mode.dart';
+import '../screens/daily/daily_walking_screen.dart';
 
 /// 散歩中バナーウィジェット
 /// 
