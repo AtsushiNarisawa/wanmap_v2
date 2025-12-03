@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:latlong2/latlong.dart';
 
@@ -107,13 +108,18 @@ class OfficialRoute {
   /// PostGISのPOINT型をLatLngに変換
   /// 例: "POINT(139.1071 35.2328)" → LatLng(35.2328, 139.1071)
   /// WKB形式（16進数バイナリ）: "0101000020E6100000..." → LatLng
+  /// GeoJSON形式: {"type":"Point","coordinates":[139.0272,35.1993]}
   /// 注意: PostGISは経度,緯度の順番だが、LatLngは緯度,経度の順番
   static LatLng _parsePostGISPoint(dynamic pointData) {
     if (pointData == null) {
       throw ArgumentError('Point data is null');
     }
 
-    // すでにMapの場合（Supabaseが自動変換する場合がある）
+    // デバッグログ追加
+    print('🔍 pointData type: ${pointData.runtimeType}');
+    print('🔍 pointData value: $pointData');
+
+    // すでにMapの場合（GeoJSON形式）
     if (pointData is Map) {
       final coords = pointData['coordinates'] as List;
       return LatLng(
@@ -122,11 +128,25 @@ class OfficialRoute {
       );
     }
 
-    // WKT文字列の場合
+    // 文字列の場合
     if (pointData is String) {
       // WKB形式（16進数バイナリ）の場合
       if (pointData.startsWith('01') && pointData.length > 20) {
         return _parseWKBPoint(pointData);
+      }
+      
+      // GeoJSON文字列の場合（JSON文字列として渡される場合）
+      if (pointData.contains('"type"') && pointData.contains('"coordinates"')) {
+        try {
+          final Map<String, dynamic> geoJson = json.decode(pointData);
+          final coords = geoJson['coordinates'] as List;
+          return LatLng(
+            (coords[1] as num).toDouble(), // 緯度
+            (coords[0] as num).toDouble(), // 経度
+          );
+        } catch (e) {
+          print('❌ Failed to parse GeoJSON string: $e');
+        }
       }
       
       // WKT形式の場合: "POINT(139.1071 35.2328)"
@@ -185,6 +205,7 @@ class OfficialRoute {
   /// PostGISのLINESTRING型をLatLngリストに変換
   /// 例: "LINESTRING(139.1071 35.2328, 139.1080 35.2335, ...)"
   /// WKB形式: "0102000020E6100000..." → List<LatLng>
+  /// GeoJSON形式: {"type":"LineString","coordinates":[[139.1071,35.2328],...]}
   static List<LatLng>? _parsePostGISLineString(dynamic lineData) {
     if (lineData == null) return null;
 
@@ -200,11 +221,29 @@ class OfficialRoute {
       }).toList();
     }
 
-    // WKT文字列の場合
+    // 文字列の場合
     if (lineData is String) {
       // WKB形式（16進数バイナリ）の場合
       if (lineData.startsWith('01') && lineData.length > 20) {
         return _parseWKBLineString(lineData);
+      }
+      
+      // GeoJSON文字列の場合
+      if (lineData.contains('"type"') && lineData.contains('"coordinates"')) {
+        try {
+          final Map<String, dynamic> geoJson = json.decode(lineData);
+          final coords = geoJson['coordinates'] as List;
+          return coords.map((coord) {
+            final c = coord as List;
+            return LatLng(
+              (c[1] as num).toDouble(), // 緯度
+              (c[0] as num).toDouble(), // 経度
+            );
+          }).toList();
+        } catch (e) {
+          print('❌ Failed to parse GeoJSON LineString: $e');
+          return null;
+        }
       }
       
       // WKT形式の場合: "LINESTRING(139.1071 35.2328, ...)"
