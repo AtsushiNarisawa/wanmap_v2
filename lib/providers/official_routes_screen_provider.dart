@@ -39,5 +39,13 @@ final officialRoutesProvider = FutureProvider.autoDispose<List<OfficialRoute>>((
     limit: 100, // 全件表示のため上限を引き上げ
   );
 
-  return routes.map((json) => OfficialRoute.fromJson(json)).toList();
+  return routes.map((json) {
+    try {
+      return OfficialRoute.fromJson(json as Map<String, dynamic>);
+    } catch (e) {
+      print('❌ OfficialRoute.fromJson エラー: $e');
+      print('❌ 問題のJSON: $json');
+      rethrow;
+    }
+  }).toList();
 });
