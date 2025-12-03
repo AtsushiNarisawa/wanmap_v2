@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:latlong2/latlong.dart';
 
 /// 難易度レベル
@@ -105,6 +106,7 @@ class OfficialRoute {
 
   /// PostGISのPOINT型をLatLngに変換
   /// 例: "POINT(139.1071 35.2328)" → LatLng(35.2328, 139.1071)
+  /// WKB形式（16進数バイナリ）: "0101000020E6100000..." → LatLng
   /// 注意: PostGISは経度,緯度の順番だが、LatLngは緯度,経度の順番
   static LatLng _parsePostGISPoint(dynamic pointData) {
     if (pointData == null) {
@@ -122,7 +124,12 @@ class OfficialRoute {
 
     // WKT文字列の場合
     if (pointData is String) {
-      // "POINT(139.1071 35.2328)" から座標を抽出
+      // WKB形式（16進数バイナリ）の場合
+      if (pointData.startsWith('01') && pointData.length > 20) {
+        return _parseWKBPoint(pointData);
+      }
+      
+      // WKT形式の場合: "POINT(139.1071 35.2328)"
       final coordsMatch = RegExp(r'POINT\(([0-9.\-]+)\s+([0-9.\-]+)\)').firstMatch(pointData);
       if (coordsMatch != null) {
         final lon = double.parse(coordsMatch.group(1)!);
@@ -134,8 +141,50 @@ class OfficialRoute {
     throw ArgumentError('Invalid PostGIS Point format: $pointData');
   }
 
+  /// WKB形式（Well-Known Binary）のPOINTをパース
+  /// フォーマット: 0101000020E6100000 + 16バイト（経度8バイト+緯度8バイト）
+  static LatLng _parseWKBPoint(String wkbHex) {
+    try {
+      // WKBヘッダーをスキップ（最初の20文字 = 10バイト）
+      // フォーマット: バイトオーダー(1) + 型(4) + SRID(4) = 9バイト → 18文字
+      // 実際には20文字スキップで座標データ開始
+      final coordsHex = wkbHex.substring(18);
+      
+      // 経度（最初の8バイト = 16文字）
+      final lonHex = coordsHex.substring(0, 16);
+      // 緯度（次の8バイト = 16文字）
+      final latHex = coordsHex.substring(16, 32);
+      
+      // リトルエンディアンのdouble値に変換
+      final lon = _hexToDouble(lonHex);
+      final lat = _hexToDouble(latHex);
+      
+      return LatLng(lat, lon);
+    } catch (e) {
+      throw ArgumentError('Failed to parse WKB Point: $wkbHex, error: $e');
+    }
+  }
+
+  /// 16進数文字列をdoubleに変換（リトルエンディアン）
+  static double _hexToDouble(String hex) {
+    // 2文字ずつ（1バイト）に分割してリトルエンディアンで並び替え
+    final bytes = <int>[];
+    for (int i = hex.length - 2; i >= 0; i -= 2) {
+      bytes.add(int.parse(hex.substring(i, i + 2), radix: 16));
+    }
+    
+    // バイト列をdoubleに変換
+    final buffer = bytes.sublist(0, 8);
+    final byteData = ByteData(8);
+    for (int i = 0; i < 8; i++) {
+      byteData.setUint8(i, buffer[i]);
+    }
+    return byteData.getFloat64(0, Endian.little);
+  }
+
   /// PostGISのLINESTRING型をLatLngリストに変換
   /// 例: "LINESTRING(139.1071 35.2328, 139.1080 35.2335, ...)"
+  /// WKB形式: "0102000020E6100000..." → List<LatLng>
   static List<LatLng>? _parsePostGISLineString(dynamic lineData) {
     if (lineData == null) return null;
 
@@ -153,6 +202,12 @@ class OfficialRoute {
 
     // WKT文字列の場合
     if (lineData is String) {
+      // WKB形式（16進数バイナリ）の場合
+      if (lineData.startsWith('01') && lineData.length > 20) {
+        return _parseWKBLineString(lineData);
+      }
+      
+      // WKT形式の場合: "LINESTRING(139.1071 35.2328, ...)"
       final coordsMatch = RegExp(r'LINESTRING\(([^)]+)\)').firstMatch(lineData);
       if (coordsMatch != null) {
         final coordsStr = coordsMatch.group(1)!;
@@ -167,6 +222,49 @@ class OfficialRoute {
     }
 
     return null;
+  }
+
+  /// WKB形式（Well-Known Binary）のLINESTRINGをパース
+  static List<LatLng> _parseWKBLineString(String wkbHex) {
+    try {
+      // WKBヘッダーをスキップ（バイトオーダー + 型 + SRID = 18文字）
+      final dataHex = wkbHex.substring(18);
+      
+      // ポイント数（最初の4バイト = 8文字）
+      final numPointsHex = dataHex.substring(0, 8);
+      final numPoints = _hexToInt32(numPointsHex);
+      
+      // 各ポイントをパース（1ポイント = 16バイト = 32文字）
+      final points = <LatLng>[];
+      for (int i = 0; i < numPoints; i++) {
+        final offset = 8 + (i * 32);
+        final lonHex = dataHex.substring(offset, offset + 16);
+        final latHex = dataHex.substring(offset + 16, offset + 32);
+        
+        final lon = _hexToDouble(lonHex);
+        final lat = _hexToDouble(latHex);
+        points.add(LatLng(lat, lon));
+      }
+      
+      return points;
+    } catch (e) {
+      print('❌ Failed to parse WKB LineString: $e');
+      return [];
+    }
+  }
+
+  /// 16進数文字列を32bit整数に変換（リトルエンディアン）
+  static int _hexToInt32(String hex) {
+    final bytes = <int>[];
+    for (int i = hex.length - 2; i >= 0; i -= 2) {
+      bytes.add(int.parse(hex.substring(i, i + 2), radix: 16));
+    }
+    
+    final byteData = ByteData(4);
+    for (int i = 0; i < 4; i++) {
+      byteData.setUint8(i, bytes[i]);
+    }
+    return byteData.getInt32(0, Endian.little);
   }
 
   /// OfficialRouteオブジェクトをJSON形式に変換
