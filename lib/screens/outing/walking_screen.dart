@@ -15,6 +15,8 @@ import '../../services/walk_save_service.dart';
 import '../../services/photo_service.dart';
 import '../../services/badge_service.dart';
 import 'dart:io';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'pin_create_screen.dart';
 
 /// 散歩中画面（公式ルートを歩いている時）
@@ -41,11 +43,39 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
   bool _isFollowingUser = true;
   bool _showRouteInfo = true;
   bool _isRecordingStarted = false; // GPS記録開始フラグ
+  double _currentZoom = 15.0; // 現在のズームレベル
+  bool _autoZoomTriggered = false; // 自動ズーム遷移が実行されたか
+  Timer? _autoZoomTimer; // 自動ズーム用タイマー
 
   @override
   void initState() {
     super.initState();
     _prepareWalking(); // GPS準備のみ（記録は開始しない）
+    _startAutoZoomTransition(); // 2秒後に自動ズーム遷移
+  }
+
+  @override
+  void dispose() {
+    _autoZoomTimer?.cancel();
+    super.dispose();
+  }
+
+  /// 2秒後に自動ズーム遷移（15.0 → 17.0）
+  void _startAutoZoomTransition() {
+    _autoZoomTimer = Timer(const Duration(seconds: 2), () {
+      if (!_autoZoomTriggered && mounted) {
+        setState(() {
+          _currentZoom = 17.0;
+          _autoZoomTriggered = true;
+        });
+        final gpsState = ref.read(gpsProviderRiverpod);
+        final center = gpsState.currentLocation ?? widget.route.startLocation;
+        _mapController.move(center, _currentZoom);
+        if (kDebugMode) {
+          print('🔍 自動ズーム遷移: 15.0 → 17.0');
+        }
+      }
+    });
   }
 
   /// GPS準備（権限チェックと現在地取得のみ）
@@ -360,8 +390,9 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
       mapController: _mapController,
       options: MapOptions(
         initialCenter: center,
-        initialZoom: 16.0,
+        initialZoom: _currentZoom,
         onPositionChanged: (position, hasGesture) {
+          // ユーザーが地図をドラッグした場合のみ追従解除
           if (hasGesture) {
             setState(() {
               _isFollowingUser = false;
@@ -655,12 +686,34 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
             ),
           ),
           const SizedBox(height: WanMapSpacing.md),
+          // ズームインボタン
+          FloatingActionButton.small(
+            heroTag: "zoom_in_button",
+            onPressed: _zoomIn,
+            backgroundColor: Colors.white.withOpacity(0.9),
+            child: const Icon(
+              Icons.add,
+              color: WanMapColors.accent,
+            ),
+          ),
+          const SizedBox(height: WanMapSpacing.xs),
+          // ズームアウトボタン
+          FloatingActionButton.small(
+            heroTag: "zoom_out_button",
+            onPressed: _zoomOut,
+            backgroundColor: Colors.white.withOpacity(0.9),
+            child: const Icon(
+              Icons.remove,
+              color: WanMapColors.accent,
+            ),
+          ),
+          const SizedBox(height: WanMapSpacing.sm),
           // 現在位置追従ボタン
           FloatingActionButton(
             heroTag: "location_button",
             onPressed: () {
               if (gpsState.currentLocation != null) {
-                _mapController.move(gpsState.currentLocation!, 16.0);
+                _mapController.move(gpsState.currentLocation!, _currentZoom);
                 setState(() {
                   _isFollowingUser = true;
                 });
@@ -721,6 +774,68 @@ class _StatItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// ズームイン
+  void _zoomIn() {
+    if (_currentZoom < 18.0) {
+      setState(() {
+        _currentZoom = (_currentZoom + 0.5).clamp(14.0, 18.0);
+        _autoZoomTriggered = true; // ユーザー操作なので自動遷移をキャンセル
+      });
+      final gpsState = ref.read(gpsProviderRiverpod);
+      final center = _isFollowingUser && gpsState.currentLocation != null
+          ? gpsState.currentLocation!
+          : _mapController.camera.center;
+      _mapController.move(center, _currentZoom);
+      HapticFeedback.lightImpact(); // 触覚フィードバック
+      _showZoomLevel(); // ズームレベル表示
+      if (kDebugMode) {
+        print('🔍 ズームイン: $_currentZoom');
+      }
+    }
+  }
+
+  /// ズームアウト
+  void _zoomOut() {
+    if (_currentZoom > 14.0) {
+      setState(() {
+        _currentZoom = (_currentZoom - 0.5).clamp(14.0, 18.0);
+        _autoZoomTriggered = true; // ユーザー操作なので自動遷移をキャンセル
+      });
+      final gpsState = ref.read(gpsProviderRiverpod);
+      final center = _isFollowingUser && gpsState.currentLocation != null
+          ? gpsState.currentLocation!
+          : _mapController.camera.center;
+      _mapController.move(center, _currentZoom);
+      HapticFeedback.lightImpact(); // 触覚フィードバック
+      _showZoomLevel(); // ズームレベル表示
+      if (kDebugMode) {
+        print('🔍 ズームアウト: $_currentZoom');
+      }
+    }
+  }
+
+  /// ズームレベルを一時的に表示
+  void _showZoomLevel() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'ズーム: ${_currentZoom.toStringAsFixed(1)}',
+          textAlign: TextAlign.center,
+        ),
+        duration: const Duration(milliseconds: 500),
+        backgroundColor: Colors.black.withOpacity(0.7),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height * 0.4,
+          left: MediaQuery.of(context).size.width * 0.4,
+          right: MediaQuery.of(context).size.width * 0.4,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      ),
     );
   }
 }
