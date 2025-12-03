@@ -85,9 +85,10 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
 
                   const SizedBox(height: WanMapSpacing.xl),
 
-                  // 愛犬家向け情報
-                  if (route.petInfo != null && route.petInfo!.hasAnyInfo)
-                    _buildPetInfoSection(route.petInfo!, isDark),
+                  // 愛犬家向け情報（OfficialRouteには未実装）
+                  // TODO: 将来的にpetInfo機能を追加する場合はここを有効化
+                  // if (route.petInfo != null && route.petInfo!.hasAnyInfo)
+                  //   _buildPetInfoSection(route.petInfo!, isDark),
 
                   const SizedBox(height: WanMapSpacing.xl),
 
@@ -454,6 +455,8 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   }
 
   /// 愛犬家向け情報セクション
+  /// TODO: OfficialRouteにpetInfo機能を追加する際に有効化
+  /*
   Widget _buildPetInfoSection(PetInfo petInfo, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,6 +546,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       ],
     );
   }
+  */
 
   /// 愛犬家向け情報の個別アイテム
   Widget _buildPetInfoItem({
