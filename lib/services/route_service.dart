@@ -297,4 +297,64 @@ class RouteService {
         .toList();
   }
 
+  /// 公式ルートを検索・ソート・フィルタして取得（official_routes用）
+  Future<List<dynamic>> searchOfficialRoutes({
+    String? searchQuery,
+    String? areaId,
+    String sortBy = 'popularity', // popularity, distance_asc, distance_desc, newest, duration_asc, duration_desc
+    int limit = 100,
+  }) async {
+    try {
+      // データベースの実際のカラム名を使用
+      var query = _supabase
+          .from('official_routes')
+          .select();
+
+      // エリアフィルタ
+      if (areaId != null && areaId.isNotEmpty) {
+        query = query.eq('area_id', areaId);
+      }
+
+      // 検索クエリ（ルート名・説明文）
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        query = query.or('name.ilike.%$searchQuery%,description.ilike.%$searchQuery%');
+      }
+
+      // ソート処理
+      switch (sortBy) {
+        case 'distance_asc':
+          query = query.order('distance_meters', ascending: true);
+          break;
+        case 'distance_desc':
+          query = query.order('distance_meters', ascending: false);
+          break;
+        case 'newest':
+          query = query.order('created_at', ascending: false);
+          break;
+        case 'duration_asc':
+          query = query.order('estimated_minutes', ascending: true);
+          break;
+        case 'duration_desc':
+          query = query.order('estimated_minutes', ascending: false);
+          break;
+        case 'popularity':
+        default:
+          query = query.order('total_walks', ascending: false);
+          break;
+      }
+
+      query = query.limit(limit);
+
+      final response = await query;
+      
+      return response as List;
+    } catch (e) {
+      if (kDebugMode) {
+        print('公式ルート検索エラー: $e');
+        print('エラー詳細: ${e.runtimeType}');
+      }
+      rethrow;
+    }
+  }
+
 }
