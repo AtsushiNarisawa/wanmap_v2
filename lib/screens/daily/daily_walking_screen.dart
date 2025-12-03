@@ -38,7 +38,23 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   @override
   void initState() {
     super.initState();
-    _startWalking();
+    _initializeWalking();
+  }
+
+  /// 散歩を初期化（既に記録中の場合はスキップ）
+  Future<void> _initializeWalking() async {
+    final gpsState = ref.read(gpsProviderRiverpod);
+    
+    // 既に記録中の場合はスキップ
+    if (gpsState.isRecording) {
+      if (kDebugMode) {
+        print('🔵 既にGPS記録中のため、初期化をスキップ');
+      }
+      return;
+    }
+    
+    // 新規記録を開始
+    await _startWalking();
   }
 
   /// 散歩を開始

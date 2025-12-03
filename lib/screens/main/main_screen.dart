@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
+import '../../widgets/active_walk_banner.dart';
 import 'tabs/home_tab.dart';
 import 'tabs/map_tab.dart';
 import 'tabs/records_tab.dart';
@@ -56,7 +57,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         index: _selectedIndex,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      // 散歩中バナー（BottomNavigationBarの上に表示）
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 散歩中バナー
+          const ActiveWalkBanner(),
+          // BottomNavigationBar
+          BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -92,6 +100,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icon(Icons.person_outline, size: 28),
             activeIcon: Icon(Icons.person, size: 28),
             label: 'プロフィール',
+          ),
+        ],
           ),
         ],
       ),
