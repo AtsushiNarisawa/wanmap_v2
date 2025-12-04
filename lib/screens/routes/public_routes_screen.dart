@@ -69,7 +69,14 @@ class _PublicRoutesScreenState extends ConsumerState<PublicRoutesScreen> {
           // フィルタ・ソートバー
           _buildFilterSortBar(context, isDark, areasAsync, selectedAreaId, sortOption),
 
-          // ルート一覧
+          // 件数表示（固定）
+          routesAsync.when(
+            data: (routes) => _buildRouteCountHeader(isDark, routes.length),
+            loading: () => const SizedBox(),
+            error: (_, __) => const SizedBox(),
+          ),
+
+          // ルートカード一覧（スクロール可能）
           Expanded(
             child: routesAsync.when(
               data: (routes) => _buildRouteList(context, isDark, routes),
@@ -193,7 +200,27 @@ class _PublicRoutesScreenState extends ConsumerState<PublicRoutesScreen> {
     );
   }
 
-  /// ルート一覧
+  /// 件数表示ヘッダー（固定）
+  Widget _buildRouteCountHeader(bool isDark, int count) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: WanMapSpacing.md,
+        vertical: WanMapSpacing.sm,
+      ),
+      color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
+      child: Text(
+        '${count}件のルート',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+        ),
+      ),
+    );
+  }
+
+  /// ルート一覧（スクロール可能）
   Widget _buildRouteList(BuildContext context, bool isDark, List<OfficialRoute> routes) {
     if (routes.isEmpty) {
       return _buildEmptyState(context, isDark);
@@ -203,52 +230,24 @@ class _PublicRoutesScreenState extends ConsumerState<PublicRoutesScreen> {
       onRefresh: () async {
         ref.invalidate(officialRoutesProvider);
       },
-      child: CustomScrollView(
-        slivers: [
-          // 固定ヘッダー（件数表示）
-          SliverToBoxAdapter(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: WanMapSpacing.md,
-                vertical: WanMapSpacing.sm,
-              ),
-              color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
-              child: Text(
-                '${routes.length}件のルート',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(WanMapSpacing.md),
+        itemCount: routes.length,
+        itemBuilder: (context, index) {
+          final route = routes[index];
+          return _OfficialRouteCard(
+            route: route,
+            isDark: isDark,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RouteDetailScreen(routeId: route.id),
                 ),
-              ),
-            ),
-          ),
-          // スクロール可能なルート一覧
-          SliverPadding(
-            padding: const EdgeInsets.all(WanMapSpacing.md),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final route = routes[index];
-                  return _OfficialRouteCard(
-                    route: route,
-                    isDark: isDark,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => RouteDetailScreen(routeId: route.id),
-                        ),
-                      );
-                    },
-                  );
-                },
-                childCount: routes.length,
-              ),
-            ),
-          ),
-        ],
+              );
+            },
+          );
+        },
       ),
     );
   }
