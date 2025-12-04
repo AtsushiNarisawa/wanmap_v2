@@ -361,6 +361,8 @@ class HomeTab extends ConsumerWidget {
     return Consumer(
       builder: (context, ref, child) {
         final popularRoutesAsync = ref.watch(popularRoutesProvider);
+        // 全ルート数を取得
+        final allRoutesAsync = ref.watch(officialRoutesProvider);
         
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
@@ -383,6 +385,12 @@ class HomeTab extends ConsumerWidget {
                   
                   // 最大3件表示
                   final displayRoutes = routes.take(3).toList();
+                  
+                  // 全ルート数を取得（ボタン表示用）
+                  final totalRoutes = allRoutesAsync.maybeWhen(
+                    data: (allRoutes) => allRoutes.length,
+                    orElse: () => routes.length,
+                  );
                   
                   return Column(
                     children: [
@@ -410,7 +418,7 @@ class HomeTab extends ConsumerWidget {
                       }),
                       
                       // 一覧を見るボタン
-                      if (routes.length > 3) ...[
+                      if (routes.length > 3 || totalRoutes > 3) ...[
                         const SizedBox(height: WanMapSpacing.md),
                         OutlinedButton.icon(
                           onPressed: () {
@@ -425,7 +433,7 @@ class HomeTab extends ConsumerWidget {
                             );
                           },
                           icon: const Icon(Icons.list),
-                          label: Text('一覧を見る（${routes.length}ルート）'),
+                          label: Text('一覧を見る（${totalRoutes}ルート）'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: WanMapColors.accent,
                             side: const BorderSide(color: WanMapColors.accent),
