@@ -8,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../providers/area_provider.dart';
 import '../../../providers/route_provider.dart';
+import '../../../providers/official_routes_screen_provider.dart';
 import '../../../providers/recent_pins_provider.dart';
 import '../../../models/recent_pin_post.dart';
 import '../../outing/area_list_screen.dart';
