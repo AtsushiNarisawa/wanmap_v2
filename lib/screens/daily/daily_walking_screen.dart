@@ -39,6 +39,14 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   void initState() {
     super.initState();
     // 自動的に記録開始しない（スタートボタンを待つ）
+    // ただし、現在地は取得しておく（地図表示のため）
+    _initializeLocation();
+  }
+
+  /// 初期位置を取得（記録は開始しない）
+  Future<void> _initializeLocation() async {
+    final gpsNotifier = ref.read(gpsProviderRiverpod.notifier);
+    await gpsNotifier.getCurrentLocation();
   }
 
   /// 散歩を開始
