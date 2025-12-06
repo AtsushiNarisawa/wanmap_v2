@@ -703,37 +703,33 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                         ),
                       );
                     },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // サムネイル画像
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              bottomLeft: Radius.circular(16),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                            child: pin.hasPhotos
-                                ? Image.network(
-                                    pin.photoUrls.first,
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => _buildDefaultPinImage(),
-                                  )
-                                : _buildDefaultPinImage(),
-                          ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // サムネイル画像（固定サイズ120x120）
+                            SizedBox(
+                              width: 120,
+                              height: 120,
+                              child: pin.hasPhotos
+                                  ? Image.network(
+                                      pin.photoUrls.first,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => _buildDefaultPinImage(),
+                                    )
+                                  : _buildDefaultPinImage(),
+                            ),
                           // テキスト情報
                           Expanded(
                             child: Padding(
@@ -793,8 +789,8 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                                 ],
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -837,8 +833,8 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   /// デフォルトピン画像
   Widget _buildDefaultPinImage() {
     return Container(
-      width: 100,
-      height: 100,
+      width: 120,
+      height: 120,
       decoration: BoxDecoration(
         color: WanMapColors.accent.withOpacity(0.2),
       ),
