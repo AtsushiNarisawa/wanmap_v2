@@ -94,14 +94,14 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                     const SizedBox(height: WanMapSpacing.xl),
                   ],
 
+                  // ギャラリーセクション
+                  if (route.galleryImages != null && route.galleryImages!.isNotEmpty) ...[
+                    _buildGallerySection(route, isDark),
+                    const SizedBox(height: WanMapSpacing.xl),
+                  ],
+
                   // 散歩を開始ボタン
                   _buildStartButton(context, isDark, route),
-
-                  const SizedBox(height: WanMapSpacing.xl),
-
-                  // ギャラリーセクション
-                  if (route.galleryImages != null && route.galleryImages!.isNotEmpty)
-                    _buildGallerySection(route, isDark),
 
                   const SizedBox(height: WanMapSpacing.xxxl),
 
