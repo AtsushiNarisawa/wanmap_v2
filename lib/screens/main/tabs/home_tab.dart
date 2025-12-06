@@ -17,6 +17,7 @@ import '../../../providers/pin_comment_provider.dart';
 import '../../../models/recent_pin_post.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
+import '../../outing/pin_comment_screen.dart';
 import '../../notifications/notifications_screen.dart';
 import '../../routes/public_routes_screen.dart';
 import '../../outing/route_list_screen.dart';
@@ -844,9 +845,14 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                       const SizedBox(width: WanMapSpacing.sm),
                       GestureDetector(
                         onTap: () {
-                          // TODO: コメント画面への遷移を実装
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('コメント機能は次のステップで実装します')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PinCommentScreen(
+                                pinId: widget.pin.pinId,
+                                pinTitle: widget.pin.title,
+                              ),
+                            ),
                           );
                         },
                         child: Row(

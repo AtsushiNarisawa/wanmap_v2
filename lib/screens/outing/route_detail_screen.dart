@@ -16,6 +16,7 @@ import '../../models/official_route.dart';
 import '../../models/walk_mode.dart';
 import 'walking_screen.dart';
 import 'pin_detail_screen.dart';
+import 'pin_comment_screen.dart';
 import '../daily/daily_walking_screen.dart';
 
 /// ルート詳細画面
@@ -776,6 +777,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                                       const SizedBox(width: WanMapSpacing.sm),
                                       _PinCommentButton(
                                         pinId: pin.id,
+                                        pinTitle: pin.title,
                                         initialCommentsCount: pin.commentsCount,
                                         isDark: isDark,
                                       ),
@@ -1164,11 +1166,13 @@ class _PinBookmarkButtonState extends ConsumerState<_PinBookmarkButton> {
 /// ピンコメントボタン - 楽観的UI更新対応
 class _PinCommentButton extends ConsumerStatefulWidget {
   final String pinId;
+  final String pinTitle;
   final int initialCommentsCount;
   final bool isDark;
 
   const _PinCommentButton({
     required this.pinId,
+    required this.pinTitle,
     required this.initialCommentsCount,
     required this.isDark,
   });
@@ -1196,9 +1200,14 @@ class _PinCommentButtonState extends ConsumerState<_PinCommentButton> {
 
     return GestureDetector(
       onTap: () {
-        // TODO: コメント画面への遷移を実装
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('コメント機能は次のステップで実装します')),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PinCommentScreen(
+              pinId: widget.pinId,
+              pinTitle: widget.pinTitle,
+            ),
+          ),
         );
       },
       child: Row(
