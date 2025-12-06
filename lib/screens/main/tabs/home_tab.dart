@@ -125,21 +125,74 @@ class HomeTab extends ConsumerWidget {
         
         // デフォルト中心位置（横浜）
         LatLng center = const LatLng(35.4437, 139.638);
+        String? topRouteId;
         
         return popularRoutesAsync.when(
           data: (routes) {
-            // 人気の公式ルート1位がある場合はその位置を中心に
+            // 人気の公式ルート1位のIDを取得
             if (routes.isNotEmpty) {
-              final topRoute = routes.first;
-              // ルートの開始位置を使用
-              if (topRoute['start_lat'] != null && topRoute['start_lon'] != null) {
-                center = LatLng(
-                  (topRoute['start_lat'] as num).toDouble(),
-                  (topRoute['start_lon'] as num).toDouble(),
-                );
-              }
+              topRouteId = routes.first['route_id'] as String?;
             }
             
+            // ルートIDがある場合、詳細データを取得
+            if (topRouteId != null) {
+              final routeAsync = ref.watch(routeByIdProvider(topRouteId!));
+              
+              return routeAsync.when(
+                data: (route) {
+                  if (route != null) {
+                    center = route.startLocation;
+                  }
+                  
+                  return SizedBox(
+                    height: 280,
+                    width: double.infinity,
+                    child: FlutterMap(
+                      options: MapOptions(
+                        initialCenter: center,
+                        initialZoom: 13.0,
+                        interactionOptions: const InteractionOptions(
+                          flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                        ),
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        ),
+                        // 人気ルート1位のマーカーを表示
+                        if (route != null)
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: route.startLocation,
+                                width: 40,
+                                height: 40,
+                                child: const Icon(
+                                  Icons.star,
+                                  color: WanMapColors.accent,
+                                  size: 40,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => Container(
+                  height: 280,
+                  color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, __) => Container(
+                  height: 280,
+                  color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                  child: const Center(child: Text('マップを読み込めませんでした')),
+                ),
+              );
+            }
+            
+            // ルートIDがない場合はデフォルト地図を表示
             return SizedBox(
               height: 280,
               width: double.infinity,
@@ -155,25 +208,6 @@ class HomeTab extends ConsumerWidget {
                   TileLayer(
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   ),
-                  // 人気ルート1位のマーカーを表示
-                  if (routes.isNotEmpty && routes.first['start_lat'] != null && routes.first['start_lon'] != null)
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: LatLng(
-                            (routes.first['start_lat'] as num).toDouble(),
-                            (routes.first['start_lon'] as num).toDouble(),
-                          ),
-                          width: 40,
-                          height: 40,
-                          child: const Icon(
-                            Icons.star,
-                            color: WanMapColors.accent,
-                            size: 40,
-                          ),
-                        ),
-                      ],
-                    ),
                 ],
               ),
             );
