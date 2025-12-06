@@ -145,50 +145,134 @@ class HomeTab extends ConsumerWidget {
                     center = route.startLocation;
                   }
                   
-                  return SizedBox(
-                    height: 280,
-                    width: double.infinity,
-                    child: FlutterMap(
-                      options: MapOptions(
-                        initialCenter: center,
-                        initialZoom: 13.0,
-                        interactionOptions: const InteractionOptions(
-                          flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
-                        ),
-                      ),
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(WanMapSpacing.md),
+                    child: Column(
                       children: [
-                        TileLayer(
-                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        ),
-                        // 人気ルート1位のマーカーを表示
-                        if (route != null)
-                          MarkerLayer(
-                            markers: [
-                              Marker(
-                                point: route.startLocation,
-                                width: 40,
-                                height: 40,
-                                child: const Icon(
-                                  Icons.star,
-                                  color: WanMapColors.accent,
-                                  size: 40,
-                                ),
+                        // ヘッダー: 人気No.1ルート
+                        GestureDetector(
+                          onTap: route != null
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => RouteDetailScreen(route: route),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: WanMapSpacing.md,
+                              vertical: WanMapSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.orange.shade400,
+                                  Colors.deepOrange.shade600,
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
                               ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  '🏆',
+                                  style: TextStyle(fontSize: 24),
+                                ),
+                                const SizedBox(width: WanMapSpacing.sm),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        '人気No.1ルート',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      if (route != null)
+                                        Text(
+                                          route.name,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // 地図
+                        SizedBox(
+                          height: 240,
+                          width: double.infinity,
+                          child: FlutterMap(
+                            options: MapOptions(
+                              initialCenter: center,
+                              initialZoom: 13.0,
+                              interactionOptions: const InteractionOptions(
+                                flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                              ),
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              ),
+                              // 人気ルート1位のマーカーを表示
+                              if (route != null)
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: route.startLocation,
+                                      width: 40,
+                                      height: 40,
+                                      child: const Icon(
+                                        Icons.star,
+                                        color: WanMapColors.accent,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
+                        ),
                       ],
                     ),
                   );
                 },
-                loading: () => Container(
-                  height: 280,
-                  color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                  child: const Center(child: CircularProgressIndicator()),
+                loading: () => ClipRRect(
+                  borderRadius: BorderRadius.circular(WanMapSpacing.md),
+                  child: Container(
+                    height: 300,
+                    color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
                 ),
-                error: (_, __) => Container(
-                  height: 280,
-                  color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                  child: const Center(child: Text('マップを読み込めませんでした')),
+                error: (_, __) => ClipRRect(
+                  borderRadius: BorderRadius.circular(WanMapSpacing.md),
+                  child: Container(
+                    height: 300,
+                    color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                    child: const Center(child: Text('マップを読み込めませんでした')),
+                  ),
                 ),
               );
             }
@@ -213,15 +297,21 @@ class HomeTab extends ConsumerWidget {
               ),
             );
           },
-          loading: () => Container(
-            height: 280,
-            color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-            child: const Center(child: CircularProgressIndicator()),
+          loading: () => ClipRRect(
+            borderRadius: BorderRadius.circular(WanMapSpacing.md),
+            child: Container(
+              height: 300,
+              color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
           ),
-          error: (_, __) => Container(
-            height: 280,
-            color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-            child: const Center(child: Text('マップを読み込めませんでした')),
+          error: (_, __) => ClipRRect(
+            borderRadius: BorderRadius.circular(WanMapSpacing.md),
+            child: Container(
+              height: 300,
+              color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+              child: const Center(child: Text('マップを読み込めませんでした')),
+            ),
           ),
         );
       },
