@@ -19,7 +19,7 @@ class PinDetailScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PinDetailScreen> createState() => _PinDetailScreenState;
+  ConsumerState<PinDetailScreen> createState() => _PinDetailScreenState();
 }
 
 class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
