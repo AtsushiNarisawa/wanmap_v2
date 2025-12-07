@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
 import '../../models/route_pin.dart';
+import '../../providers/pin_comment_provider.dart';
 
 /// ピン詳細画面
 /// ユーザーが投稿したピンの詳細情報を表示
-class PinDetailScreen extends ConsumerWidget {
+class PinDetailScreen extends ConsumerStatefulWidget {
   final RoutePin pin;
 
   const PinDetailScreen({
@@ -17,8 +19,113 @@ class PinDetailScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PinDetailScreen> createState() => _PinDetailScreenState;
+}
+
+class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
+  final TextEditingController _commentController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // コメント数の初期化
+    Future.microtask(() {
+      ref.read(pinCommentActionsProvider).initializeCommentCount(
+        widget.pin.id,
+        widget.pin.commentsCount,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  /// コメントを投稿
+  Future<void> _submitComment() async {
+    if (_commentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('コメントを入力してください')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final actions = ref.read(pinCommentActionsProvider);
+    final success = await actions.addComment(
+      widget.pin.id,
+      _commentController.text.trim(),
+    );
+
+    setState(() {
+      _isSubmitting = false;
+    });
+
+    if (success) {
+      _commentController.clear();
+      _focusNode.unfocus();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('コメントを投稿しました')),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('コメントの投稿に失敗しました')),
+        );
+      }
+    }
+  }
+
+  /// コメントを削除
+  Future<void> _deleteComment(String commentId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('コメントを削除'),
+        content: const Text('このコメントを削除しますか?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('削除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final actions = ref.read(pinCommentActionsProvider);
+      final success = await actions.deleteComment(widget.pin.id, commentId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? 'コメントを削除しました' : 'コメントの削除に失敗しました'),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final commentsAsync = ref.watch(pinCommentsProvider(widget.pin.id));
+    final commentCount = ref.watch(pinCommentCountProvider(widget.pin.id));
+    final currentUser = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
       backgroundColor: isDark
@@ -34,7 +141,7 @@ class PinDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 写真ギャラリー（横スクロール）
-            if (pin.hasPhotos) _buildPhotoGallery(pin, isDark),
+            if (widget.pin.hasPhotos) _buildPhotoGallery(widget.pin, isDark),
 
             Padding(
               padding: const EdgeInsets.all(WanMapSpacing.lg),
@@ -43,7 +150,7 @@ class PinDetailScreen extends ConsumerWidget {
                 children: [
                   // タイトル
                   Text(
-                    pin.title,
+                    widget.pin.title,
                     style: WanMapTypography.headlineMedium.copyWith(
                       color: isDark
                           ? WanMapColors.textPrimaryDark
@@ -55,17 +162,17 @@ class PinDetailScreen extends ConsumerWidget {
                   const SizedBox(height: WanMapSpacing.md),
 
                   // ピンタイプバッジ
-                  _buildPinTypeBadge(pin.pinType),
+                  _buildPinTypeBadge(widget.pin.pinType),
 
                   const SizedBox(height: WanMapSpacing.xl),
 
                   // 統計情報
-                  _buildStats(pin, isDark),
+                  _buildStats(widget.pin, isDark),
 
                   const SizedBox(height: WanMapSpacing.xl),
 
                   // コメント
-                  if (pin.comment.isNotEmpty) ...[
+                  if (widget.pin.comment.isNotEmpty) ...[
                     Text(
                       'コメント',
                       style: WanMapTypography.headlineSmall.copyWith(
@@ -84,7 +191,7 @@ class PinDetailScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        pin.comment,
+                        widget.pin.comment,
                         style: WanMapTypography.bodyMedium.copyWith(
                           color: isDark
                               ? WanMapColors.textPrimaryDark
@@ -106,9 +213,276 @@ class PinDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: WanMapSpacing.sm),
-                  _buildLocationMap(pin, isDark),
+                  _buildLocationMap(widget.pin, isDark),
+
+                  const SizedBox(height: WanMapSpacing.xl),
+
+                  // みんなのコメントセクション
+                  _buildCommentsSection(commentsAsync, commentCount, currentUser, isDark),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+      // コメント入力欄（固定）
+      bottomNavigationBar: _buildCommentInput(isDark),
+    );
+  }
+
+  /// みんなのコメントセクション
+  Widget _buildCommentsSection(
+    AsyncValue<List<PinComment>> commentsAsync,
+    int commentCount,
+    User? currentUser,
+    bool isDark,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // セクションヘッダー
+        Row(
+          children: [
+            Icon(
+              Icons.chat_bubble_outline,
+              size: 20,
+              color: isDark
+                  ? WanMapColors.textSecondaryDark
+                  : WanMapColors.textSecondaryLight,
+            ),
+            const SizedBox(width: WanMapSpacing.xs),
+            Text(
+              'みんなのコメント',
+              style: WanMapTypography.headlineSmall.copyWith(
+                color: isDark
+                    ? WanMapColors.textPrimaryDark
+                    : WanMapColors.textPrimaryLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: WanMapSpacing.xs),
+            Text(
+              '($commentCount)',
+              style: WanMapTypography.bodyMedium.copyWith(
+                color: isDark
+                    ? WanMapColors.textSecondaryDark
+                    : WanMapColors.textSecondaryLight,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: WanMapSpacing.md),
+
+        // コメント一覧
+        commentsAsync.when(
+          data: (comments) {
+            if (comments.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: WanMapSpacing.xl),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 48,
+                        color: isDark ? Colors.grey[700] : Colors.grey[300],
+                      ),
+                      const SizedBox(height: WanMapSpacing.sm),
+                      Text(
+                        'まだコメントがありません',
+                        style: WanMapTypography.bodyMedium.copyWith(
+                          color: isDark
+                              ? WanMapColors.textSecondaryDark
+                              : WanMapColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: comments.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final comment = comments[index];
+                final isOwnComment = currentUser?.id == comment.userId;
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: WanMapSpacing.md),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // アバター
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: WanMapColors.accent.withOpacity(0.2),
+                        backgroundImage: comment.userAvatar != null
+                            ? NetworkImage(comment.userAvatar!)
+                            : null,
+                        child: comment.userAvatar == null
+                            ? Icon(
+                                Icons.person,
+                                size: 20,
+                                color: WanMapColors.accent,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: WanMapSpacing.sm),
+                      // コメント内容
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ユーザー名・時間
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    comment.userName,
+                                    style: WanMapTypography.bodyMedium.copyWith(
+                                      color: isDark
+                                          ? WanMapColors.textPrimaryDark
+                                          : WanMapColors.textPrimaryLight,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: WanMapSpacing.xs),
+                                Text(
+                                  comment.getRelativeTime(),
+                                  style: WanMapTypography.caption.copyWith(
+                                    color: isDark
+                                        ? WanMapColors.textSecondaryDark
+                                        : WanMapColors.textSecondaryLight,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: WanMapSpacing.xs),
+                            // コメント本文
+                            Text(
+                              comment.comment,
+                              style: WanMapTypography.bodySmall.copyWith(
+                                color: isDark
+                                    ? WanMapColors.textPrimaryDark
+                                    : WanMapColors.textPrimaryLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // 削除ボタン（自分のコメントのみ）
+                      if (isOwnComment)
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          color: Colors.grey[600],
+                          onPressed: () => _deleteComment(comment.commentId),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(WanMapSpacing.lg),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (error, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(WanMapSpacing.lg),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Colors.red[300],
+                  ),
+                  const SizedBox(height: WanMapSpacing.sm),
+                  Text(
+                    'コメントの読み込みに失敗しました',
+                    style: WanMapTypography.bodyMedium.copyWith(
+                      color: isDark
+                          ? WanMapColors.textSecondaryDark
+                          : WanMapColors.textSecondaryLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// コメント入力欄
+  Widget _buildCommentInput(bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.only(
+        left: WanMapSpacing.md,
+        right: WanMapSpacing.md,
+        top: WanMapSpacing.sm,
+        bottom: MediaQuery.of(context).viewInsets.bottom + WanMapSpacing.sm,
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _commentController,
+                focusNode: _focusNode,
+                decoration: InputDecoration(
+                  hintText: 'コメントを入力...',
+                  hintStyle: TextStyle(
+                    color: isDark ? Colors.grey[600] : Colors.grey[400],
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: isDark ? Colors.grey[850] : Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: WanMapSpacing.md,
+                    vertical: WanMapSpacing.sm,
+                  ),
+                ),
+                maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _submitComment(),
+              ),
+            ),
+            const SizedBox(width: WanMapSpacing.sm),
+            IconButton(
+              onPressed: _isSubmitting ? null : _submitComment,
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send),
+              color: WanMapColors.accent,
             ),
           ],
         ),
@@ -207,6 +581,8 @@ class PinDetailScreen extends ConsumerWidget {
 
   /// 統計情報
   Widget _buildStats(RoutePin pin, bool isDark) {
+    final commentCount = ref.watch(pinCommentCountProvider(pin.id));
+    
     return Row(
       children: [
         Expanded(
@@ -220,18 +596,18 @@ class PinDetailScreen extends ConsumerWidget {
         const SizedBox(width: WanMapSpacing.md),
         Expanded(
           child: _StatCard(
-            icon: Icons.photo_library,
-            label: '写真',
-            value: '${pin.photoCount}枚',
+            icon: Icons.chat_bubble_outline,
+            label: 'コメント',
+            value: '$commentCount',
             isDark: isDark,
           ),
         ),
         const SizedBox(width: WanMapSpacing.md),
         Expanded(
           child: _StatCard(
-            icon: Icons.access_time,
-            label: '投稿',
-            value: pin.relativeTime,
+            icon: Icons.photo_library,
+            label: '写真',
+            value: '${pin.photoCount}枚',
             isDark: isDark,
           ),
         ),
