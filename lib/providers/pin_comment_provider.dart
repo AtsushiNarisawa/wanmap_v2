@@ -14,16 +14,28 @@ class PinCommentService {
   Future<Map<String, dynamic>> addComment(
     String pinId,
     String userId,
-    String comment,
-  ) async {
+    String comment, {
+    String? replyToUserId,
+    String? replyToUserName,
+  }) async {
     try {
+      final params = {
+        'p_pin_id': pinId,
+        'p_user_id': userId,
+        'p_comment': comment,
+      };
+      
+      // 返信先がある場合はパラメータに追加
+      if (replyToUserId != null) {
+        params['p_reply_to_user_id'] = replyToUserId;
+      }
+      if (replyToUserName != null) {
+        params['p_reply_to_user_name'] = replyToUserName;
+      }
+      
       final response = await _supabase.rpc(
         'add_pin_comment',
-        params: {
-          'p_pin_id': pinId,
-          'p_user_id': userId,
-          'p_comment': comment,
-        },
+        params: params,
       );
       return response as Map<String, dynamic>;
     } catch (e) {
@@ -98,6 +110,8 @@ class PinComment {
   final String comment;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? replyToUserId;
+  final String? replyToUserName;
 
   PinComment({
     required this.commentId,
@@ -107,7 +121,12 @@ class PinComment {
     required this.comment,
     required this.createdAt,
     required this.updatedAt,
+    this.replyToUserId,
+    this.replyToUserName,
   });
+
+  /// 返信コメントかどうか
+  bool get isReply => replyToUserId != null;
 
   factory PinComment.fromJson(Map<String, dynamic> json) {
     return PinComment(
@@ -118,6 +137,8 @@ class PinComment {
       comment: json['comment'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      replyToUserId: json['reply_to_user_id'] as String?,
+      replyToUserName: json['reply_to_user_name'] as String?,
     );
   }
 
@@ -185,8 +206,10 @@ class PinCommentActions {
   /// コメントを追加（楽観的UI更新）
   Future<bool> addComment(
     String pinId,
-    String comment,
-  ) async {
+    String comment, {
+    String? replyToUserId,
+    String? replyToUserName,
+  }) async {
     final service = ref.read(pinCommentServiceProvider);
     final currentUser = Supabase.instance.client.auth.currentUser;
 
@@ -200,7 +223,13 @@ class PinCommentActions {
     ref.invalidate(pinCommentsProvider(pinId));
 
     try {
-      final result = await service.addComment(pinId, currentUser.id, comment);
+      final result = await service.addComment(
+        pinId,
+        currentUser.id,
+        comment,
+        replyToUserId: replyToUserId,
+        replyToUserName: replyToUserName,
+      );
 
       if (result['success'] == true) {
         return true;

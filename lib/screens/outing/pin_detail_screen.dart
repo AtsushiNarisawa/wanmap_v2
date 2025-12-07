@@ -26,6 +26,10 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isSubmitting = false;
+  
+  // 返信先の情報
+  String? _replyToUserId;
+  String? _replyToUserName;
 
   @override
   void initState() {
@@ -46,6 +50,23 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
     super.dispose();
   }
 
+  /// 返信を開始
+  void _startReply(String userId, String userName) {
+    setState(() {
+      _replyToUserId = userId;
+      _replyToUserName = userName;
+    });
+    _focusNode.requestFocus();
+  }
+
+  /// 返信をキャンセル
+  void _cancelReply() {
+    setState(() {
+      _replyToUserId = null;
+      _replyToUserName = null;
+    });
+  }
+
   /// コメントを投稿
   Future<void> _submitComment() async {
     if (_commentController.text.trim().isEmpty) {
@@ -63,6 +84,8 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
     final success = await actions.addComment(
       widget.pin.id,
       _commentController.text.trim(),
+      replyToUserId: _replyToUserId,
+      replyToUserName: _replyToUserName,
     );
 
     setState(() {
@@ -71,6 +94,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
 
     if (success) {
       _commentController.clear();
+      _cancelReply(); // 返信先をクリア
       _focusNode.unfocus();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -366,6 +390,29 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: WanMapSpacing.xs),
+                            // 返信先表示
+                            if (comment.isReply && comment.replyToUserName != null) ...[
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.subdirectory_arrow_right,
+                                    size: 14,
+                                    color: isDark
+                                        ? WanMapColors.textSecondaryDark
+                                        : WanMapColors.textSecondaryLight,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    comment.replyToUserName!,
+                                    style: WanMapTypography.caption.copyWith(
+                                      color: WanMapColors.accent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: WanMapSpacing.xs),
+                            ],
                             // コメント本文
                             Text(
                               comment.comment,
@@ -373,6 +420,18 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                                 color: isDark
                                     ? WanMapColors.textPrimaryDark
                                     : WanMapColors.textPrimaryLight,
+                              ),
+                            ),
+                            const SizedBox(height: WanMapSpacing.xs),
+                            // 返信ボタン
+                            GestureDetector(
+                              onTap: () => _startReply(comment.userId, comment.userName),
+                              child: Text(
+                                '返信する',
+                                style: WanMapTypography.caption.copyWith(
+                                  color: WanMapColors.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -445,14 +504,61 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
         bottom: MediaQuery.of(context).viewInsets.bottom + WanMapSpacing.sm,
       ),
       child: SafeArea(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: TextField(
-                controller: _commentController,
-                focusNode: _focusNode,
-                decoration: InputDecoration(
-                  hintText: 'コメントを入力...',
+            // 返信先インジケーター
+            if (_replyToUserName != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: WanMapSpacing.sm,
+                  vertical: WanMapSpacing.xs,
+                ),
+                margin: const EdgeInsets.only(bottom: WanMapSpacing.sm),
+                decoration: BoxDecoration(
+                  color: WanMapColors.accent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.reply,
+                      size: 16,
+                      color: WanMapColors.accent,
+                    ),
+                    const SizedBox(width: WanMapSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        '$_replyToUserNameに返信中',
+                        style: WanMapTypography.caption.copyWith(
+                          color: WanMapColors.accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _cancelReply,
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: WanMapColors.accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            // 入力フィールド
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    focusNode: _focusNode,
+                    decoration: InputDecoration(
+                      hintText: _replyToUserName != null 
+                          ? '返信を入力...' 
+                          : 'コメントを入力...',
                   hintStyle: TextStyle(
                     color: isDark ? Colors.grey[600] : Colors.grey[400],
                   ),
@@ -467,22 +573,24 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                     vertical: WanMapSpacing.sm,
                   ),
                 ),
-                maxLines: null,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _submitComment(),
-              ),
-            ),
-            const SizedBox(width: WanMapSpacing.sm),
-            IconButton(
-              onPressed: _isSubmitting ? null : _submitComment,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.send),
-              color: WanMapColors.accent,
+                    maxLines: null,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _submitComment(),
+                  ),
+                ),
+                const SizedBox(width: WanMapSpacing.sm),
+                IconButton(
+                  onPressed: _isSubmitting ? null : _submitComment,
+                  icon: _isSubmitting
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send),
+                  color: WanMapColors.accent,
+                ),
+              ],
             ),
           ],
         ),
