@@ -11,6 +11,7 @@ import '../../../providers/area_provider.dart';
 import '../../../models/area.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
+import '../../daily/daily_walking_screen.dart';
 
 /// MapTab - おでかけ散歩の中心（公式ルート、エリア、ピン）
 /// 
@@ -139,24 +140,57 @@ class _MapTabState extends ConsumerState<MapTab> {
             ],
           ),
           
-          // FAB: おでかけ散歩開始
+          // ボタングループ
           Positioned(
             right: WanMapSpacing.lg,
             bottom: WanMapSpacing.lg,
-            child: FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AreaListScreen()),
-                );
-              },
-              backgroundColor: WanMapColors.accent,
-              elevation: 8,
-              icon: const Icon(Icons.explore, size: 28, color: Colors.white),
-              label: Text(
-                'おでかけ散歩',
-                style: WanMapTypography.bodyLarge.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // お散歩ボタン（日常散歩）
+                FloatingActionButton.extended(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DailyWalkingScreen()),
+                    );
+                  },
+                  backgroundColor: WanMapColors.accent,
+                  elevation: 8,
+                  heroTag: 'daily_walk_button',
+                  icon: const Icon(Icons.pets, size: 28, color: Colors.white),
+                  label: Text(
+                    'お散歩',
+                    style: WanMapTypography.bodyLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: WanMapSpacing.md),
+                
+                // お出かけ散歩ボタン（既存）
+                FloatingActionButton.extended(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AreaListScreen()),
+                    );
+                  },
+                  backgroundColor: WanMapColors.accent,
+                  elevation: 8,
+                  heroTag: 'outing_walk_button',
+                  icon: const Icon(Icons.explore, size: 28, color: Colors.white),
+                  label: Text(
+                    'おでかけ散歩',
+                    style: WanMapTypography.bodyLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
