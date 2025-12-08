@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// WanMap デザインシステム - タイポグラフィ
-/// Nike Run Club風の大胆で視認性の高いタイポグラフィ
+/// DogHub風の柔らかく読みやすいタイポグラフィ
 class WanMapTypography {
   // ==================================================
   // ディスプレイスタイル（超大見出し - 記録中の数値など）
@@ -10,28 +10,28 @@ class WanMapTypography {
   /// 超大見出し - 記録中の距離表示など
   /// 使用例: GPS記録画面の距離「2.5」
   static const TextStyle displayLarge = TextStyle(
-    fontSize: 72,
-    fontWeight: FontWeight.w800,  // Extra Bold
-    height: 1.0,
-    letterSpacing: -2.0,
+    fontSize: 64,
+    fontWeight: FontWeight.w600,  // Semi Bold（柔らかさ）
+    height: 1.1,
+    letterSpacing: -1.0,
   );
   
   /// 大見出し - 統計の主要数値など
   /// 使用例: ホーム画面の「今週 12.5km」
   static const TextStyle displayMedium = TextStyle(
-    fontSize: 56,
-    fontWeight: FontWeight.w700,  // Bold
-    height: 1.1,
-    letterSpacing: -1.5,
+    fontSize: 48,
+    fontWeight: FontWeight.w600,  // Semi Bold
+    height: 1.2,
+    letterSpacing: -0.8,
   );
   
   /// 中見出し - サマリー数値など
   /// 使用例: 統計カードの数値
   static const TextStyle displaySmall = TextStyle(
-    fontSize: 48,
-    fontWeight: FontWeight.w700,
-    height: 1.1,
-    letterSpacing: -1.0,
+    fontSize: 40,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    letterSpacing: -0.5,
   );
   
   // ==================================================
@@ -40,10 +40,10 @@ class WanMapTypography {
   
   /// 大ヘッドライン - 画面タイトルなど
   static const TextStyle headlineLarge = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w700,
-    height: 1.2,
-    letterSpacing: -0.5,
+    fontSize: 28,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    letterSpacing: 0.5,
   );
   
   /// 中ヘッドライン - セクションタイトル
@@ -94,21 +94,24 @@ class WanMapTypography {
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 17,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 1.6,
+    letterSpacing: 0.3,
   );
   
   /// 中本文 - 一般的な本文
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 1.6,
+    letterSpacing: 0.3,
   );
   
   /// 小本文 - 補助的な説明文
   static const TextStyle bodySmall = TextStyle(
     fontSize: 13,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 1.6,
+    letterSpacing: 0.2,
   );
   
   // ==================================================
