@@ -6,6 +6,7 @@ import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
 import '../../models/dog_model.dart';
 import '../../providers/dog_provider.dart';
+import 'vaccination_info_widget.dart';
 
 /// 愛犬編集画面
 class DogEditScreen extends ConsumerStatefulWidget {
@@ -495,6 +496,15 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
                     return null;
                   },
                 ),
+                
+                // 予防接種情報（編集モードのみ）
+                if (isEditMode && widget.dog != null) ...[
+                  const SizedBox(height: WanMapSpacing.large),
+                  VaccinationInfoWidget(
+                    dog: widget.dog!,
+                    userId: widget.userId,
+                  ),
+                ],
               ],
             ),
           ),

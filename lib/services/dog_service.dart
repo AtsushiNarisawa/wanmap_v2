@@ -80,6 +80,36 @@ class DogService {
     }
   }
 
+  /// ワクチン接種証明書の写真をアップロード
+  Future<String?> uploadVaccinationPhoto({
+    required File file,
+    required String userId,
+    required String dogId,
+    required String vaccineType, // 'rabies' or 'mixed'
+  }) async {
+    try {
+      final fileName = '${vaccineType}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = 'dogs/$userId/$dogId/vaccinations/$fileName';
+
+      // Supabase Storageにアップロード
+      await _supabase.storage
+          .from('dog-photos')
+          .upload(filePath, file);
+
+      // 公開URLを取得
+      final publicUrl = _supabase.storage
+          .from('dog-photos')
+          .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (e) {
+      if (kDebugMode) {
+        print('ワクチン接種証明書アップロードエラー: $e');
+      }
+      return null;
+    }
+  }
+
   /// 犬情報を作成
   Future<DogModel?> createDog(DogModel dog) async {
     try {

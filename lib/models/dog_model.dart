@@ -8,6 +8,10 @@ class DogModel {
   final DateTime? birthDate;
   final double? weight; // kg
   final String? photoUrl;
+  final String? rabiesVaccinePhotoUrl;
+  final DateTime? rabiesVaccineDate;
+  final String? mixedVaccinePhotoUrl;
+  final DateTime? mixedVaccineDate;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +24,10 @@ class DogModel {
     this.birthDate,
     this.weight,
     this.photoUrl,
+    this.rabiesVaccinePhotoUrl,
+    this.rabiesVaccineDate,
+    this.mixedVaccinePhotoUrl,
+    this.mixedVaccineDate,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -71,6 +79,10 @@ class DogModel {
       birthDate: json['birth_date'] != null ? DateTime.parse(json['birth_date'] as String) : null,
       weight: (json['weight'] as num?)?.toDouble(),
       photoUrl: json['photo_url'] as String?,
+      rabiesVaccinePhotoUrl: json['rabies_vaccine_photo_url'] as String?,
+      rabiesVaccineDate: json['rabies_vaccine_date'] != null ? DateTime.parse(json['rabies_vaccine_date'] as String) : null,
+      mixedVaccinePhotoUrl: json['mixed_vaccine_photo_url'] as String?,
+      mixedVaccineDate: json['mixed_vaccine_date'] != null ? DateTime.parse(json['mixed_vaccine_date'] as String) : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -87,6 +99,10 @@ class DogModel {
       'birth_date': birthDate?.toIso8601String().split('T')[0], // YYYY-MM-DD形式
       'weight': weight,
       'photo_url': photoUrl,
+      'rabies_vaccine_photo_url': rabiesVaccinePhotoUrl,
+      'rabies_vaccine_date': rabiesVaccineDate?.toIso8601String().split('T')[0],
+      'mixed_vaccine_photo_url': mixedVaccinePhotoUrl,
+      'mixed_vaccine_date': mixedVaccineDate?.toIso8601String().split('T')[0],
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -102,6 +118,10 @@ class DogModel {
       if (birthDate != null) 'birth_date': birthDate!.toIso8601String().split('T')[0],
       if (weight != null) 'weight': weight,
       if (photoUrl != null) 'photo_url': photoUrl,
+      if (rabiesVaccinePhotoUrl != null) 'rabies_vaccine_photo_url': rabiesVaccinePhotoUrl,
+      if (rabiesVaccineDate != null) 'rabies_vaccine_date': rabiesVaccineDate!.toIso8601String().split('T')[0],
+      if (mixedVaccinePhotoUrl != null) 'mixed_vaccine_photo_url': mixedVaccinePhotoUrl,
+      if (mixedVaccineDate != null) 'mixed_vaccine_date': mixedVaccineDate!.toIso8601String().split('T')[0],
     };
   }
 
@@ -115,6 +135,10 @@ class DogModel {
     DateTime? birthDate,
     double? weight,
     String? photoUrl,
+    String? rabiesVaccinePhotoUrl,
+    DateTime? rabiesVaccineDate,
+    String? mixedVaccinePhotoUrl,
+    DateTime? mixedVaccineDate,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -127,6 +151,10 @@ class DogModel {
       birthDate: birthDate ?? this.birthDate,
       weight: weight ?? this.weight,
       photoUrl: photoUrl ?? this.photoUrl,
+      rabiesVaccinePhotoUrl: rabiesVaccinePhotoUrl ?? this.rabiesVaccinePhotoUrl,
+      rabiesVaccineDate: rabiesVaccineDate ?? this.rabiesVaccineDate,
+      mixedVaccinePhotoUrl: mixedVaccinePhotoUrl ?? this.mixedVaccinePhotoUrl,
+      mixedVaccineDate: mixedVaccineDate ?? this.mixedVaccineDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
