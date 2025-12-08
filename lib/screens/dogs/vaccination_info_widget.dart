@@ -192,14 +192,14 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
               const SizedBox(width: WanMapSpacing.sm),
               Text(
                 '予防接種情報',
-                style: WanMapTypography.headlineSmall(isDark: isDark),
+                style: WanMapTypography.headlineSmall,
               ),
             ],
           ),
           const SizedBox(height: WanMapSpacing.md),
           Text(
             'ペット施設利用時に提示が必要な接種証明書を登録できます',
-            style: WanMapTypography.bodySmall(isDark: isDark),
+            style: WanMapTypography.bodySmall,
           ),
           const SizedBox(height: WanMapSpacing.lg),
           
@@ -248,7 +248,7 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
         children: [
           Text(
             title,
-            style: WanMapTypography.titleMedium(isDark: isDark).copyWith(
+            style: WanMapTypography.titleMedium.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -263,7 +263,7 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
                   children: [
                     Text(
                       '接種証明書',
-                      style: WanMapTypography.bodyMedium(isDark: isDark),
+                      style: WanMapTypography.bodyMedium,
                     ),
                     const SizedBox(height: WanMapSpacing.xs),
                     if (photoUrl != null && photoUrl.isNotEmpty)
@@ -334,14 +334,14 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
                   children: [
                     Text(
                       '接種日',
-                      style: WanMapTypography.bodyMedium(isDark: isDark),
+                      style: WanMapTypography.bodyMedium,
                     ),
                     const SizedBox(height: WanMapSpacing.xs),
                     Text(
                       date != null 
                           ? DateFormat('yyyy年MM月dd日').format(date)
                           : '未設定',
-                      style: WanMapTypography.bodyLarge(isDark: isDark).copyWith(
+                      style: WanMapTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
