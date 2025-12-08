@@ -444,16 +444,111 @@ class _MapTabState extends ConsumerState<MapTab> {
   Widget _buildRecommendedRouteCards(List<Map<String, dynamic>> routes) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (routes.isEmpty) {
-      return Center(
-        child: Text(
-          '現在地から20km以内におすすめルートがありません',
-          style: WanMapTypography.bodyMedium.copyWith(
-            color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ヘッダー
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: WanMapSpacing.md,
+            vertical: WanMapSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.recommend,
+                color: WanMapColors.accent,
+                size: 20,
+              ),
+              const SizedBox(width: WanMapSpacing.xs),
+              Text(
+                '近くのおすすめルート',
+                style: WanMapTypography.headlineSmall.copyWith(
+                  color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: WanMapSpacing.xs),
+              if (routes.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: WanMapSpacing.sm,
+                    vertical: WanMapSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: WanMapColors.accent.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${routes.length}件',
+                    style: WanMapTypography.bodySmall.copyWith(
+                      color: WanMapColors.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
-      );
-    }
+        
+        // ルートカードリスト または 0件メッセージ
+        Expanded(
+          child: routes.isEmpty
+              ? _buildEmptyState(isDark)
+              : _buildRouteList(routes, isDark),
+        ),
+      ],
+    );
+  }
+
+  /// 0件の場合のUI
+  Widget _buildEmptyState(bool isDark) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(WanMapSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.explore_off,
+              size: 64,
+              color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+            ),
+            const SizedBox(height: WanMapSpacing.md),
+            Text(
+              '現在地から20km以内に\nおすすめルートがありません',
+              textAlign: TextAlign.center,
+              style: WanMapTypography.bodyMedium.copyWith(
+                color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+              ),
+            ),
+            const SizedBox(height: WanMapSpacing.lg),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AreaListScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: WanMapColors.accent,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: WanMapSpacing.lg,
+                  vertical: WanMapSpacing.md,
+                ),
+              ),
+              icon: const Icon(Icons.list),
+              label: const Text('エリア一覧を見る'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ルートリスト
+  Widget _buildRouteList(List<Map<String, dynamic>> routes, bool isDark) {
 
     return ListView.builder(
       padding: EdgeInsets.symmetric(
