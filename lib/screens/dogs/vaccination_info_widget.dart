@@ -170,6 +170,13 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
+    // 最新の愛犬データを取得（更新後に自動で反映される）
+    final dogState = ref.watch(dogProvider);
+    final currentDog = dogState.dogs.firstWhere(
+      (dog) => dog.id == widget.dog.id,
+      orElse: () => widget.dog,
+    );
+    
     return Container(
       padding: const EdgeInsets.all(WanMapSpacing.md),
       decoration: BoxDecoration(
@@ -207,8 +214,8 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
           _buildVaccinationCard(
             title: '狂犬病ワクチン',
             vaccineType: 'rabies',
-            photoUrl: widget.dog.rabiesVaccinePhotoUrl,
-            date: widget.dog.rabiesVaccineDate,
+            photoUrl: currentDog.rabiesVaccinePhotoUrl,
+            date: currentDog.rabiesVaccineDate,
             isDark: isDark,
           ),
           
@@ -218,8 +225,8 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
           _buildVaccinationCard(
             title: '混合ワクチン',
             vaccineType: 'mixed',
-            photoUrl: widget.dog.mixedVaccinePhotoUrl,
-            date: widget.dog.mixedVaccineDate,
+            photoUrl: currentDog.mixedVaccinePhotoUrl,
+            date: currentDog.mixedVaccineDate,
             isDark: isDark,
           ),
         ],
