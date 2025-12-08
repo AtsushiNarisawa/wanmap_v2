@@ -11,13 +11,12 @@ import '../../../providers/walk_history_provider.dart';
 import '../../../services/photo_service.dart';
 import '../../../widgets/walk_photo_grid.dart';
 import '../../../widgets/shimmer/wanmap_shimmer.dart';
-import '../../daily/daily_walking_screen.dart';
 import '../../history/walk_history_screen.dart';
 
 /// RecordsTab - 日常の散歩記録+統計+バッジ統合
 /// 
 /// 構成:
-/// 1. 今日の統計カード（散歩開始ボタン）
+/// 1. 今日の統計カード
 /// 2. 総合統計（4つ）
 /// 3. バッジコレクション（サマリー）
 /// 4. 最近の散歩
@@ -157,22 +156,7 @@ class RecordsTab extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: WanMapSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyWalkingScreen())),
-              icon: const Icon(Icons.play_circle_filled, size: 24),
-              label: const Text('散歩を開始', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: WanMapColors.accent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-            ),
-          ),
+
         ],
       ),
     );
