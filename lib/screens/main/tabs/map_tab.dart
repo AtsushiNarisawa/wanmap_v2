@@ -102,7 +102,7 @@ class _MapTabState extends ConsumerState<MapTab> {
         children: [
           // 地図表示（画面の約2/3）
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.6,
+            height: MediaQuery.of(context).size.height * 0.45,
             child: Stack(
               children: [
                 FlutterMap(
