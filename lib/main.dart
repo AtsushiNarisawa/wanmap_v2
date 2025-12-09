@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'config/supabase_config.dart';
 import 'config/wanmap_theme.dart';
 import 'config/wanmap_colors.dart';
@@ -12,6 +13,9 @@ import 'screens/main/main_screen.dart';
 void main() async {
   // Flutterバインディングの初期化
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 日本語ロケールの初期化
+  await initializeDateFormatting('ja', null);
   
   // 開発中のオーバーフローエラーを非表示（デバッグビルドのみ）
   FlutterError.onError = (FlutterErrorDetails details) {
