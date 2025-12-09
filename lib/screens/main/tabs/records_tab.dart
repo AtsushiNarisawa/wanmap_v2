@@ -362,21 +362,44 @@ class RecordsTab extends ConsumerWidget {
               ],
             ),
 
-            // 写真グリッド（Phase 3拡張機能）
-            FutureBuilder<List<WalkPhoto>>(
-              future: PhotoService().getWalkPhotos(walkId),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  return Column(
-                    children: [
-                      const SizedBox(height: WanMapSpacing.md),
-                      WalkPhotoGrid(photos: snapshot.data!, maxPhotosToShow: 3),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+            // 写真グリッド（お出かけ散歩のみ）
+            if (isOuting && walk.photoUrls.isNotEmpty) ...[
+              const SizedBox(height: WanMapSpacing.md),
+              SizedBox(
+                height: 80,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: walk.photoUrls.take(3).length,
+                  itemBuilder: (context, index) {
+                    final photoUrl = walk.photoUrls[index];
+                    return Container(
+                      width: 80,
+                      margin: EdgeInsets.only(right: index < walk.photoUrls.take(3).length - 1 ? WanMapSpacing.sm : 0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          photoUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: Icon(Icons.image_not_supported, color: Colors.grey[600]),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),
