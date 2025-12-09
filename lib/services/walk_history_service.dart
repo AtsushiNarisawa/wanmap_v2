@@ -21,6 +21,10 @@ class WalkHistoryService {
     int offset = 0,
   }) async {
     try {
+      if (kDebugMode) {
+        print('🔍 Fetching outing walk history for user: $userId');
+      }
+      
       final response = await _supabase.rpc(
         'get_outing_walk_history',
         params: {
@@ -30,13 +34,20 @@ class WalkHistoryService {
         },
       );
 
+      if (kDebugMode) {
+        print('📦 RPC response: $response');
+      }
+
       if (response == null) return [];
 
       final List<dynamic> data = response as List<dynamic>;
+      if (kDebugMode) {
+        print('✅ Found ${data.length} outing walks');
+      }
       return data.map((item) => OutingWalkHistory.fromJson(item)).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('Error fetching outing walk history: $e');
+        print('❌ Error fetching outing walk history: $e');
       }
       return [];
     }
