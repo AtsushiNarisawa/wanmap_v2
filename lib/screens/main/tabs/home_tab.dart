@@ -640,15 +640,11 @@ class _AreaCard extends StatelessWidget {
         width: isHorizontal ? double.infinity : 160,
         padding: const EdgeInsets.all(WanMapSpacing.lg),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [WanMapColors.accent, WanMapColors.accent.withOpacity(0.8)],
-          ),
+          color: WanMapColors.routeOrange,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: WanMapColors.accent.withOpacity(0.3),
+              color: WanMapColors.routeOrange.withOpacity(0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -1087,15 +1083,11 @@ class _FeaturedAreaCard extends StatelessWidget {
         height: 160,
         padding: const EdgeInsets.all(WanMapSpacing.xl),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [WanMapColors.accent, WanMapColors.accent.withOpacity(0.8)],
-          ),
+          color: WanMapColors.routeOrange,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: WanMapColors.accent.withOpacity(0.3),
+              color: WanMapColors.routeOrange.withOpacity(0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

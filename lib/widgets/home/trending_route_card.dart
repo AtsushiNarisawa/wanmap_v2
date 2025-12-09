@@ -53,12 +53,7 @@ class TrendingRouteCard extends StatelessWidget {
                       vertical: WanMapSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.orange.shade400,
-                          Colors.red.shade400,
-                        ],
-                      ),
+                      color: WanMapColors.routeOrange,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(

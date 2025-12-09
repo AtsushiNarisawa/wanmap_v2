@@ -129,6 +129,15 @@ class WanMapColors {
   static const Color share = Color(0xFFA8B5A0);
   
   // ==================================================
+  // 機能別カラー（お出かけ散歩、ルート表示）
+  // ==================================================
+  
+  /// お出かけ散歩・ルート表示統一カラー - オレンジ
+  static const Color routeOrange = Color(0xFFFF9500);
+  static const Color routeOrangeLight = Color(0xFFFFB340);
+  static const Color routeOrangeDark = Color(0xFFCC7700);
+  
+  // ==================================================
   // データビジュアライゼーション用カラー（自然な色調）
   // ==================================================
   
