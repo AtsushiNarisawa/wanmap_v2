@@ -8,23 +8,44 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/badge_provider.dart';
 import '../../../providers/user_statistics_provider.dart';
 import '../../../providers/walk_history_provider.dart';
-import '../../../services/photo_service.dart';
-import '../../../widgets/walk_photo_grid.dart';
 import '../../../widgets/shimmer/wanmap_shimmer.dart';
 import '../../history/walk_history_screen.dart';
+import '../../history/outing_walk_detail_screen.dart';
+import '../../badges/badge_list_screen.dart';
 
-/// RecordsTab - 日常の散歩記録+統計+バッジ統合
+/// RecordsTab - 思い出ファースト構成
 /// 
 /// 構成:
-/// 1. 今日の統計カード
-/// 2. 総合統計（4つ）
-/// 3. バッジコレクション（サマリー）
-/// 4. 最近の散歩
-class RecordsTab extends ConsumerWidget {
+/// 1. コンパクトヘッダー（レベル、総距離、エリア数）
+/// 2. 今週の統計（1行）
+/// 3. タブ切り替え（全て/お出かけ/日常）
+/// 4. 最近の散歩リスト
+/// 5. バッジコレクション（簡略版）
+/// 6. 統計詳細リンク
+class RecordsTab extends ConsumerStatefulWidget {
   const RecordsTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecordsTab> createState() => _RecordsTabState();
+}
+
+class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userId = ref.watch(currentUserIdProvider);
 
@@ -59,399 +80,574 @@ class RecordsTab extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(WanMapSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 今日の統計カード
-              _buildTodayStatsCard(context, isDark),
-              
-              const SizedBox(height: WanMapSpacing.xxxl),
-              
-              // 総合統計
-              statisticsAsync.when(
-                data: (stats) => _buildOverallStats(context, isDark, stats),
-                loading: () => const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
-                  child: CardShimmer(count: 2, height: 100),
-                ),
-                error: (_, __) => _buildEmptyCard(isDark, '統計の読み込みに失敗しました'),
-              ),
-              
-              const SizedBox(height: WanMapSpacing.xxxl),
-              
-              // バッジコレクション
-              badgeStatsAsync.when(
-                data: (badgeStats) => _buildBadgeSummary(context, isDark, badgeStats),
-                loading: () => const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
-                  child: CardShimmer(count: 1, height: 150),
-                ),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-              
-              const SizedBox(height: WanMapSpacing.xxxl),
-              
-              // 最近の散歩
-              _buildRecentWalks(context, isDark),
-            ],
+        // コンパクトヘッダー
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: statisticsAsync.when(
+            data: (stats) => _buildCompactHeader(stats, isDark),
+            loading: () => const SizedBox(height: 48),
+            error: (_, __) => const SizedBox(height: 48),
           ),
         ),
       ),
-    );
-  }
-
-  /// 今日の統計カード
-  Widget _buildTodayStatsCard(BuildContext context, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(WanMapSpacing.xl),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [WanMapColors.accent, WanMapColors.accent.withOpacity(0.8)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(color: WanMapColors.accent.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Row(
-            children: [
-              const Icon(Icons.today, color: Colors.white, size: 28),
-              const SizedBox(width: WanMapSpacing.sm),
-              Text(
-                '今日の統計',
-                style: WanMapTypography.headlineSmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: WanMapSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('0回', style: WanMapTypography.headlineMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                    Text('散歩回数', style: WanMapTypography.caption.copyWith(color: Colors.white.withOpacity(0.9))),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('0.0km', style: WanMapTypography.headlineMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                    Text('距離', style: WanMapTypography.caption.copyWith(color: Colors.white.withOpacity(0.9))),
-                  ],
-                ),
-              ),
-            ],
+          // 今週の統計（1行）
+          statisticsAsync.when(
+            data: (stats) => _buildWeeklyStats(stats, isDark),
+            loading: () => const SizedBox(height: 48),
+            error: (_, __) => const SizedBox.shrink(),
           ),
 
-        ],
-      ),
-    );
-  }
-
-  /// 総合統計
-  Widget _buildOverallStats(BuildContext context, bool isDark, dynamic stats) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '総合統計',
-          style: WanMapTypography.headlineSmall.copyWith(
-            color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: WanMapSpacing.md),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: WanMapSpacing.md,
-          mainAxisSpacing: WanMapSpacing.md,
-          childAspectRatio: 1.0,
-          children: [
-            _StatCard(icon: Icons.star, label: 'レベル', value: 'Lv.${stats.userLevel}', color: Colors.amber, isDark: isDark),
-            _StatCard(icon: Icons.route, label: '総距離', value: stats.formattedTotalDistance, color: Colors.blue, isDark: isDark),
-            _StatCard(icon: Icons.directions_walk, label: '総散歩', value: '${stats.totalWalks}回', color: Colors.green, isDark: isDark),
-            _StatCard(icon: Icons.explore, label: 'エリア', value: '${stats.areasVisited}箇所', color: WanMapColors.accent, isDark: isDark),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// バッジコレクション（サマリー）
-  Widget _buildBadgeSummary(BuildContext context, bool isDark, dynamic badgeStats) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'バッジコレクション',
-              style: WanMapTypography.headlineSmall.copyWith(
-                color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                fontWeight: FontWeight.bold,
-              ),
+          // タブバー
+          Container(
+            color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: WanMapColors.accent,
+              unselectedLabelColor: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+              indicatorColor: WanMapColors.accent,
+              labelStyle: WanMapTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+              unselectedLabelStyle: WanMapTypography.bodyMedium,
+              tabs: const [
+                Tab(text: '全て'),
+                Tab(icon: Icon(Icons.explore, size: 20), text: 'お出かけ'),
+                Tab(icon: Icon(Icons.directions_walk, size: 20), text: '日常'),
+              ],
             ),
-            Text(
-              '${badgeStats.unlockedBadges}/17',
-              style: WanMapTypography.bodyLarge.copyWith(
-                color: WanMapColors.accent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: WanMapSpacing.md),
-        Container(
-          padding: const EdgeInsets.all(WanMapSpacing.lg),
-          decoration: BoxDecoration(
-            color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-            borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Icon(badgeStats.unlockedBadges > 0 ? Icons.emoji_events : Icons.emoji_events_outlined, size: 40, color: WanMapColors.accent),
-                  Icon(badgeStats.unlockedBadges > 1 ? Icons.emoji_events : Icons.emoji_events_outlined, size: 40, color: Colors.grey),
-                  Icon(badgeStats.unlockedBadges > 2 ? Icons.emoji_events : Icons.emoji_events_outlined, size: 40, color: Colors.grey),
-                  Icon(badgeStats.unlockedBadges > 3 ? Icons.emoji_events : Icons.emoji_events_outlined, size: 40, color: Colors.grey),
-                  Icon(badgeStats.unlockedBadges > 4 ? Icons.emoji_events : Icons.emoji_events_outlined, size: 40, color: Colors.grey),
-                  Icon(badgeStats.unlockedBadges > 5 ? Icons.emoji_events : Icons.emoji_events_outlined, size: 40, color: Colors.grey),
-                ],
-              ),
-              const SizedBox(height: WanMapSpacing.md),
-              TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('バッジ一覧は準備中です')),
-                  );
-                },
-                child: const Text('すべて見る'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
-  /// 最近の散歩
-  Widget _buildRecentWalks(BuildContext context, bool isDark) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final userId = ref.watch(currentUserIdProvider);
-        if (userId == null) {
-          return _buildEmptyCard(isDark, 'ログインして散歩記録を確認しましょう');
-        }
-
-        final historyAsync = ref.watch(allWalkHistoryProvider(AllHistoryParams(userId: userId, limit: 5)));
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // タブビュー
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                Text(
-                  '最近の散歩',
-                  style: WanMapTypography.headlineSmall.copyWith(
-                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                    fontWeight: FontWeight.bold,
-                  ),
+                _buildWalkList(null, isDark), // 全て
+                _buildWalkList(WalkHistoryType.outing, isDark), // お出かけ
+                _buildWalkList(WalkHistoryType.daily, isDark), // 日常
+              ],
+            ),
+          ),
+
+          // 下部：バッジ＆統計詳細リンク
+          Container(
+            padding: const EdgeInsets.all(WanMapSpacing.md),
+            decoration: BoxDecoration(
+              color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? WanMapColors.borderDark : WanMapColors.borderLight,
                 ),
-                TextButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WalkHistoryScreen())),
-                  child: const Text('すべて見る'),
+              ),
+            ),
+            child: Column(
+              children: [
+                // バッジコレクション（簡略版）
+                badgeStatsAsync.when(
+                  data: (badgeStats) => _buildCompactBadges(context, badgeStats, isDark),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                const SizedBox(height: WanMapSpacing.sm),
+                // 統計詳細リンク
+                OutlinedButton.icon(
+                  onPressed: () {
+                    // TODO: 統計詳細画面へ遷移
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('統計詳細画面は準備中です')),
+                    );
+                  },
+                  icon: const Icon(Icons.bar_chart),
+                  label: const Text('全期間の統計を見る'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: WanMapColors.accent,
+                    side: const BorderSide(color: WanMapColors.accent),
+                    minimumSize: const Size(double.infinity, 44),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: WanMapSpacing.md),
-            historyAsync.when(
-              data: (walks) {
-                if (walks.isEmpty) {
-                  return _buildEmptyCard(isDark, 'まだ散歩の記録がありません');
-                }
-                return Column(
-                  children: walks.map((walk) => _buildWalkHistoryCard(context, isDark, walk, userId)).toList(),
-                );
-              },
-              loading: () => const ListTileShimmer(count: 3),
-              error: (error, stack) => _buildEmptyCard(isDark, '散歩記録の読み込みに失敗しました'),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 
-  /// 散歩履歴カード（写真表示機能付き - Phase 3拡張）
-  Widget _buildWalkHistoryCard(BuildContext context, bool isDark, WalkHistoryItem walk, String userId) {
-    // 散歩タイプを判定
-    final isOuting = walk.type == WalkHistoryType.outing;
-    final walkId = walk.walkId;
+  /// コンパクトヘッダー（AppBar下部）
+  Widget _buildCompactHeader(dynamic stats, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg, vertical: WanMapSpacing.sm),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _CompactStat(
+            icon: Icons.star,
+            label: 'Lv.${stats.userLevel}',
+            color: Colors.amber,
+            isDark: isDark,
+          ),
+          _CompactStat(
+            icon: Icons.route,
+            label: stats.formattedTotalDistance,
+            color: Colors.blue,
+            isDark: isDark,
+          ),
+          _CompactStat(
+            icon: Icons.explore,
+            label: '${stats.areasVisited}箇所',
+            color: WanMapColors.accent,
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: WanMapSpacing.md),
-      color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  /// 今週の統計（1行）
+  Widget _buildWeeklyStats(dynamic stats, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg, vertical: WanMapSpacing.md),
+      decoration: BoxDecoration(
+        color: WanMapColors.accent.withOpacity(0.1),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? WanMapColors.borderDark : WanMapColors.borderLight,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '今週の散歩:',
+            style: WanMapTypography.bodyMedium.copyWith(
+              color: WanMapColors.accent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: WanMapSpacing.md),
+          // TODO: 今週の統計データを取得（現在は仮データ）
+          Expanded(
+            child: Text(
+              '5回 / 12.5km / 3時間',
+              style: WanMapTypography.bodyMedium.copyWith(
+                color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 散歩リスト
+  Widget _buildWalkList(WalkHistoryType? filterType, bool isDark) {
+    final userId = ref.watch(currentUserIdProvider);
+    if (userId == null) return const SizedBox.shrink();
+
+    final outingAsync = ref.watch(outingWalkHistoryProvider(userId));
+    final dailyAsync = ref.watch(dailyWalkHistoryProvider(userId));
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(outingWalkHistoryProvider(userId));
+        ref.invalidate(dailyWalkHistoryProvider(userId));
+      },
+      child: outingAsync.when(
+        data: (outingWalks) => dailyAsync.when(
+          data: (dailyWalks) {
+            // フィルタリング
+            List<WalkHistoryItem> walks = [];
+            if (filterType == null) {
+              // 全て
+              walks = [...outingWalks, ...dailyWalks];
+            } else if (filterType == WalkHistoryType.outing) {
+              walks = outingWalks;
+            } else {
+              walks = dailyWalks;
+            }
+
+            // 日時でソート
+            walks.sort((a, b) => b.walkedAt.compareTo(a.walkedAt));
+
+            if (walks.isEmpty) {
+              return _buildEmptyState(filterType, isDark);
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(WanMapSpacing.lg),
+              itemCount: walks.length,
+              itemBuilder: (context, index) {
+                final walk = walks[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: WanMapSpacing.md),
+                  child: _WalkCard(
+                    walk: walk,
+                    isDark: isDark,
+                    onTap: () {
+                      if (walk is OutingWalkHistory) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OutingWalkDetailScreen(history: walk),
+                          ),
+                        );
+                      } else {
+                        // TODO: 日常散歩詳細画面へ遷移
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('日常散歩詳細画面は準備中です')),
+                        );
+                      }
+                    },
+                  ),
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => _buildEmptyState(filterType, isDark),
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => _buildEmptyState(filterType, isDark),
+      ),
+    );
+  }
+
+  /// 空状態
+  Widget _buildEmptyState(WalkHistoryType? filterType, bool isDark) {
+    String message;
+    if (filterType == WalkHistoryType.outing) {
+      message = 'お出かけ散歩の記録がありません\n公式ルートを歩いて思い出を残しましょう';
+    } else if (filterType == WalkHistoryType.daily) {
+      message = '日常散歩の記録がありません\nいつもの散歩を記録してみましょう';
+    } else {
+      message = '散歩の記録がありません\nさっそく散歩に出かけましょう！';
+    }
+
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.all(WanMapSpacing.md),
+        padding: const EdgeInsets.all(WanMapSpacing.xl),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ヘッダー（タイプアイコン + タイトル）
-            Row(
-              children: [
-                Icon(
-                  isOuting ? Icons.explore : Icons.directions_walk,
-                  color: WanMapColors.accent,
-                  size: 24,
-                ),
-                const SizedBox(width: WanMapSpacing.sm),
-                Expanded(
-                  child: Text(
-                    isOuting ? (walk.routeName ?? 'おでかけ散歩') : _formatDateTimeTitle(walk.walkedAt),
-                    style: WanMapTypography.bodyLarge.copyWith(
+            Icon(
+              Icons.directions_walk,
+              size: 64,
+              color: isDark
+                  ? WanMapColors.textSecondaryDark.withOpacity(0.5)
+                  : WanMapColors.textSecondaryLight.withOpacity(0.5),
+            ),
+            const SizedBox(height: WanMapSpacing.lg),
+            Text(
+              message,
+              style: WanMapTypography.bodyMedium.copyWith(
+                color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// コンパクトバッジ表示
+  Widget _buildCompactBadges(BuildContext context, dynamic badgeStats, bool isDark) {
+    final earnedCount = badgeStats['earned'] ?? 0;
+    final totalCount = badgeStats['total'] ?? 15;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const BadgeListScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(WanMapSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.amber.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.emoji_events, color: Colors.amber, size: 32),
+            const SizedBox(width: WanMapSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'バッジコレクション',
+                    style: WanMapTypography.bodyMedium.copyWith(
                       color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: WanMapSpacing.sm),
-            
-            // 統計情報
-            Row(
-              children: [
-                Icon(Icons.straighten, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${(walk.distanceMeters / 1000).toStringAsFixed(2)} km',
-                  style: WanMapTypography.bodySmall.copyWith(
-                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                  Text(
+                    '$earnedCount/$totalCount個獲得',
+                    style: WanMapTypography.bodySmall.copyWith(
+                      color: Colors.amber,
+                    ),
                   ),
-                ),
-                const SizedBox(width: WanMapSpacing.md),
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${(walk.durationSeconds / 60).ceil()} 分',
-                  style: WanMapTypography.bodySmall.copyWith(
-                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.amber),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-            // 写真グリッド（お出かけ散歩のみ）
-            if (isOuting && walk.photoUrls != null && walk.photoUrls!.isNotEmpty) ...[
-              const SizedBox(height: WanMapSpacing.md),
-              SizedBox(
-                height: 80,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: walk.photoUrls!.take(3).length,
-                  itemBuilder: (context, index) {
-                    final photoUrl = walk.photoUrls![index];
-                    return Container(
-                      width: 80,
-                      margin: EdgeInsets.only(right: index < walk.photoUrls!.take(3).length - 1 ? WanMapSpacing.sm : 0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+/// コンパクト統計項目
+class _CompactStat extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool isDark;
+
+  const _CompactStat({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: WanMapSpacing.xs),
+        Text(
+          label,
+          style: WanMapTypography.bodySmall.copyWith(
+            color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 散歩カード
+class _WalkCard extends StatelessWidget {
+  final WalkHistoryItem walk;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _WalkCard({
+    required this.walk,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isOuting = walk.type == WalkHistoryType.outing;
+    final outingWalk = isOuting ? walk as OutingWalkHistory : null;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 写真（お出かけ散歩のみ）
+            if (isOuting && outingWalk?.photoUrls != null && outingWalk!.photoUrls.isNotEmpty)
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: outingWalk.photoUrls.length > 3 ? 3 : outingWalk.photoUrls.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        width: 200,
+                        margin: const EdgeInsets.only(right: WanMapSpacing.xs),
                         child: Image.network(
-                          photoUrl,
+                          outingWalk.photoUrls[index],
                           fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: Colors.grey[300],
-                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: Icon(Icons.image_not_supported, color: Colors.grey[600]),
-                            );
-                          },
+                          errorBuilder: (_, __, ___) => Container(
+                            color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
+                            child: const Icon(Icons.broken_image, size: 48),
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ],
+
+            // カード情報
+            Padding(
+              padding: const EdgeInsets.all(WanMapSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // タイトル
+                  Row(
+                    children: [
+                      Icon(
+                        isOuting ? Icons.explore : Icons.directions_walk,
+                        color: WanMapColors.accent,
+                        size: 24,
+                      ),
+                      const SizedBox(width: WanMapSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          isOuting ? (outingWalk?.routeName ?? 'お出かけ散歩') : _formatDateTimeTitle(walk.walkedAt),
+                          style: WanMapTypography.bodyLarge.copyWith(
+                            color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: WanMapSpacing.sm),
+
+                  // サブ情報
+                  Row(
+                    children: [
+                      if (isOuting && outingWalk != null) ...[
+                        Icon(Icons.location_on, size: 14, color: WanMapColors.accent),
+                        const SizedBox(width: WanMapSpacing.xs),
+                        Text(
+                          outingWalk.areaName,
+                          style: WanMapTypography.bodySmall.copyWith(
+                            color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                          ),
+                        ),
+                        const SizedBox(width: WanMapSpacing.md),
+                      ],
+                      Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                      ),
+                      const SizedBox(width: WanMapSpacing.xs),
+                      Text(
+                        _formatDate(walk.walkedAt),
+                        style: WanMapTypography.bodySmall.copyWith(
+                          color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: WanMapSpacing.sm),
+
+                  // 統計
+                  Row(
+                    children: [
+                      _StatChip(
+                        icon: Icons.straighten,
+                        label: walk.formattedDistance,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: WanMapSpacing.sm),
+                      _StatChip(
+                        icon: Icons.access_time,
+                        label: walk.formattedDuration,
+                        isDark: isDark,
+                      ),
+                      if (isOuting && outingWalk != null) ...[
+                        const SizedBox(width: WanMapSpacing.sm),
+                        _StatChip(
+                          icon: Icons.push_pin,
+                          label: '${outingWalk.pinCount}個',
+                          isDark: isDark,
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  /// 日常散歩のタイトル用：日付と時間をフォーマット
-  /// 例: "11月25日 11:05"
   String _formatDateTimeTitle(DateTime date) {
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '${date.month}月${date.day}日 $hour:$minute';
+    final hour = date.hour;
+    if (hour < 12) {
+      return '朝の散歩';
+    } else if (hour < 17) {
+      return '午後の散歩';
+    } else {
+      return '夕方の散歩';
+    }
   }
 
-  Widget _buildEmptyCard(bool isDark, String message) {
-    return Container(
-      padding: const EdgeInsets.all(WanMapSpacing.xl),
-      decoration: BoxDecoration(
-        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(child: Text(message, style: WanMapTypography.bodyMedium.copyWith(color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight))),
-    );
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+
+    if (diff == 0) {
+      return '今日';
+    } else if (diff == 1) {
+      return '昨日';
+    } else if (diff < 7) {
+      return '$diff日前';
+    } else {
+      return '${date.month}/${date.day}';
+    }
   }
 }
 
-class _StatCard extends StatelessWidget {
+/// 統計チップ
+class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String value;
-  final Color color;
   final bool isDark;
 
-  const _StatCard({required this.icon, required this.label, required this.value, required this.color, required this.isDark});
+  const _StatChip({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(WanMapSpacing.sm),
-      decoration: BoxDecoration(
-        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+      padding: const EdgeInsets.symmetric(
+        horizontal: WanMapSpacing.sm,
+        vertical: WanMapSpacing.xs,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      decoration: BoxDecoration(
+        color: WanMapColors.accent.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: WanMapSpacing.xs),
-          Text(value, style: WanMapTypography.titleMedium.copyWith(color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight, fontWeight: FontWeight.bold)),
-          const SizedBox(height: WanMapSpacing.xxs),
-          Text(label, style: WanMapTypography.labelSmall.copyWith(color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight)),
+          Icon(icon, size: 14, color: WanMapColors.accent),
+          const SizedBox(width: WanMapSpacing.xs),
+          Text(
+            label,
+            style: WanMapTypography.caption.copyWith(
+              color: WanMapColors.accent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
