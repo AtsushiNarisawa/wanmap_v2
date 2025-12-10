@@ -93,7 +93,7 @@ class BadgeListScreen extends ConsumerWidget {
                       crossAxisCount: 3,
                       crossAxisSpacing: WanMapSpacing.sm,
                       mainAxisSpacing: WanMapSpacing.sm,
-                      childAspectRatio: 0.8,
+                      childAspectRatio: 0.65,
                     ),
                     itemCount: earnedBadges.length,
                     itemBuilder: (context, index) {
@@ -117,7 +117,7 @@ class BadgeListScreen extends ConsumerWidget {
                       crossAxisCount: 3,
                       crossAxisSpacing: WanMapSpacing.sm,
                       mainAxisSpacing: WanMapSpacing.sm,
-                      childAspectRatio: 0.8,
+                      childAspectRatio: 0.65,
                     ),
                     itemCount: lockedBadges.length,
                     itemBuilder: (context, index) {
