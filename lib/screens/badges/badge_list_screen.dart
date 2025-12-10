@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
@@ -12,7 +13,20 @@ class BadgeListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final badgeStatsAsync = ref.watch(badgeStatisticsProvider);
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('バッジコレクション'),
+          backgroundColor: WanMapColors.primary,
+        ),
+        body: const Center(
+          child: Text('ユーザー情報を取得できませんでした'),
+        ),
+      );
+    }
+    
+    final badgeStatsAsync = ref.watch(badgeStatisticsProvider(userId));
 
     return Scaffold(
       appBar: AppBar(
@@ -31,13 +45,13 @@ class BadgeListScreen extends ConsumerWidget {
           final lockedBadges = badgeStats.badges.where((b) => !b.isEarned).toList();
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(WanMapSpacing.m),
+            padding: const EdgeInsets.all(WanMapSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 統計サマリー
                 Container(
-                  padding: const EdgeInsets.all(WanMapSpacing.m),
+                  padding: const EdgeInsets.all(WanMapSpacing.md),
                   decoration: BoxDecoration(
                     color: WanMapColors.primary.withAlpha(26),
                     borderRadius: BorderRadius.circular(12),
@@ -66,7 +80,7 @@ class BadgeListScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: WanMapSpacing.l),
+                const SizedBox(height: WanMapSpacing.lg),
 
                 // 獲得済みバッジ
                 if (earnedBadges.isNotEmpty) ...[
@@ -74,14 +88,14 @@ class BadgeListScreen extends ConsumerWidget {
                     '獲得済みバッジ',
                     style: WanMapTypography.titleLarge,
                   ),
-                  const SizedBox(height: WanMapSpacing.m),
+                  const SizedBox(height: WanMapSpacing.md),
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      crossAxisSpacing: WanMapSpacing.s,
-                      mainAxisSpacing: WanMapSpacing.s,
+                      crossAxisSpacing: WanMapSpacing.sm,
+                      mainAxisSpacing: WanMapSpacing.sm,
                       childAspectRatio: 0.8,
                     ),
                     itemCount: earnedBadges.length,
@@ -89,7 +103,7 @@ class BadgeListScreen extends ConsumerWidget {
                       return BadgeCard(badge: earnedBadges[index]);
                     },
                   ),
-                  const SizedBox(height: WanMapSpacing.l),
+                  const SizedBox(height: WanMapSpacing.lg),
                 ],
 
                 // 未獲得バッジ
@@ -98,14 +112,14 @@ class BadgeListScreen extends ConsumerWidget {
                     '未獲得バッジ',
                     style: WanMapTypography.titleLarge,
                   ),
-                  const SizedBox(height: WanMapSpacing.m),
+                  const SizedBox(height: WanMapSpacing.md),
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      crossAxisSpacing: WanMapSpacing.s,
-                      mainAxisSpacing: WanMapSpacing.s,
+                      crossAxisSpacing: WanMapSpacing.sm,
+                      mainAxisSpacing: WanMapSpacing.sm,
                       childAspectRatio: 0.8,
                     ),
                     itemCount: lockedBadges.length,
@@ -124,12 +138,12 @@ class BadgeListScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: WanMapSpacing.m),
+              const SizedBox(height: WanMapSpacing.md),
               Text('エラー: $error'),
-              const SizedBox(height: WanMapSpacing.m),
+              const SizedBox(height: WanMapSpacing.md),
               ElevatedButton(
                 onPressed: () {
-                  ref.invalidate(badgeStatisticsProvider);
+                  ref.invalidate(badgeStatisticsProvider(userId));
                 },
                 child: const Text('再読み込み'),
               ),
