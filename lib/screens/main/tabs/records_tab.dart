@@ -4,6 +4,7 @@ import '../../../config/wanmap_colors.dart';
 import '../../../config/wanmap_typography.dart';
 import '../../../config/wanmap_spacing.dart';
 import '../../../models/walk_history.dart';
+import '../../../models/badge.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/badge_provider.dart';
 import '../../../providers/user_statistics_provider.dart';
@@ -368,9 +369,9 @@ class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProvid
   }
 
   /// コンパクトバッジ表示
-  Widget _buildCompactBadges(BuildContext context, dynamic badgeStats, bool isDark) {
-    final earnedCount = badgeStats['earned'] ?? 0;
-    final totalCount = badgeStats['total'] ?? 15;
+  Widget _buildCompactBadges(BuildContext context, BadgeStatistics badgeStats, bool isDark) {
+    final earnedCount = badgeStats.unlockedBadges;
+    final totalCount = badgeStats.totalBadges;
 
     return GestureDetector(
       onTap: () {
