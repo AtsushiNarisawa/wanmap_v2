@@ -33,20 +33,45 @@ class BadgeCard extends StatelessWidget {
             : BorderSide.none,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Badge Icon
-            _buildBadgeIcon(isDark),
+            // Badge Icon (smaller)
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: badge.isUnlocked
+                    ? RadialGradient(
+                        colors: [
+                          badge.tierColor.withOpacity(0.3),
+                          badge.tierColor.withOpacity(0.1),
+                        ],
+                      )
+                    : null,
+                color: badge.isUnlocked
+                    ? null
+                    : (isDark ? Colors.grey[800] : Colors.grey[300]),
+              ),
+              child: Icon(
+                badge.icon,
+                size: 28,
+                color: badge.isUnlocked
+                    ? badge.tierColor
+                    : (isDark ? Colors.grey[700] : Colors.grey[400]),
+              ),
+            ),
             
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             
-            // Badge Name
+            // Badge Name (smaller font)
             Text(
               badge.nameJa,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: badge.isUnlocked
                     ? (isDark ? Colors.white : Colors.black87)
@@ -59,17 +84,17 @@ class BadgeCard extends StatelessWidget {
             
             const SizedBox(height: 4),
             
-            // Tier Badge
+            // Tier Badge (compact)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: badge.tierColor.withOpacity(badge.isUnlocked ? 0.2 : 0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 badge.tier.label,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 9,
                   fontWeight: FontWeight.bold,
                   color: badge.isUnlocked
                       ? badge.tierColor
@@ -78,29 +103,21 @@ class BadgeCard extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 8),
+            const Spacer(),
             
-            // Badge Description
-            Text(
-              badge.description,
-              style: TextStyle(
-                fontSize: 12,
-                color: badge.isUnlocked
-                    ? (isDark ? Colors.grey[400] : Colors.grey[600])
-                    : (isDark ? Colors.grey[700] : Colors.grey[400]),
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Unlock Status
+            // Unlock Status (compact)
             if (badge.isUnlocked && badge.unlockedAt != null)
-              _buildUnlockDate(isDark)
+              Icon(
+                Icons.check_circle,
+                size: 14,
+                color: WanMapColors.accent,
+              )
             else
-              _buildLockedStatus(isDark),
+              Icon(
+                Icons.lock_outline,
+                size: 14,
+                color: isDark ? Colors.grey[700] : Colors.grey[400],
+              ),
           ],
         ),
       ),
