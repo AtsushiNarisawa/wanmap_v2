@@ -249,7 +249,7 @@ class HomeTab extends ConsumerWidget {
                                       height: 40,
                                       child: const Icon(
                                         Icons.star,
-                                        color: WanMapColors.accent,
+                                        color: Colors.orange,
                                         size: 40,
                                       ),
                                     ),
