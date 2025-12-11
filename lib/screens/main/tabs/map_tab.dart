@@ -80,7 +80,7 @@ class _MapTabState extends ConsumerState<MapTab> {
         elevation: 0,
         title: Row(
           children: [
-            Icon(Icons.explore, color: WanMapColors.accent, size: 28),
+            Icon(Icons.map, color: WanMapColors.accent, size: 28),
             const SizedBox(width: WanMapSpacing.sm),
             Text(
               'マップ',
