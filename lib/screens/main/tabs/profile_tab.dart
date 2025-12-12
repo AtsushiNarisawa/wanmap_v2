@@ -6,7 +6,6 @@ import '../../../config/wanmap_colors.dart';
 import '../../../config/wanmap_typography.dart';
 import '../../../config/wanmap_spacing.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/user_statistics_provider.dart';
 import '../../../providers/profile_provider.dart';
 import '../../../providers/dog_provider.dart';
 import '../../../models/dog_model.dart';
@@ -61,7 +60,6 @@ class ProfileTab extends ConsumerWidget {
       );
     }
 
-    final statisticsAsync = ref.watch(userStatisticsProvider(userId));
     final profileAsync = ref.watch(profileProvider(userId));
     final currentUser = ref.watch(currentUserProvider);
 
@@ -101,9 +99,9 @@ class ProfileTab extends ConsumerWidget {
               children: [
                 // ユーザー情報カード
                 profileAsync.when(
-                  data: (profile) => _buildUserInfoCard(context, isDark, profile, currentUser, statisticsAsync),
+                  data: (profile) => _buildUserInfoCard(context, isDark, profile, currentUser),
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => _buildUserInfoCard(context, isDark, null, currentUser, statisticsAsync),
+                  error: (_, __) => _buildUserInfoCard(context, isDark, null, currentUser),
                 ),
                 
                 const SizedBox(height: WanMapSpacing.xl),
@@ -128,7 +126,6 @@ class ProfileTab extends ConsumerWidget {
     bool isDark,
     ProfileData? profile,
     User? currentUser,
-    AsyncValue<dynamic> statisticsAsync,
   ) {
     return Container(
       padding: const EdgeInsets.all(WanMapSpacing.xl),
@@ -351,7 +348,6 @@ class ProfileTab extends ConsumerWidget {
               );
               // プロフィールが更新された場合、再読み込み
               if (result == true) {
-                ref.invalidate(userStatisticsProvider);
                 ref.invalidate(profileProvider);
               }
             },
