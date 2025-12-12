@@ -112,18 +112,27 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
         final newDog = await ref.read(dogProvider.notifier).createDog(dog);
         
         if (mounted && newDog != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('愛犬を登録しました。ワクチン情報を入力してください。')),
-          );
-          // 新規登録後、編集画面へ遷移してワクチン情報を入力できるようにする
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => DogEditScreen(
-                userId: widget.userId,
-                dog: newDog,
+          // まず現在の画面を閉じる
+          Navigator.of(context).pop(true);
+          
+          // 少し待ってから編集画面を開く
+          await Future.delayed(const Duration(milliseconds: 100));
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('愛犬を登録しました。ワクチン情報を入力してください。')),
+            );
+            // 編集画面へ遷移してワクチン情報を入力できるようにする
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DogEditScreen(
+                  userId: widget.userId,
+                  dog: newDog,
+                ),
               ),
-            ),
-          );
+            );
+          }
         } else if (mounted) {
           Navigator.of(context).pop(true);
         }
