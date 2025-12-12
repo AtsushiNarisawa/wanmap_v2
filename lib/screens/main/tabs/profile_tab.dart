@@ -281,10 +281,14 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               height: 160,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.md),
                 itemCount: dogs.length,
                 itemBuilder: (context, index) {
                   final dog = dogs[index];
+                  if (kDebugMode) {
+                    print('🐕 Building dog card #$index: ${dog.name}');
+                  }
                   return _DogCard(
                     dog: dog,
                     isDark: isDark,
@@ -480,6 +484,9 @@ class _DogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kDebugMode) {
+      print('🐕 _DogCard.build() called for: ${dog.name}');
+    }
     return Container(
       width: 320,
       margin: const EdgeInsets.symmetric(horizontal: WanMapSpacing.xs),
