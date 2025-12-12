@@ -223,5 +223,6 @@ final dogProvider = StateNotifierProvider<DogNotifier, DogState>((ref) {
 /// ユーザーの犬一覧を取得するProvider
 final userDogsProvider = Provider.family<List<DogModel>, String>((ref, userId) {
   final dogState = ref.watch(dogProvider);
-  return dogState.dogs;
+  // userIdでフィルタリング
+  return dogState.dogs.where((dog) => dog.userId == userId).toList();
 });

@@ -32,6 +32,12 @@ class ProfileTab extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userId = ref.watch(currentUserIdProvider);
     
+    // ユーザーIDがある場合、犬データをロード
+    if (userId != null) {
+      // 初回表示時に犬データをロード
+      ref.read(dogProvider.notifier).loadUserDogs(userId);
+    }
+    
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('プロフィール')),
