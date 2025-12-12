@@ -214,6 +214,11 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     WidgetRef ref,
   ) {
     final dogs = ref.watch(userDogsProvider(userId));
+    
+    if (kDebugMode) {
+      print('🐕 ProfileTab _buildDogCards: ${dogs.length} dogs');
+      print('🐕 Dogs: ${dogs.map((d) => d.name).join(", ")}');
+    }
 
     return Container(
       decoration: BoxDecoration(
