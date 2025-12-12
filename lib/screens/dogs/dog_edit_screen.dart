@@ -100,17 +100,33 @@ class _DogEditScreenState extends ConsumerState<DogEditScreen> {
             'weight': dog.weight,
           },
         );
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('愛犬情報を更新しました')),
+          );
+          Navigator.of(context).pop(true);
+        }
       } else {
-        await ref.read(dogProvider.notifier).createDog(dog);
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isEditMode ? '愛犬情報を更新しました' : '愛犬を登録しました'),
-          ),
-        );
-        Navigator.of(context).pop(true);
+        // 新規登録
+        final newDog = await ref.read(dogProvider.notifier).createDog(dog);
+        
+        if (mounted && newDog != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('愛犬を登録しました。ワクチン情報を入力してください。')),
+          );
+          // 新規登録後、編集画面へ遷移してワクチン情報を入力できるようにする
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => DogEditScreen(
+                userId: widget.userId,
+                dog: newDog,
+              ),
+            ),
+          );
+        } else if (mounted) {
+          Navigator.of(context).pop(true);
+        }
       }
     } catch (e) {
       if (mounted) {
