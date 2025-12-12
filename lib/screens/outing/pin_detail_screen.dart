@@ -7,15 +7,16 @@ import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
 import '../../models/route_pin.dart';
 import '../../providers/pin_comment_provider.dart';
+import '../../providers/route_pin_provider.dart';
 
 /// ピン詳細画面
 /// ユーザーが投稿したピンの詳細情報を表示
 class PinDetailScreen extends ConsumerStatefulWidget {
-  final RoutePin pin;
+  final String pinId;
 
   const PinDetailScreen({
     super.key,
-    required this.pin,
+    required this.pinId,
   });
 
   @override
@@ -34,13 +35,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // コメント数の初期化
-    Future.microtask(() {
-      ref.read(pinCommentActionsProvider).initializeCommentCount(
-        widget.pin.id,
-        widget.pin.commentsCount,
-      );
-    });
+    // コメント数の初期化はbuild内で行う（pinデータ取得後）
   }
 
   @override
@@ -82,7 +77,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
 
     final actions = ref.read(pinCommentActionsProvider);
     final success = await actions.addComment(
-      widget.pin.id,
+      widget.pinId,
       _commentController.text.trim(),
       replyToUserId: _replyToUserId,
       replyToUserName: _replyToUserName,
@@ -147,8 +142,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final commentsAsync = ref.watch(pinCommentsProvider(widget.pin.id));
-    final commentCount = ref.watch(pinCommentCountProvider(widget.pin.id));
+    final pinAsync = ref.watch(pinByIdProvider(widget.pinId));
     final currentUser = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
@@ -160,63 +154,89 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 写真ギャラリー（横スクロール）
-            if (widget.pin.hasPhotos) _buildPhotoGallery(widget.pin, isDark),
+      body: pinAsync.when(
+        data: (pin) {
+          if (pin == null) {
+            return Center(
+              child: Text(
+                'ピンが見つかりません',
+                style: WanMapTypography.bodyLarge.copyWith(
+                  color: isDark
+                      ? WanMapColors.textSecondaryDark
+                      : WanMapColors.textSecondaryLight,
+                ),
+              ),
+            );
+          }
 
-            Padding(
-              padding: const EdgeInsets.all(WanMapSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // タイトル
-                  Text(
-                    widget.pin.title,
-                    style: WanMapTypography.headlineMedium.copyWith(
-                      color: isDark
-                          ? WanMapColors.textPrimaryDark
-                          : WanMapColors.textPrimaryLight,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          // コメント数の初期化
+          Future.microtask(() {
+            ref.read(pinCommentActionsProvider).initializeCommentCount(
+              pin.id,
+              pin.commentsCount,
+            );
+          });
 
-                  const SizedBox(height: WanMapSpacing.md),
+          final commentsAsync = ref.watch(pinCommentsProvider(pin.id));
+          final commentCount = ref.watch(pinCommentCountProvider(pin.id));
 
-                  // ピンタイプバッジ
-                  _buildPinTypeBadge(widget.pin.pinType),
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 写真ギャラリー（横スクロール）
+                if (pin.hasPhotos) _buildPhotoGallery(pin, isDark),
 
-                  const SizedBox(height: WanMapSpacing.xl),
-
-                  // 統計情報
-                  _buildStats(widget.pin, isDark),
-
-                  const SizedBox(height: WanMapSpacing.xl),
-
-                  // コメント
-                  if (widget.pin.comment.isNotEmpty) ...[
-                    Text(
-                      'コメント',
-                      style: WanMapTypography.headlineSmall.copyWith(
-                        color: isDark
-                            ? WanMapColors.textPrimaryDark
-                            : WanMapColors.textPrimaryLight,
-                        fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.all(WanMapSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // タイトル
+                      Text(
+                        pin.title,
+                        style: WanMapTypography.headlineMedium.copyWith(
+                          color: isDark
+                              ? WanMapColors.textPrimaryDark
+                              : WanMapColors.textPrimaryLight,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: WanMapSpacing.sm),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(WanMapSpacing.md),
-                      decoration: BoxDecoration(
-                        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        widget.pin.comment,
-                        style: WanMapTypography.bodyMedium.copyWith(
+
+                      const SizedBox(height: WanMapSpacing.md),
+
+                      // ピンタイプバッジ
+                      _buildPinTypeBadge(pin.pinType),
+
+                      const SizedBox(height: WanMapSpacing.xl),
+
+                      // 統計情報
+                      _buildStats(pin, isDark),
+
+                      const SizedBox(height: WanMapSpacing.xl),
+
+                      // コメント
+                      if (pin.comment.isNotEmpty) ...[
+                        Text(
+                          'コメント',
+                          style: WanMapTypography.headlineSmall.copyWith(
+                            color: isDark
+                                ? WanMapColors.textPrimaryDark
+                                : WanMapColors.textPrimaryLight,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: WanMapSpacing.sm),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(WanMapSpacing.md),
+                          decoration: BoxDecoration(
+                            color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            pin.comment,
+                            style: WanMapTypography.bodyMedium.copyWith(
                           color: isDark
                               ? WanMapColors.textPrimaryDark
                               : WanMapColors.textPrimaryLight,
@@ -226,27 +246,53 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                     const SizedBox(height: WanMapSpacing.xl),
                   ],
 
-                  // 位置情報
-                  Text(
-                    '位置',
-                    style: WanMapTypography.headlineSmall.copyWith(
-                      color: isDark
-                          ? WanMapColors.textPrimaryDark
-                          : WanMapColors.textPrimaryLight,
-                      fontWeight: FontWeight.bold,
-                    ),
+                      // 位置情報
+                      Text(
+                        '位置',
+                        style: WanMapTypography.headlineSmall.copyWith(
+                          color: isDark
+                              ? WanMapColors.textPrimaryDark
+                              : WanMapColors.textPrimaryLight,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: WanMapSpacing.sm),
+                      _buildLocationMap(pin, isDark),
+
+                      const SizedBox(height: WanMapSpacing.xl),
+
+                      // みんなのコメントセクション
+                      _buildCommentsSection(commentsAsync, commentCount, currentUser, isDark),
+                    ],
                   ),
-                  const SizedBox(height: WanMapSpacing.sm),
-                  _buildLocationMap(widget.pin, isDark),
-
-                  const SizedBox(height: WanMapSpacing.xl),
-
-                  // みんなのコメントセクション
-                  _buildCommentsSection(commentsAsync, commentCount, currentUser, isDark),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: isDark
+                    ? WanMapColors.textSecondaryDark
+                    : WanMapColors.textSecondaryLight,
+              ),
+              const SizedBox(height: WanMapSpacing.md),
+              Text(
+                'ピンの読み込みに失敗しました',
+                style: WanMapTypography.bodyLarge.copyWith(
+                  color: isDark
+                      ? WanMapColors.textSecondaryDark
+                      : WanMapColors.textSecondaryLight,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       // コメント入力欄（固定）

@@ -17,6 +17,7 @@ import '../../../providers/pin_comment_provider.dart';
 import '../../../models/recent_pin_post.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
+import '../../outing/pin_detail_screen.dart';
 import '../../outing/pin_comment_screen.dart';
 
 import '../../routes/public_routes_screen.dart';
@@ -731,14 +732,14 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
 
     return GestureDetector(
       onTap: () {
-        // ピンが投稿されたルートの詳細画面へ遷移
+        // ピン投稿の詳細画面へ遷移
         if (kDebugMode) {
-          print('📌 Pin tapped: ${widget.pin.title} → Navigate to route: ${widget.pin.routeName}');
+          print('📌 Pin tapped: ${widget.pin.title} (pinId: ${widget.pin.pinId}) → Navigate to PinDetailScreen');
         }
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => RouteDetailScreen(routeId: widget.pin.routeId),
+            builder: (_) => PinDetailScreen(pinId: widget.pin.pinId),
           ),
         );
       },
