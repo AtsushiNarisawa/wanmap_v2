@@ -157,15 +157,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   void _handleNotificationTap(BuildContext context, dynamic notification) {
     switch (notification.type) {
-      case 'new_follower':
-        if (notification.actorId != null) {
-          Navigator.pushNamed(
-            context,
-            '/user_profile',
-            arguments: notification.actorId,
-          );
-        }
-        break;
       case 'pin_liked':
       case 'pin_commented':
         if (notification.targetId != null) {

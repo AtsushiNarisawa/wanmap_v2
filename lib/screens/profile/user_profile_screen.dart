@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
-import '../../providers/social_provider.dart';
 import '../../providers/user_statistics_provider.dart';
 import '../../providers/auth_provider.dart';
 
@@ -24,7 +23,6 @@ class UserProfileScreen extends ConsumerWidget {
     final isOwnProfile = currentUser?.id == userId;
     
     final statisticsAsync = ref.watch(userStatisticsProvider(userId));
-    final isFollowingAsync = ref.watch(socialIsFollowingProvider(userId));
 
     return Scaffold(
       backgroundColor: isDark
@@ -59,7 +57,6 @@ class UserProfileScreen extends ConsumerWidget {
                   isDark,
                   statistics,
                   isOwnProfile,
-                  isFollowingAsync,
                 ),
                 const SizedBox(height: WanMapSpacing.medium),
                 _buildStatisticsSection(isDark, statistics),
@@ -81,7 +78,6 @@ class UserProfileScreen extends ConsumerWidget {
     bool isDark,
     dynamic statistics,
     bool isOwnProfile,
-    AsyncValue<bool> isFollowingAsync,
   ) {
     return Container(
       padding: const EdgeInsets.all(WanMapSpacing.large),
