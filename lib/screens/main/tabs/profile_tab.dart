@@ -314,34 +314,40 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
 
           const Divider(height: 1),
 
-          // 愛犬を追加ボタン
-          InkWell(
-            onTap: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => DogEditScreen(userId: userId)),
-              );
-              // createDogで既にstateに追加されているため、loadUserDogsは不要
-              // （サーバーから取得すると、新規登録した犬が反映されていない場合がある）
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(WanMapSpacing.lg),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_circle_outline,
+          // 愛犬を追加ボタン（小さく控えめに）
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: WanMapSpacing.md,
+              vertical: WanMapSpacing.sm,
+            ),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => DogEditScreen(userId: userId)),
+                  );
+                  // createDogで既にstateに追加されているため、loadUserDogsは不要
+                  // （サーバーから取得すると、新規登録した犬が反映されていない場合がある）
+                },
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  size: 18,
+                  color: WanMapColors.accent,
+                ),
+                label: Text(
+                  '愛犬を追加',
+                  style: WanMapTypography.bodySmall.copyWith(
                     color: WanMapColors.accent,
                   ),
-                  const SizedBox(width: WanMapSpacing.sm),
-                  Text(
-                    '愛犬を追加',
-                    style: WanMapTypography.bodyLarge.copyWith(
-                      color: WanMapColors.accent,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: WanMapSpacing.sm,
+                    vertical: WanMapSpacing.xs,
                   ),
-                ],
+                ),
               ),
             ),
           ),
