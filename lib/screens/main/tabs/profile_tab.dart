@@ -24,19 +24,33 @@ import '../../settings/settings_screen.dart';
 /// 1. ユーザー情報カード（アバター、名前、レベル、XP）
 /// 2. ソーシャル統計（フォロワー/フォロー中）
 /// 3. メニューリスト（設定、編集、愛犬管理など）
-class ProfileTab extends ConsumerWidget {
+class ProfileTab extends ConsumerStatefulWidget {
   const ProfileTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends ConsumerState<ProfileTab> {
+  @override
+  void initState() {
+    super.initState();
+    // 初回表示時に犬データをロード
+    Future.microtask(() {
+      final userId = ref.read(currentUserIdProvider);
+      if (userId != null) {
+        if (kDebugMode) {
+          print('🐕 ProfileTab: Loading dogs for user $userId');
+        }
+        ref.read(dogProvider.notifier).loadUserDogs(userId);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userId = ref.watch(currentUserIdProvider);
-    
-    // ユーザーIDがある場合、犬データをロード
-    if (userId != null) {
-      // 初回表示時に犬データをロード
-      ref.read(dogProvider.notifier).loadUserDogs(userId);
-    }
     
     if (userId == null) {
       return Scaffold(
