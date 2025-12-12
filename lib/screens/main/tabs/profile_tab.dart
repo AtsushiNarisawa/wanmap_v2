@@ -8,14 +8,16 @@ import '../../../config/wanmap_spacing.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/user_statistics_provider.dart';
 import '../../../providers/profile_provider.dart';
+import '../../../providers/dog_provider.dart';
+import '../../../models/dog_model.dart';
 import '../../auth/login_screen.dart';
-import '../../notifications/notifications_screen.dart';
 import '../../legal/terms_of_service_screen.dart';
 import '../../legal/privacy_policy_screen.dart';
 
 
 import '../../profile/profile_edit_screen.dart';
 import '../../dogs/dog_list_screen.dart';
+import '../../dogs/dog_edit_screen.dart';
 import '../../settings/settings_screen.dart';
 
 /// ProfileTab - ユーザープロフィールとアカウント管理
@@ -106,6 +108,11 @@ class ProfileTab extends ConsumerWidget {
                 
                 const SizedBox(height: WanMapSpacing.xl),
                 
+                // 愛犬カード
+                _buildDogCards(context, isDark, userId, ref),
+                
+                const SizedBox(height: WanMapSpacing.xl),
+                
                 // メニューリスト
                 _buildMenuList(context, isDark, currentUser, ref),
               ],
@@ -181,52 +188,144 @@ class ProfileTab extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
           
-          const SizedBox(height: WanMapSpacing.lg),
-          
-          // 統計情報
-          statisticsAsync.when(
-            data: (stats) => Column(
+
+        ],
+      ),
+    );
+  }
+
+  /// 愛犬カードセクション
+  Widget _buildDogCards(
+    BuildContext context,
+    bool isDark,
+    String userId,
+    WidgetRef ref,
+  ) {
+    final dogs = ref.watch(userDogsProvider(userId));
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ヘッダー
+          Padding(
+            padding: const EdgeInsets.all(WanMapSpacing.lg),
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.directions_walk, color: Colors.amber, size: 28),
-                    const SizedBox(width: WanMapSpacing.xs),
-                    Text(
-                      '総散歩回数: ${stats.totalWalks}',
-                      style: WanMapTypography.headlineSmall.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: WanMapSpacing.sm),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.route, color: Colors.amber, size: 24),
-                    const SizedBox(width: WanMapSpacing.xs),
-                    Text(
-                      '総距離: ${stats.totalDistanceKm.toStringAsFixed(1)} km',
-                      style: WanMapTypography.bodyLarge.copyWith(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                    ),
-                  ],
+                Icon(Icons.pets, color: WanMapColors.accent, size: 24),
+                const SizedBox(width: WanMapSpacing.sm),
+                Text(
+                  '愛犬情報',
+                  style: WanMapTypography.headlineSmall.copyWith(
+                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
-            loading: () => const SizedBox(
-              height: 60,
-              child: Center(child: CircularProgressIndicator(color: Colors.white)),
+          ),
+
+          // 愛犬リスト
+          if (dogs.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(WanMapSpacing.xl),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.pets_outlined,
+                      size: 64,
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
+                    ),
+                    const SizedBox(height: WanMapSpacing.md),
+                    Text(
+                      '愛犬が登録されていません',
+                      style: WanMapTypography.bodyMedium.copyWith(
+                        color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              height: 240,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.md),
+                itemCount: dogs.length,
+                itemBuilder: (context, index) {
+                  final dog = dogs[index];
+                  return _DogCard(
+                    dog: dog,
+                    isDark: isDark,
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DogEditScreen(dog: dog),
+                        ),
+                      );
+                      if (result == true) {
+                        ref.read(dogProvider.notifier).loadUserDogs(userId);
+                      }
+                    },
+                  );
+                },
+              ),
             ),
-            error: (_, __) => const SizedBox.shrink(),
+
+          const Divider(height: 1),
+
+          // 愛犬を追加ボタン
+          InkWell(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DogEditScreen()),
+              );
+              if (result == true) {
+                ref.read(dogProvider.notifier).loadUserDogs(userId);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(WanMapSpacing.lg),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_circle_outline,
+                    color: WanMapColors.accent,
+                  ),
+                  const SizedBox(width: WanMapSpacing.sm),
+                  Text(
+                    '愛犬を追加',
+                    style: WanMapTypography.bodyLarge.copyWith(
+                      color: WanMapColors.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+
   /// メニューリスト
   Widget _buildMenuList(
     BuildContext context,
@@ -278,16 +377,6 @@ class ProfileTab extends ConsumerWidget {
             },
           ),
 
-          const Divider(height: 1),
-          _MenuItem(
-            icon: Icons.notifications_outlined,
-            label: '通知設定',
-            isDark: isDark,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-            ),
-          ),
           const Divider(height: 1),
           _MenuItem(
             icon: Icons.settings_outlined,
@@ -380,6 +469,115 @@ class ProfileTab extends ConsumerWidget {
         }
       }
     }
+  }
+}
+
+// 愛犬カードウィジェット
+class _DogCard extends StatelessWidget {
+  final Dog dog;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _DogCard({
+    required this.dog,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200,
+      margin: const EdgeInsets.symmetric(horizontal: WanMapSpacing.xs),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(WanMapSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // 犬の写真
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: dog.photoUrl != null && dog.photoUrl!.isNotEmpty
+                      ? Image.network(
+                          dog.photoUrl!,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 120,
+                              height: 120,
+                              color: isDark ? Colors.grey[800] : Colors.grey[300],
+                              child: const Icon(Icons.pets, size: 48, color: Colors.grey),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: 120,
+                          height: 120,
+                          color: isDark ? Colors.grey[800] : Colors.grey[300],
+                          child: const Icon(Icons.pets, size: 48, color: Colors.grey),
+                        ),
+                ),
+                const SizedBox(height: WanMapSpacing.sm),
+                
+                // 名前
+                Text(
+                  dog.name,
+                  style: WanMapTypography.titleMedium.copyWith(
+                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: WanMapSpacing.xxs),
+                
+                // 犬種
+                Text(
+                  dog.breed,
+                  style: WanMapTypography.bodySmall.copyWith(
+                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: WanMapSpacing.xxs),
+                
+                // 年齢・性別
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      dog.gender == 'male' ? Icons.male : Icons.female,
+                      size: 16,
+                      color: dog.gender == 'male' ? Colors.blue : Colors.pink,
+                    ),
+                    const SizedBox(width: WanMapSpacing.xxs),
+                    Text(
+                      '${dog.age}歳',
+                      style: WanMapTypography.bodySmall.copyWith(
+                        color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
