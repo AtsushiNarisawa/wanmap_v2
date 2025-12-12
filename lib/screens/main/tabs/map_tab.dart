@@ -97,13 +97,6 @@ class _MapTabState extends ConsumerState<MapTab> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.my_location),
-            tooltip: '現在地',
-            onPressed: _moveToCurrentLocation,
-          ),
-        ],
       ),
       body: Column(
         children: [
