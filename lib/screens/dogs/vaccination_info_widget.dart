@@ -189,24 +189,11 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.medical_services,
-                color: WanMapColors.primary,
-                size: 24,
-              ),
-              const SizedBox(width: WanMapSpacing.sm),
-              Text(
-                '予防接種情報',
-                style: WanMapTypography.headlineSmall,
-              ),
-            ],
-          ),
-          const SizedBox(height: WanMapSpacing.md),
           Text(
-            'ペット施設利用時に提示が必要な接種証明書を登録できます',
-            style: WanMapTypography.bodySmall,
+            '🏥 予防接種情報',
+            style: WanMapTypography.headlineSmall.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: WanMapSpacing.lg),
           
@@ -261,132 +248,84 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
           ),
           const SizedBox(height: WanMapSpacing.md),
           
-          // 接種証明書写真
-          Column(
+          // 接種証明書の画像と編集ボタン
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '接種証明書',
-                style: WanMapTypography.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
+              // 写真
+              GestureDetector(
+                onTap: photoUrl != null && photoUrl.isNotEmpty 
+                    ? () => _showFullScreenImage(photoUrl) 
+                    : null,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                    image: photoUrl != null && photoUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(photoUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: photoUrl == null || photoUrl.isEmpty
+                      ? Icon(
+                          Icons.image,
+                          size: 32,
+                          color: Colors.grey[600],
+                        )
+                      : null,
                 ),
               ),
-              const SizedBox(height: WanMapSpacing.sm),
-              Row(
-                children: [
-                  // 写真
-                  if (photoUrl != null && photoUrl.isNotEmpty)
-                    GestureDetector(
-                      onTap: () => _showFullScreenImage(photoUrl),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          photoUrl,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 100,
-                              height: 100,
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.error),
-                            );
-                          },
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.image,
-                        size: 40,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  const SizedBox(width: WanMapSpacing.md),
-                  // ボタン
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _isUploading ? null : () => _uploadVaccinationPhoto(vaccineType),
-                      icon: _isUploading 
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.upload_file, size: 20),
-                      label: Text(photoUrl != null ? '写真を変更' : '写真を追加'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: WanMapColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: WanMapSpacing.md,
-                          vertical: WanMapSpacing.sm,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: WanMapSpacing.sm),
+              
+              // 写真変更ボタン（小）
+              IconButton(
+                onPressed: _isUploading ? null : () => _uploadVaccinationPhoto(vaccineType),
+                icon: _isUploading 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.edit, size: 20),
+                tooltip: '写真を変更',
+                style: IconButton.styleFrom(
+                  backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                ),
               ),
             ],
           ),
           
           const SizedBox(height: WanMapSpacing.md),
           
-          // 接種日
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // 接種日（1行）
+          Row(
             children: [
               Text(
-                '接種日',
+                '接種日: ',
                 style: WanMapTypography.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: WanMapSpacing.sm),
-              Row(
-                children: [
-                  // 日付表示
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(WanMapSpacing.md),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[800] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        date != null 
-                            ? DateFormat('yyyy年MM月dd日').format(date)
-                            : '未設定',
-                        style: WanMapTypography.bodyLarge.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: WanMapSpacing.md),
-                  // ボタン
-                  ElevatedButton.icon(
-                    onPressed: () => _updateVaccinationDate(vaccineType, date),
-                    icon: const Icon(Icons.calendar_today, size: 20),
-                    label: Text(date != null ? '日付を変更' : '日付を設定'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: WanMapColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: WanMapSpacing.md,
-                        vertical: WanMapSpacing.sm,
-                      ),
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: Text(
+                  date != null 
+                      ? DateFormat('yyyy年MM月dd日').format(date)
+                      : '未設定',
+                  style: WanMapTypography.bodyMedium,
+                ),
+              ),
+              // 日付変更ボタン（小）
+              IconButton(
+                onPressed: () => _updateVaccinationDate(vaccineType, date),
+                icon: const Icon(Icons.calendar_today, size: 18),
+                tooltip: '日付を変更',
+                style: IconButton.styleFrom(
+                  backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                ),
               ),
             ],
           ),
