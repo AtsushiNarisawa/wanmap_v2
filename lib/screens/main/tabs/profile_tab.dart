@@ -531,7 +531,7 @@ class _DogCard extends StatelessWidget {
                 
                 // 犬種
                 Text(
-                  dog.breed,
+                  dog.breed ?? '犬種不明',
                   style: WanMapTypography.bodySmall.copyWith(
                     color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                   ),
@@ -541,18 +541,25 @@ class _DogCard extends StatelessWidget {
                 ),
                 const SizedBox(height: WanMapSpacing.xxs),
                 
-                // 年齢・性別
+                // 年齢とサイズ
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      dog.gender == 'male' ? Icons.male : Icons.female,
+                      Icons.cake_outlined,
                       size: 16,
-                      color: dog.gender == 'male' ? Colors.blue : Colors.pink,
+                      color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                     ),
                     const SizedBox(width: WanMapSpacing.xxs),
                     Text(
-                      '${dog.age}歳',
+                      dog.ageDisplay,
+                      style: WanMapTypography.bodySmall.copyWith(
+                        color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                      ),
+                    ),
+                    const SizedBox(width: WanMapSpacing.sm),
+                    Text(
+                      dog.sizeDisplay,
                       style: WanMapTypography.bodySmall.copyWith(
                         color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                       ),
