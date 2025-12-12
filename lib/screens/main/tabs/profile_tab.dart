@@ -277,34 +277,38 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               ),
             )
           else
-            SizedBox(
-              height: 160,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.md),
-                itemCount: dogs.length,
-                itemBuilder: (context, index) {
-                  final dog = dogs[index];
-                  if (kDebugMode) {
-                    print('🐕 Building dog card #$index: ${dog.name}');
-                  }
-                  return _DogCard(
-                    dog: dog,
-                    isDark: isDark,
-                    onTap: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DogEditScreen(userId: userId, dog: dog),
-                        ),
-                      );
-                      if (result == true) {
-                        ref.read(dogProvider.notifier).loadUserDogs(userId);
-                      }
-                    },
-                  );
-                },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.md, vertical: WanMapSpacing.sm),
+              child: Column(
+                children: [
+                  ...dogs.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final dog = entry.value;
+                    if (kDebugMode) {
+                      print('🐕 Building dog card #$index: ${dog.name}');
+                    }
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index < dogs.length - 1 ? WanMapSpacing.md : 0,
+                      ),
+                      child: _DogCard(
+                        dog: dog,
+                        isDark: isDark,
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DogEditScreen(userId: userId, dog: dog),
+                            ),
+                          );
+                          if (result == true) {
+                            ref.read(dogProvider.notifier).loadUserDogs(userId);
+                          }
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ],
               ),
             ),
 
@@ -487,10 +491,7 @@ class _DogCard extends StatelessWidget {
     if (kDebugMode) {
       print('🐕 _DogCard.build() called for: ${dog.name}');
     }
-    return Container(
-      width: 320,
-      margin: const EdgeInsets.symmetric(horizontal: WanMapSpacing.xs),
-      child: Card(
+    return Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -600,7 +601,6 @@ class _DogCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
