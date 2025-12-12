@@ -189,14 +189,6 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '🏥 予防接種情報',
-            style: WanMapTypography.headlineSmall.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: WanMapSpacing.lg),
-          
           // 狂犬病ワクチン
           _buildVaccinationCard(
             title: '狂犬病ワクチン',
@@ -257,8 +249,8 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
                     ? () => _showFullScreenImage(photoUrl) 
                     : null,
                 child: Container(
-                  width: 120,
-                  height: 120,
+                  width: 160,
+                  height: 100,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
