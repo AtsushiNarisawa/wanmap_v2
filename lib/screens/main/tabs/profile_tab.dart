@@ -304,13 +304,12 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
           // 愛犬を追加ボタン
           InkWell(
             onTap: () async {
-              final result = await Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => DogEditScreen(userId: userId)),
               );
-              if (result == true) {
-                ref.read(dogProvider.notifier).loadUserDogs(userId);
-              }
+              // createDogで既にstateに追加されているため、loadUserDogsは不要
+              // （サーバーから取得すると、新規登録した犬が反映されていない場合がある）
             },
             child: Padding(
               padding: const EdgeInsets.all(WanMapSpacing.lg),
