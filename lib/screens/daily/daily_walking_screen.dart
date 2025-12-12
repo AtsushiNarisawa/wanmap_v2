@@ -31,6 +31,7 @@ class DailyWalkingScreen extends ConsumerStatefulWidget {
 class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
   final MapController _mapController = MapController();
   bool _isFollowingUser = true;
+  bool _showRouteInfo = true; // 統計情報の表示/非表示
   final PhotoService _photoService = PhotoService();
   final List<String> _photoUrls = []; // 撮影した写真のURL一覧
   final List<File> _photoFiles = []; // 散歩中の写真を一時保存（散歩終了時にアップロード）
@@ -309,11 +310,6 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
       backgroundColor: isDark
           ? WanMapColors.backgroundDark
           : WanMapColors.backgroundLight,
-      appBar: AppBar(
-        title: const Text('日常散歩'),
-        backgroundColor: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
-        elevation: 0,
-      ),
       body: Stack(
         children: [
           // マップ表示
@@ -323,7 +319,7 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
           _buildTopOverlay(isDark),
 
           // 下部オーバーレイ（統計情報）
-          _buildBottomOverlay(isDark, gpsState),
+          if (_showRouteInfo) _buildBottomOverlay(isDark, gpsState),
 
           // フローティングボタン（現在位置追従）
           _buildFloatingButton(gpsState),
@@ -429,6 +425,17 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
+              IconButton(
+                icon: Icon(
+                  _showRouteInfo ? Icons.info : Icons.info_outline,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _showRouteInfo = !_showRouteInfo;
+                  });
+                },
               ),
             ],
           ),
