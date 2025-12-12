@@ -346,33 +346,52 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   }
   /// 統計情報
   Widget _buildStats(OfficialRoute route, bool isDark) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _StatCard(
-            icon: Icons.straighten,
-            label: '距離',
-            value: route.formattedDistance,
-            isDark: isDark,
-          ),
+        // 1行目: 距離・所要時間
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.straighten,
+                label: '距離',
+                value: route.formattedDistance,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: WanMapSpacing.md),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.timer,
+                label: '所要時間',
+                value: route.formattedDuration,
+                isDark: isDark,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: WanMapSpacing.md),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.timer,
-            label: '所要時間',
-            value: route.formattedDuration,
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(width: WanMapSpacing.md),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.push_pin,
-            label: 'ピン',
-            value: '${route.totalPins}個',
-            isDark: isDark,
-          ),
+        const SizedBox(height: WanMapSpacing.md),
+        // 2行目: ピン数・総散歩回数
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.push_pin,
+                label: 'ピン',
+                value: '${route.totalPins}個',
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: WanMapSpacing.md),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.directions_walk,
+                label: '総散歩回数',
+                value: '${route.totalWalks}回',
+                isDark: isDark,
+              ),
+            ),
+          ],
         ),
       ],
     );

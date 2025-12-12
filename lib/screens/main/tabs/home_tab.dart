@@ -805,7 +805,8 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                   // いいねボタン・コメントボタン・ブックマークボタン・相対時間
                   Row(
                     children: [
-                      GestureDetector(
+                      // いいねボタン（タップ領域48x48）
+                      InkWell(
                         onTap: () async {
                           final success = await likeActions.toggleLike(widget.pin.pinId);
                           if (!success && context.mounted) {
@@ -814,28 +815,37 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                             );
                           }
                         },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isLiked ? Icons.favorite : Icons.favorite_border,
-                              size: 16,
-                              color: isLiked ? Colors.red : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$likeCount',
-                              style: WanMapTypography.bodySmall.copyWith(
-                                color: widget.isDark
-                                    ? WanMapColors.textSecondaryDark
-                                    : WanMapColors.textSecondaryLight,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isLiked ? Icons.favorite : Icons.favorite_border,
+                                size: 20,
+                                color: isLiked ? Colors.red : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                '$likeCount',
+                                style: WanMapTypography.bodySmall.copyWith(
+                                  color: widget.isDark
+                                      ? WanMapColors.textSecondaryDark
+                                      : WanMapColors.textSecondaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(width: WanMapSpacing.sm),
-                      GestureDetector(
+                      // コメントボタン（タップ領域48x48）
+                      InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
@@ -847,28 +857,37 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              size: 16,
-                              color: widget.isDark ? Colors.grey[400] : Colors.grey[600],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$commentCount',
-                              style: WanMapTypography.bodySmall.copyWith(
-                                color: widget.isDark
-                                    ? WanMapColors.textSecondaryDark
-                                    : WanMapColors.textSecondaryLight,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.chat_bubble_outline,
+                                size: 20,
+                                color: widget.isDark ? Colors.grey[400] : Colors.grey[600],
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                '$commentCount',
+                                style: WanMapTypography.bodySmall.copyWith(
+                                  color: widget.isDark
+                                      ? WanMapColors.textSecondaryDark
+                                      : WanMapColors.textSecondaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(width: WanMapSpacing.sm),
-                      GestureDetector(
+                      // ブックマークボタン（タップ領域48x48）
+                      InkWell(
                         onTap: () async {
                           final success = await bookmarkActions.toggleBookmark(widget.pin.pinId);
                           if (!success && context.mounted) {
@@ -877,12 +896,20 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                             );
                           }
                         },
-                        child: Icon(
-                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                          size: 16,
-                          color: isBookmarked 
-                              ? WanMapColors.accent 
-                              : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                            size: 20,
+                            color: isBookmarked 
+                                ? WanMapColors.accent 
+                                : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
+                          ),
                         ),
                       ),
                       const SizedBox(width: WanMapSpacing.sm),
@@ -975,13 +1002,13 @@ class _PopularRouteCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // サムネイル
+            // サムネイル (拡大: 80x80 → 100x80)
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: thumbnailUrl != null
                   ? Image.network(
                       thumbnailUrl!,
-                      width: 80,
+                      width: 100,
                       height: 80,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _buildDefaultThumbnail(),
@@ -1013,7 +1040,7 @@ class _PopularRouteCard extends StatelessWidget {
                   const SizedBox(height: WanMapSpacing.xs),
                   Row(
                     children: [
-                      Icon(Icons.directions_walk, size: 14, color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight),
+                      Icon(Icons.straighten, size: 14, color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight),
                       const SizedBox(width: 4),
                       Text(
                         '${(distance / 1000).toStringAsFixed(1)}km',
@@ -1022,12 +1049,28 @@ class _PopularRouteCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: WanMapSpacing.sm),
-                      const Icon(Icons.directions_walk, size: 14, color: WanMapColors.accent),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$totalWalks回',
-                        style: WanMapTypography.bodySmall.copyWith(
-                          color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                      // 月間散歩数を強調
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: WanMapSpacing.xs,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: WanMapColors.accent.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.trending_up, size: 14, color: WanMapColors.accent),
+                            const SizedBox(width: 4),
+                            Text(
+                              '今月$totalWalks回',
+                              style: WanMapTypography.bodySmall.copyWith(
+                                color: WanMapColors.accent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -1043,7 +1086,7 @@ class _PopularRouteCard extends StatelessWidget {
 
   Widget _buildDefaultThumbnail() {
     return Container(
-      width: 80,
+      width: 100,
       height: 80,
       decoration: BoxDecoration(
         color: WanMapColors.accent.withOpacity(0.2),
