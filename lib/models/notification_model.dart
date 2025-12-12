@@ -8,14 +8,11 @@
 
 /// 通知タイプ
 enum NotificationType {
-  follow,
   like,
   system;
 
   static NotificationType fromString(String type) {
     switch (type) {
-      case 'follow':
-        return NotificationType.follow;
       case 'like':
         return NotificationType.like;
       case 'system':
@@ -90,22 +87,6 @@ class NotificationModel {
     );
   }
 
-  /// フォロー通知の場合、フォロワーIDを取得
-  String? get followerId {
-    if (type == NotificationType.follow && data != null) {
-      return data!['follower_id'] as String?;
-    }
-    return null;
-  }
-
-  /// フォロー通知の場合、フォロワー名を取得
-  String? get followerUsername {
-    if (type == NotificationType.follow && data != null) {
-      return data!['follower_username'] as String?;
-    }
-    return null;
-  }
-
   /// いいね通知の場合、いいねした人のIDを取得
   String? get likerId {
     if (type == NotificationType.like && data != null) {
@@ -166,8 +147,6 @@ class NotificationModel {
   /// 通知タイプに応じたアイコン名
   String get iconName {
     switch (type) {
-      case NotificationType.follow:
-        return 'person_add';
       case NotificationType.like:
         return 'favorite';
       case NotificationType.system:
@@ -178,8 +157,6 @@ class NotificationModel {
   /// 通知タイプに応じたアイコンカラー（Hex文字列）
   String get iconColor {
     switch (type) {
-      case NotificationType.follow:
-        return '#4CAF50'; // Green
       case NotificationType.like:
         return '#F44336'; // Red
       case NotificationType.system:
@@ -190,13 +167,11 @@ class NotificationModel {
 
 /// 通知設定モデル（将来の拡張用）
 class NotificationSettings {
-  final bool enableFollowNotifications;
   final bool enableLikeNotifications;
   final bool enableSystemNotifications;
   final bool enablePushNotifications;
 
   NotificationSettings({
-    this.enableFollowNotifications = true,
     this.enableLikeNotifications = true,
     this.enableSystemNotifications = true,
     this.enablePushNotifications = false,
@@ -204,7 +179,6 @@ class NotificationSettings {
 
   factory NotificationSettings.fromJson(Map<String, dynamic> json) {
     return NotificationSettings(
-      enableFollowNotifications: json['enable_follow_notifications'] ?? true,
       enableLikeNotifications: json['enable_like_notifications'] ?? true,
       enableSystemNotifications: json['enable_system_notifications'] ?? true,
       enablePushNotifications: json['enable_push_notifications'] ?? false,
@@ -213,7 +187,6 @@ class NotificationSettings {
 
   Map<String, dynamic> toJson() {
     return {
-      'enable_follow_notifications': enableFollowNotifications,
       'enable_like_notifications': enableLikeNotifications,
       'enable_system_notifications': enableSystemNotifications,
       'enable_push_notifications': enablePushNotifications,
@@ -221,14 +194,11 @@ class NotificationSettings {
   }
 
   NotificationSettings copyWith({
-    bool? enableFollowNotifications,
     bool? enableLikeNotifications,
     bool? enableSystemNotifications,
     bool? enablePushNotifications,
   }) {
     return NotificationSettings(
-      enableFollowNotifications:
-          enableFollowNotifications ?? this.enableFollowNotifications,
       enableLikeNotifications:
           enableLikeNotifications ?? this.enableLikeNotifications,
       enableSystemNotifications:

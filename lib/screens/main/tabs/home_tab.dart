@@ -18,7 +18,7 @@ import '../../../models/recent_pin_post.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
 import '../../outing/pin_comment_screen.dart';
-import '../../notifications/notifications_screen.dart';
+
 import '../../routes/public_routes_screen.dart';
 import '../../outing/route_list_screen.dart';
 import '../../../models/area.dart';
@@ -85,12 +85,8 @@ class HomeTab extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
-          ),
-        ],
+        // フォロー機能削除: 通知ボタンを非表示
+        actions: [],
       ),
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

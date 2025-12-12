@@ -12,8 +12,7 @@ import '../../auth/login_screen.dart';
 import '../../notifications/notifications_screen.dart';
 import '../../legal/terms_of_service_screen.dart';
 import '../../legal/privacy_policy_screen.dart';
-import '../../social/followers_screen.dart';
-import '../../social/following_screen.dart';
+
 
 import '../../profile/profile_edit_screen.dart';
 import '../../dogs/dog_list_screen.dart';
@@ -104,11 +103,6 @@ class ProfileTab extends ConsumerWidget {
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (_, __) => _buildUserInfoCard(context, isDark, null, currentUser, statisticsAsync),
                 ),
-                
-                const SizedBox(height: WanMapSpacing.xl),
-                
-                // ソーシャル統計
-                _buildSocialStats(context, isDark, userId, statisticsAsync),
                 
                 const SizedBox(height: WanMapSpacing.xl),
                 

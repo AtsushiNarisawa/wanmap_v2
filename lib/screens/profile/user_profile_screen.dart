@@ -6,8 +6,7 @@ import '../../config/wanmap_spacing.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/user_statistics_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../social/followers_screen.dart';
-import '../social/following_screen.dart';
+
 
 /// ユーザープロフィール画面
 class UserProfileScreen extends ConsumerWidget {
@@ -120,87 +119,9 @@ class UserProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: WanMapSpacing.medium),
           
-          // フォロワー・フォロー中の数
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildStatButton(
-                context,
-                isDark,
-                statistics.followersCount,
-                'フォロワー',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FollowersScreen(userId: userId),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(width: WanMapSpacing.large),
-              _buildStatButton(
-                context,
-                isDark,
-                statistics.followingCount,
-                'フォロー中',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FollowingScreen(userId: userId),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          
-          // フォローボタン（自分以外のプロフィール）
-          if (!isOwnProfile) ...[
-            const SizedBox(height: WanMapSpacing.medium),
-            isFollowingAsync.when(
-              data: (isFollowing) {
-                return SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final currentUser = ref.read(currentUserProvider);
-                      if (currentUser == null) return;
-                      
-                      final service = ref.read(socialServiceProvider);
-                      await service.toggleFollow(
-                        followerId: currentUser.id,
-                        followingId: userId,
-                        isFollowing: isFollowing,
-                      );
-                      
-                      // プロバイダーを無効化して再取得
-                      ref.invalidate(socialIsFollowingProvider);
-                      ref.invalidate(userStatisticsProvider);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isFollowing
-                          ? (isDark ? Colors.grey.shade700 : Colors.grey.shade300)
-                          : WanMapColors.accent,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: WanMapSpacing.small,
-                      ),
-                    ),
-                    child: Text(
-                      isFollowing ? 'フォロー中' : 'フォロー',
-                      style: TextStyle(
-                        color: isFollowing
-                            ? (isDark ? Colors.white : Colors.black87)
-                            : Colors.white,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
+          // フォロー機能削除: フォローボタンを表示しない
+          if (false) ...[
+            // フォローボタン削除
           ],
         ],
       ),
