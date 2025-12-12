@@ -473,7 +473,7 @@ class _OutingWalkDetailScreenState extends ConsumerState<OutingWalkDetailScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PinDetailScreen(pin: pin),
+                      builder: (_) => PinDetailScreen(pinId: pin.id),
                     ),
                   );
                 },

@@ -106,7 +106,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
   }
 
   /// コメントを削除
-  Future<void> _deleteComment(String commentId) async {
+  Future<void> _deleteComment(String commentId, String pinId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -127,7 +127,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
 
     if (confirmed == true) {
       final actions = ref.read(pinCommentActionsProvider);
-      final success = await actions.deleteComment(widget.pin.id, commentId);
+      final success = await actions.deleteComment(pinId, commentId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -262,7 +262,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                       const SizedBox(height: WanMapSpacing.xl),
 
                       // みんなのコメントセクション
-                      _buildCommentsSection(commentsAsync, commentCount, currentUser, isDark),
+                      _buildCommentsSection(commentsAsync, commentCount, currentUser, isDark, pin),
                     ],
                   ),
                 ),
@@ -306,6 +306,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
     int commentCount,
     User? currentUser,
     bool isDark,
+    RoutePin pin,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,7 +382,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
               itemBuilder: (context, index) {
                 final comment = comments[index];
                 final isOwnComment = currentUser?.id == comment.userId;
-                final isPinOwner = currentUser?.id == widget.pin.userId;
+                final isPinOwner = currentUser?.id == pin.userId;
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: WanMapSpacing.md),
@@ -430,7 +431,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                                         ),
                                       ),
                                       // ピン投稿者バッジ
-                                      if (comment.userId == widget.pin.userId) ...[
+                                      if (comment.userId == pin.userId) ...[
                                         const SizedBox(width: 4),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
@@ -519,7 +520,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                         IconButton(
                           icon: const Icon(Icons.delete_outline, size: 20),
                           color: Colors.grey[600],
-                          onPressed: () => _deleteComment(comment.commentId),
+                          onPressed: () => _deleteComment(comment.commentId, pin.id),
                         ),
                     ],
                   ),

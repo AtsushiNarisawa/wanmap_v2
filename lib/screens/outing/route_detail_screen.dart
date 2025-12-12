@@ -716,7 +716,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => PinDetailScreen(pin: pin),
+                          builder: (_) => PinDetailScreen(pinId: pin.id),
                         ),
                       );
                     },
