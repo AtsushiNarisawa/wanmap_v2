@@ -81,15 +81,6 @@ class ProfileTab extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-            ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -272,7 +263,7 @@ class ProfileTab extends ConsumerWidget {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => DogEditScreen(dog: dog),
+                          builder: (_) => DogEditScreen(userId: userId, dog: dog),
                         ),
                       );
                       if (result == true) {
@@ -291,7 +282,7 @@ class ProfileTab extends ConsumerWidget {
             onTap: () async {
               final result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const DogEditScreen()),
+                MaterialPageRoute(builder: (_) => DogEditScreen(userId: userId)),
               );
               if (result == true) {
                 ref.read(dogProvider.notifier).loadUserDogs(userId);
@@ -470,7 +461,7 @@ class ProfileTab extends ConsumerWidget {
 
 // 愛犬カードウィジェット
 class _DogCard extends StatelessWidget {
-  final Dog dog;
+  final DogModel dog;
   final bool isDark;
   final VoidCallback onTap;
 
