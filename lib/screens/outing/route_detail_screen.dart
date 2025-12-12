@@ -51,8 +51,12 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         title: const Text('ルート詳細'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-
       ),
+      floatingActionButton: routeAsync.maybeWhen(
+        data: (route) => route != null ? _buildFAB(context, isDark, route) : null,
+        orElse: () => null,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: routeAsync.when(
         data: (route) {
           if (route == null) {
@@ -104,13 +108,13 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                     const SizedBox(height: WanMapSpacing.xl),
                   ],
 
-                  // 散歩を開始ボタン
-                  _buildStartButton(context, isDark, route),
-
-                  const SizedBox(height: WanMapSpacing.xxxl),
+                  const SizedBox(height: WanMapSpacing.xl),
 
                   // ピンセクション
                   _buildPinsSection(context, ref, pinsAsync, isDark),
+                  
+                  // FABの高さ分のスペース確保
+                  const SizedBox(height: 80),
                 ],
               ),
                 ),
@@ -420,14 +424,16 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   }
 
   /// 散歩を開始ボタン（散歩中の場合は「進行中の散歩に戻る」ボタンに変更）
-  Widget _buildStartButton(BuildContext context, bool isDark, OfficialRoute route) {
+  /// Floating Action Button（散歩開始ボタン）
+  Widget _buildFAB(BuildContext context, bool isDark, OfficialRoute route) {
     final gpsState = ref.watch(gpsProviderRiverpod);
     final isRecording = gpsState.isRecording;
     
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
       width: double.infinity,
       height: 56,
-      child: ElevatedButton(
+      child: FloatingActionButton.extended(
         onPressed: () {
           if (isRecording) {
             // 散歩中の場合：進行中の散歩画面へ遷移
@@ -442,33 +448,21 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
             );
           }
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isRecording 
-              ? WanMapColors.secondary  // 散歩中は異なる色
-              : WanMapColors.accent,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 8,
-          shadowColor: (isRecording ? WanMapColors.secondary : WanMapColors.accent).withOpacity(0.4),
+        backgroundColor: isRecording 
+            ? WanMapColors.secondary  // 散歩中は異なる色
+            : WanMapColors.accent,
+        elevation: 8,
+        icon: Icon(
+          isRecording ? Icons.my_location : Icons.directions_walk, 
+          size: 28,
+          color: Colors.white,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isRecording ? Icons.my_location : Icons.directions_walk, 
-              size: 28,
-            ),
-            const SizedBox(width: WanMapSpacing.sm),
-            Text(
-              isRecording ? '進行中の散歩に戻る' : 'このルートを歩く',
-              style: WanMapTypography.bodyLarge.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        label: Text(
+          isRecording ? '進行中の散歩に戻る' : 'このルートを歩く',
+          style: WanMapTypography.bodyLarge.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

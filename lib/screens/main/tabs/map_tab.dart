@@ -153,6 +153,20 @@ class _MapTabState extends ConsumerState<MapTab> {
                     ),
                   ],
                 ),
+                // 現在地ボタン（右下・ズームコントロールの上）
+                Positioned(
+                  right: WanMapSpacing.lg,
+                  bottom: WanMapSpacing.lg + 120, // ズームコントロールの高さ分上に配置
+                  child: FloatingActionButton(
+                    heroTag: 'map_current_location',
+                    mini: true,
+                    backgroundColor: Colors.white,
+                    foregroundColor: WanMapColors.accent,
+                    onPressed: _moveToCurrentLocation,
+                    tooltip: '現在地に移動',
+                    child: const Icon(Icons.my_location, size: 24),
+                  ),
+                ),
                 // ズームコントロール（右下）
                 Positioned(
                   right: WanMapSpacing.lg,

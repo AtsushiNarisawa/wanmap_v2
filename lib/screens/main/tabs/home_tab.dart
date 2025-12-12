@@ -225,7 +225,7 @@ class HomeTab extends ConsumerWidget {
                         ),
                         // 地図
                         SizedBox(
-                          height: 240,
+                          height: 200,
                           width: double.infinity,
                           child: FlutterMap(
                             options: MapOptions(
@@ -265,7 +265,7 @@ class HomeTab extends ConsumerWidget {
                 loading: () => ClipRRect(
                   borderRadius: BorderRadius.circular(WanMapSpacing.md),
                   child: Container(
-                    height: 300,
+                    height: 260,
                     color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
                     child: const Center(child: CircularProgressIndicator()),
                   ),
@@ -273,7 +273,7 @@ class HomeTab extends ConsumerWidget {
                 error: (_, __) => ClipRRect(
                   borderRadius: BorderRadius.circular(WanMapSpacing.md),
                   child: Container(
-                    height: 300,
+                    height: 260,
                     color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
                     child: const Center(child: Text('マップを読み込めませんでした')),
                   ),
@@ -304,7 +304,7 @@ class HomeTab extends ConsumerWidget {
           loading: () => ClipRRect(
             borderRadius: BorderRadius.circular(WanMapSpacing.md),
             child: Container(
-              height: 300,
+              height: 260,
               color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
               child: const Center(child: CircularProgressIndicator()),
             ),
@@ -312,7 +312,7 @@ class HomeTab extends ConsumerWidget {
           error: (_, __) => ClipRRect(
             borderRadius: BorderRadius.circular(WanMapSpacing.md),
             child: Container(
-              height: 300,
+              height: 260,
               color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
               child: const Center(child: Text('マップを読み込めませんでした')),
             ),
