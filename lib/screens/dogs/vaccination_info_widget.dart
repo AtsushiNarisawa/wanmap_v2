@@ -177,39 +177,29 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
       orElse: () => widget.dog,
     );
     
-    return Container(
-      padding: const EdgeInsets.all(WanMapSpacing.md),
-      decoration: BoxDecoration(
-        color: isDark ? WanMapColors.surfaceDark : WanMapColors.surfaceLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? WanMapColors.borderDark : WanMapColors.borderLight,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 狂犬病ワクチン
+        _buildVaccinationCard(
+          title: '狂犬病ワクチン',
+          vaccineType: 'rabies',
+          photoUrl: currentDog.rabiesVaccinePhotoUrl,
+          date: currentDog.rabiesVaccineDate,
+          isDark: isDark,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 狂犬病ワクチン
-          _buildVaccinationCard(
-            title: '狂犬病ワクチン',
-            vaccineType: 'rabies',
-            photoUrl: currentDog.rabiesVaccinePhotoUrl,
-            date: currentDog.rabiesVaccineDate,
-            isDark: isDark,
-          ),
-          
-          const SizedBox(height: WanMapSpacing.md),
-          
-          // 混合ワクチン
-          _buildVaccinationCard(
-            title: '混合ワクチン',
-            vaccineType: 'mixed',
-            photoUrl: currentDog.mixedVaccinePhotoUrl,
-            date: currentDog.mixedVaccineDate,
-            isDark: isDark,
-          ),
-        ],
-      ),
+        
+        const SizedBox(height: WanMapSpacing.lg),
+        
+        // 混合ワクチン
+        _buildVaccinationCard(
+          title: '混合ワクチン',
+          vaccineType: 'mixed',
+          photoUrl: currentDog.mixedVaccinePhotoUrl,
+          date: currentDog.mixedVaccineDate,
+          isDark: isDark,
+        ),
+      ],
     );
   }
 
@@ -220,31 +210,22 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
     required DateTime? date,
     required bool isDark,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(WanMapSpacing.md),
-      decoration: BoxDecoration(
-        color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark ? WanMapColors.borderDark : WanMapColors.borderLight,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: WanMapTypography.titleMedium.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: WanMapTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: WanMapSpacing.md),
-          
-          // 接種証明書の画像と編集ボタン
-          Stack(
-            children: [
-              // 写真（接種日ブロックと同じ幅）
-              GestureDetector(
+        ),
+        const SizedBox(height: WanMapSpacing.sm),
+        
+        // 接種証明書の画像と編集ボタン
+        Stack(
+          children: [
+            // 写真（接種日ブロックと同じ幅）
+            GestureDetector(
                 onTap: photoUrl != null && photoUrl.isNotEmpty 
                     ? () => _showFullScreenImage(photoUrl) 
                     : null,
@@ -268,11 +249,11 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
                           color: Colors.grey[600],
                         )
                       : null,
-                ),
               ),
-              
-              // 写真変更ボタン（右上に配置）
-              Positioned(
+            ),
+            
+            // 写真変更ボタン（右上に配置）
+            Positioned(
                 top: 4,
                 right: 4,
                 child: Container(
@@ -306,67 +287,56 @@ class _VaccinationInfoWidgetState extends ConsumerState<VaccinationInfoWidget> {
                       minWidth: 32,
                       minHeight: 32,
                     ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: WanMapSpacing.md),
+        
+        // 接種日（1行）
+        Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+              const SizedBox(width: WanMapSpacing.xs),
+              Text(
+                '接種日: ',
+                style: WanMapTypography.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  date != null 
+                      ? DateFormat('yyyy年MM月dd日').format(date)
+                      : '未設定',
+                  style: WanMapTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              // 日付変更ボタン（小）
+              InkWell(
+                onTap: () => _updateVaccinationDate(vaccineType, date),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.edit,
+                    size: 18,
+                    color: WanMapColors.primary,
                   ),
                 ),
               ),
             ],
-          ),
-          
-          const SizedBox(height: WanMapSpacing.md),
-          
-          // 接種日（1行）
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: WanMapSpacing.md,
-              vertical: WanMapSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[800] : Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: 16,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-                const SizedBox(width: WanMapSpacing.xs),
-                Text(
-                  '接種日: ',
-                  style: WanMapTypography.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    date != null 
-                        ? DateFormat('yyyy年MM月dd日').format(date)
-                        : '未設定',
-                    style: WanMapTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                // 日付変更ボタン（小）
-                InkWell(
-                  onTap: () => _updateVaccinationDate(vaccineType, date),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: WanMapColors.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
