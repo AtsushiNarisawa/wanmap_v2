@@ -18,7 +18,7 @@ class SpotReviewService {
           .from('spot_reviews')
           .select()
           .eq('spot_id', spotId)
-          .order('created_at', ascending: false);
+          .order('created_at');
 
       if (kDebugMode) {
         print('📝 レビュー取得成功: ${(response as List).length}件');
@@ -46,7 +46,7 @@ class SpotReviewService {
           .from('spot_reviews')
           .select()
           .eq('user_id', userId)
-          .order('created_at', ascending: false);
+          .order('created_at');
 
       if (kDebugMode) {
         print('📝 ユーザーレビュー取得成功: ${(response as List).length}件');
@@ -227,10 +227,10 @@ class SpotReviewService {
 
       final response = await _supabase
           .from('spot_reviews')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id', FetchOptions(count: CountOption.exact))
           .eq('spot_id', spotId);
 
-      final count = response.count ?? 0;
+      final count = (response as PostgrestList).count ?? 0;
 
       if (kDebugMode) {
         print('📊 レビュー数: $count件');
@@ -343,7 +343,7 @@ class SpotReviewService {
         query = query.eq('dog_size_suitable', dogSizeSuitable);
       }
 
-      final response = await query.order('created_at', ascending: false);
+      final response = await query.order('created_at');
 
       if (kDebugMode) {
         print('🔍 フィルタリング結果: ${(response as List).length}件');

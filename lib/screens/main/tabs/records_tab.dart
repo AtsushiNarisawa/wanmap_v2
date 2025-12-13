@@ -4,15 +4,12 @@ import '../../../config/wanmap_colors.dart';
 import '../../../config/wanmap_typography.dart';
 import '../../../config/wanmap_spacing.dart';
 import '../../../models/walk_history.dart';
-import '../../../models/badge.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/badge_provider.dart';
 import '../../../providers/user_statistics_provider.dart';
 import '../../../providers/walk_history_provider.dart';
 import '../../../widgets/shimmer/wanmap_shimmer.dart';
 import '../../history/walk_history_screen.dart';
 import '../../history/outing_walk_detail_screen.dart';
-import '../../badges/badge_list_screen.dart';
 
 /// RecordsTab - 思い出ファースト構成
 /// 
@@ -67,7 +64,6 @@ class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProvid
     }
 
     final statisticsAsync = ref.watch(userStatisticsProvider(userId));
-    final badgeStatsAsync = ref.watch(badgeStatisticsProvider(userId));
 
     return Scaffold(
       backgroundColor: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
@@ -136,7 +132,7 @@ class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProvid
             ),
           ),
 
-          // 下部：バッジ＆統計詳細リンク
+          // 下部：統計詳細リンク
           Container(
             padding: const EdgeInsets.all(WanMapSpacing.md),
             decoration: BoxDecoration(
@@ -149,13 +145,6 @@ class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProvid
             ),
             child: Column(
               children: [
-                // バッジコレクション（簡略版）
-                badgeStatsAsync.when(
-                  data: (badgeStats) => _buildCompactBadges(context, badgeStats, isDark),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-                const SizedBox(height: WanMapSpacing.sm),
                 // 統計詳細リンク
                 OutlinedButton.icon(
                   onPressed: () {
@@ -374,55 +363,7 @@ class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProvid
     );
   }
 
-  /// コンパクトバッジ表示
-  Widget _buildCompactBadges(BuildContext context, BadgeStatistics badgeStats, bool isDark) {
-    final earnedCount = badgeStats.unlockedBadges;
-    final totalCount = badgeStats.totalBadges;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const BadgeListScreen()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(WanMapSpacing.md),
-        decoration: BoxDecoration(
-          color: Colors.amber.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.amber.withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.emoji_events, color: Colors.amber, size: 32),
-            const SizedBox(width: WanMapSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'バッジコレクション',
-                    style: WanMapTypography.bodyMedium.copyWith(
-                      color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '$earnedCount/$totalCount個獲得',
-                    style: WanMapTypography.bodySmall.copyWith(
-                      color: Colors.amber,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.amber),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 /// コンパクト統計項目
