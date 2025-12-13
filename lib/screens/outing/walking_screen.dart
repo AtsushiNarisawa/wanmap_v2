@@ -197,15 +197,6 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
           distanceMeters: distanceMeters,
           durationMinutes: durationMinutes,
         );
-
-        // 4. バッジ解除チェック
-        final badgeService = BadgeService(Supabase.instance.client);
-        final newBadges = await badgeService.checkAndUnlockBadges(userId: userId);
-        if (newBadges.isNotEmpty && mounted) {
-          if (kDebugMode) {
-            print('🏆 新しいバッジを解除しました: ${newBadges.length}個');
-          }
-        }
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
