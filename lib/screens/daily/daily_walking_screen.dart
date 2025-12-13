@@ -14,7 +14,6 @@ import '../../providers/gps_provider_riverpod.dart';
 import '../../services/profile_service.dart';
 import '../../services/walk_save_service.dart';
 import '../../services/photo_service.dart';
-import '../../services/badge_service.dart';
 import '../../widgets/zoom_control_widget.dart';
 
 /// 日常散歩中画面
