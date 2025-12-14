@@ -66,7 +66,7 @@ class _SpotReviewFormScreenState extends ConsumerState<SpotReviewFormScreen> {
       _hasParking = review.hasParking;
       _hasDogWasteBin = review.hasDogWasteBin;
       _leashRequired = review.leashRequired;
-      _hasDogFriendlyCafe = review.hasDogFriendlyCafe;
+      _hasDogFriendlyCafe = review.dogFriendlyCafe;
       _dogSizeSuitable = review.dogSizeSuitable ?? 'all';
       _seasonalInfoController.text = review.seasonalInfo ?? '';
       _photoUrls = review.photoUrls;
@@ -121,12 +121,12 @@ class _SpotReviewFormScreenState extends ConsumerState<SpotReviewFormScreen> {
       if (widget.existingReview != null) {
         // 更新
         await ref
-            .read(spotReviewNotifierProvider.notifier)
+            .read(spotReviewProvider.notifier)
             .updateReview(widget.existingReview!.id, reviewData);
       } else {
         // 新規作成
         await ref
-            .read(spotReviewNotifierProvider.notifier)
+            .read(spotReviewProvider.notifier)
             .createReview(reviewData);
       }
 
