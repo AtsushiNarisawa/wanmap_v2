@@ -96,38 +96,61 @@ class _SpotReviewFormScreenState extends ConsumerState<SpotReviewFormScreen> {
         throw Exception('ログインが必要です');
       }
 
-      final reviewData = {
-        'user_id': userId,
-        'spot_id': widget.spotId,
-        'rating': _rating,
-        'review_text': _reviewTextController.text.trim().isEmpty
-            ? null
-            : _reviewTextController.text.trim(),
-        'has_water_fountain': _hasWaterFountain,
-        'has_dog_run': _hasDogRun,
-        'has_shade': _hasShade,
-        'has_toilet': _hasToilet,
-        'has_parking': _hasParking,
-        'has_dog_waste_bin': _hasDogWasteBin,
-        'leash_required': _leashRequired,
-        'has_dog_friendly_cafe': _hasDogFriendlyCafe,
-        'dog_size_suitable': _dogSizeSuitable,
-        'seasonal_info': _seasonalInfoController.text.trim().isEmpty
-            ? null
-            : _seasonalInfoController.text.trim(),
-        'photo_urls': _photoUrls,
-      };
-
       if (widget.existingReview != null) {
         // 更新
-        await ref
-            .read(spotReviewProvider.notifier)
-            .updateReview(widget.existingReview!.id, reviewData);
+        final updates = {
+          'rating': _rating,
+          'review_text': _reviewTextController.text.trim().isEmpty
+              ? null
+              : _reviewTextController.text.trim(),
+          'has_water_fountain': _hasWaterFountain,
+          'has_dog_run': _hasDogRun,
+          'has_shade': _hasShade,
+          'has_toilet': _hasToilet,
+          'has_parking': _hasParking,
+          'has_dog_waste_bin': _hasDogWasteBin,
+          'leash_required': _leashRequired,
+          'dog_friendly_cafe': _hasDogFriendlyCafe,
+          'dog_size_suitable': _dogSizeSuitable,
+          'seasonal_info': _seasonalInfoController.text.trim().isEmpty
+              ? null
+              : _seasonalInfoController.text.trim(),
+          'photo_urls': _photoUrls,
+        };
+
+        await ref.read(spotReviewProvider.notifier).updateReview(
+              reviewId: widget.existingReview!.id,
+              spotId: widget.spotId,
+              updates: updates,
+            );
       } else {
         // 新規作成
-        await ref
-            .read(spotReviewProvider.notifier)
-            .createReview(reviewData);
+        final newReview = SpotReviewModel(
+          id: '', // IDはSupabaseが自動生成
+          userId: userId,
+          spotId: widget.spotId,
+          rating: _rating,
+          reviewText: _reviewTextController.text.trim().isEmpty
+              ? null
+              : _reviewTextController.text.trim(),
+          hasWaterFountain: _hasWaterFountain,
+          hasDogRun: _hasDogRun,
+          hasShade: _hasShade,
+          hasToilet: _hasToilet,
+          hasParking: _hasParking,
+          hasDogWasteBin: _hasDogWasteBin,
+          leashRequired: _leashRequired,
+          dogFriendlyCafe: _hasDogFriendlyCafe,
+          dogSizeSuitable: _dogSizeSuitable,
+          seasonalInfo: _seasonalInfoController.text.trim().isEmpty
+              ? null
+              : _seasonalInfoController.text.trim(),
+          photoUrls: _photoUrls,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        await ref.read(spotReviewProvider.notifier).createReview(newReview);
       }
 
       if (mounted) {
