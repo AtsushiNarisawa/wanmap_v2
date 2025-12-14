@@ -18,7 +18,7 @@ class SpotReviewService {
           .from('spot_reviews')
           .select()
           .eq('spot_id', spotId)
-          .order('created_at');
+          .order('created_at', ascending: false);
 
       if (kDebugMode) {
         print('📝 レビュー取得成功: ${(response as List).length}件');
@@ -46,7 +46,7 @@ class SpotReviewService {
           .from('spot_reviews')
           .select()
           .eq('user_id', userId)
-          .order('created_at');
+          .order('created_at', ascending: false);
 
       if (kDebugMode) {
         print('📝 ユーザーレビュー取得成功: ${(response as List).length}件');
@@ -227,10 +227,11 @@ class SpotReviewService {
 
       final response = await _supabase
           .from('spot_reviews')
-          .select('id', FetchOptions(count: CountOption.exact))
-          .eq('spot_id', spotId);
+          .select('id')
+          .eq('spot_id', spotId)
+          .count();
 
-      final count = (response as PostgrestList).count ?? 0;
+      final count = response.count;
 
       if (kDebugMode) {
         print('📊 レビュー数: $count件');
