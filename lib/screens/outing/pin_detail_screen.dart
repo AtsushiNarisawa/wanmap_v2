@@ -10,6 +10,7 @@ import '../../models/spot_review_model.dart';
 import '../../providers/pin_comment_provider.dart';
 import '../../providers/route_pin_provider.dart';
 import '../../providers/spot_review_provider.dart';
+import 'spot_review_form_screen.dart';
 
 /// ピン詳細画面
 /// ユーザーが投稿したピンの詳細情報を表示
@@ -264,7 +265,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                       const SizedBox(height: WanMapSpacing.xl),
 
                       // スポット評価・レビューセクション
-                      _buildReviewsSection(pin.id, isDark),
+                      _buildReviewsSection(pin.id, pin.title, isDark),
 
                       const SizedBox(height: WanMapSpacing.xl),
 
@@ -859,7 +860,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
   }
 
   /// スポット評価・レビューセクション
-  Widget _buildReviewsSection(String spotId, bool isDark) {
+  Widget _buildReviewsSection(String spotId, String spotTitle, bool isDark) {
     // 平均評価を取得
     final averageRatingAsync = ref.watch(spotAverageRatingProvider(spotId));
     // レビュー数を取得
@@ -975,6 +976,36 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: WanMapSpacing.md),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SpotReviewFormScreen(
+                                spotId: spotId,
+                                spotTitle: spotTitle,
+                              ),
+                            ),
+                          );
+                          // レビュー投稿成功時はプロバイダーをリフレッシュ
+                          if (result == true) {
+                            ref.invalidate(spotReviewsProvider(spotId));
+                            ref.invalidate(spotAverageRatingProvider(spotId));
+                            ref.invalidate(spotReviewCountProvider(spotId));
+                          }
+                        },
+                        icon: const Icon(Icons.edit_note),
+                        label: const Text('レビューを書く'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: WanMapColors.accent,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: WanMapSpacing.lg,
+                            vertical: WanMapSpacing.md,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -983,10 +1014,45 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
 
             // レビューカードを表示（最大3件）
             return Column(
-              children: reviews
-                  .take(3)
-                  .map((review) => _buildReviewCard(review, isDark))
-                  .toList(),
+              children: [
+                ...reviews
+                    .take(3)
+                    .map((review) => _buildReviewCard(review, isDark))
+                    .toList(),
+                
+                const SizedBox(height: WanMapSpacing.md),
+                
+                // レビューを書くボタン
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final result = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SpotReviewFormScreen(
+                            spotId: spotId,
+                            spotTitle: spotTitle,
+                          ),
+                        ),
+                      );
+                      // レビュー投稿成功時はプロバイダーをリフレッシュ
+                      if (result == true) {
+                        ref.invalidate(spotReviewsProvider(spotId));
+                        ref.invalidate(spotAverageRatingProvider(spotId));
+                        ref.invalidate(spotReviewCountProvider(spotId));
+                      }
+                    },
+                    icon: const Icon(Icons.edit_note),
+                    label: const Text('レビューを書く'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: WanMapColors.accent,
+                      side: BorderSide(color: WanMapColors.accent),
+                      padding: const EdgeInsets.symmetric(vertical: WanMapSpacing.md),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
