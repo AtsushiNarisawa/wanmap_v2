@@ -861,12 +861,20 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
 
   /// スポット評価・レビューセクション
   Widget _buildReviewsSection(String spotId, String spotTitle, bool isDark) {
+    // 現在のユーザーIDを取得
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    final userId = currentUser?.id;
+    
     // 平均評価を取得
     final averageRatingAsync = ref.watch(spotAverageRatingProvider(spotId));
     // レビュー数を取得
     final reviewCountAsync = ref.watch(spotReviewCountProvider(spotId));
     // レビュー一覧を取得
     final reviewsAsync = ref.watch(spotReviewsProvider(spotId));
+    // ユーザーの既存レビューを取得
+    final userReviewAsync = userId != null
+        ? ref.watch(userSpotReviewProvider((userId: userId, spotId: spotId)))
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -979,12 +987,20 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                       const SizedBox(height: WanMapSpacing.md),
                       ElevatedButton.icon(
                         onPressed: () async {
+                          // ユーザーの既存レビューを取得
+                          final existingReview = userReviewAsync != null
+                              ? await userReviewAsync.future
+                              : null;
+                          
+                          if (!context.mounted) return;
+                          
                           final result = await Navigator.push<bool>(
                             context,
                             MaterialPageRoute(
                               builder: (context) => SpotReviewFormScreen(
                                 spotId: spotId,
                                 spotTitle: spotTitle,
+                                existingReview: existingReview,
                               ),
                             ),
                           );
@@ -993,10 +1009,17 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                             ref.invalidate(spotReviewsProvider(spotId));
                             ref.invalidate(spotAverageRatingProvider(spotId));
                             ref.invalidate(spotReviewCountProvider(spotId));
+                            if (userId != null) {
+                              ref.invalidate(userSpotReviewProvider((userId: userId, spotId: spotId)));
+                            }
                           }
                         },
-                        icon: const Icon(Icons.edit_note),
-                        label: const Text('レビューを書く'),
+                        icon: Icon(userReviewAsync != null 
+                            ? Icons.edit 
+                            : Icons.edit_note),
+                        label: Text(userReviewAsync != null 
+                            ? 'レビューを編集' 
+                            : 'レビューを書く'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: WanMapColors.accent,
                           foregroundColor: Colors.white,
@@ -1027,12 +1050,20 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () async {
+                      // ユーザーの既存レビューを取得
+                      final existingReview = userReviewAsync != null
+                          ? await userReviewAsync.future
+                          : null;
+                      
+                      if (!context.mounted) return;
+                      
                       final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SpotReviewFormScreen(
                             spotId: spotId,
                             spotTitle: spotTitle,
+                            existingReview: existingReview,
                           ),
                         ),
                       );
@@ -1041,10 +1072,17 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
                         ref.invalidate(spotReviewsProvider(spotId));
                         ref.invalidate(spotAverageRatingProvider(spotId));
                         ref.invalidate(spotReviewCountProvider(spotId));
+                        if (userId != null) {
+                          ref.invalidate(userSpotReviewProvider((userId: userId, spotId: spotId)));
+                        }
                       }
                     },
-                    icon: const Icon(Icons.edit_note),
-                    label: const Text('レビューを書く'),
+                    icon: Icon(userReviewAsync != null 
+                        ? Icons.edit 
+                        : Icons.edit_note),
+                    label: Text(userReviewAsync != null 
+                        ? 'レビューを編集' 
+                        : 'レビューを書く'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: WanMapColors.accent,
                       side: BorderSide(color: WanMapColors.accent),
