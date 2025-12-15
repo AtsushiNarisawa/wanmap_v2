@@ -1100,134 +1100,134 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: WanMapSpacing.sm),
-                  // アクションボタンと相対時間を2行に分ける
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 1行目: アクションボタン
-                      Row(
+                      // アクションボタンと相対時間を2行に分ける
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // いいねボタン（タップ領域48x48）
-                          InkWell(
-                        onTap: () async {
-                          final success = await likeActions.toggleLike(widget.pin.pinId);
-                          if (!success && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('いいねの更新に失敗しました')),
-                            );
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            minWidth: 48,
-                            minHeight: 48,
-                          ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          // 1行目: アクションボタン
+                          Row(
                             children: [
-                              Icon(
-                                isLiked ? Icons.favorite : Icons.favorite_border,
-                                size: 20,
-                                color: isLiked ? Colors.red : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
+                              // いいねボタン（タップ領域48x48）
+                              InkWell(
+                                onTap: () async {
+                                  final success = await likeActions.toggleLike(widget.pin.pinId);
+                                  if (!success && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('いいねの更新に失敗しました')),
+                                    );
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isLiked ? Icons.favorite : Icons.favorite_border,
+                                        size: 20,
+                                        color: isLiked ? Colors.red : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '$likeCount',
+                                        style: WanMapTypography.bodySmall.copyWith(
+                                          color: widget.isDark
+                                              ? WanMapColors.textSecondaryDark
+                                              : WanMapColors.textSecondaryLight,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$likeCount',
-                                style: WanMapTypography.bodySmall.copyWith(
-                                  color: widget.isDark
-                                      ? WanMapColors.textSecondaryDark
-                                      : WanMapColors.textSecondaryLight,
+                              const SizedBox(width: WanMapSpacing.sm),
+                              // コメントボタン（タップ領域48x48）
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => PinCommentScreen(
+                                        pinId: widget.pin.pinId,
+                                        pinTitle: widget.pin.title,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.chat_bubble_outline,
+                                        size: 20,
+                                        color: widget.isDark ? Colors.grey[400] : Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '$commentCount',
+                                        style: WanMapTypography.bodySmall.copyWith(
+                                          color: widget.isDark
+                                              ? WanMapColors.textSecondaryDark
+                                              : WanMapColors.textSecondaryLight,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: WanMapSpacing.sm),
+                              // ブックマークボタン（タップ領域48x48）
+                              InkWell(
+                                onTap: () async {
+                                  final success = await bookmarkActions.toggleBookmark(widget.pin.pinId);
+                                  if (!success && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('ブックマークの更新に失敗しました')),
+                                    );
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                                    size: 20,
+                                    color: isBookmarked 
+                                        ? WanMapColors.accent 
+                                        : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: WanMapSpacing.sm),
-                      // コメントボタン（タップ領域48x48）
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PinCommentScreen(
-                                pinId: widget.pin.pinId,
-                                pinTitle: widget.pin.title,
-                              ),
+                          // 2行目: 相対時間
+                          const SizedBox(height: WanMapSpacing.xs),
+                          Text(
+                            _formatTimeAgo(widget.pin.createdAt),
+                            style: WanMapTypography.bodySmall.copyWith(
+                              color: widget.isDark
+                                  ? WanMapColors.textSecondaryDark
+                                  : WanMapColors.textSecondaryLight,
                             ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            minWidth: 48,
-                            minHeight: 48,
                           ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.chat_bubble_outline,
-                                size: 20,
-                                color: widget.isDark ? Colors.grey[400] : Colors.grey[600],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$commentCount',
-                                style: WanMapTypography.bodySmall.copyWith(
-                                  color: widget.isDark
-                                      ? WanMapColors.textSecondaryDark
-                                      : WanMapColors.textSecondaryLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: WanMapSpacing.sm),
-                      // ブックマークボタン（タップ領域48x48）
-                      InkWell(
-                        onTap: () async {
-                          final success = await bookmarkActions.toggleBookmark(widget.pin.pinId);
-                          if (!success && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('ブックマークの更新に失敗しました')),
-                            );
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            minWidth: 48,
-                            minHeight: 48,
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                            size: 20,
-                            color: isBookmarked 
-                                ? WanMapColors.accent 
-                                : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                      // 2行目: 相対時間
-                      const SizedBox(height: WanMapSpacing.xs),
-                      Text(
-                        _formatTimeAgo(widget.pin.createdAt),
-                        style: WanMapTypography.bodySmall.copyWith(
-                          color: widget.isDark
-                              ? WanMapColors.textSecondaryDark
-                              : WanMapColors.textSecondaryLight,
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
