@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../config/theme/wanmap_colors.dart';
-import '../../../config/theme/wanmap_spacing.dart';
-import '../../../config/theme/wanmap_typography.dart';
+import '../../../config/wanmap_colors.dart';
+import '../../../config/wanmap_spacing.dart';
+import '../../../config/wanmap_typography.dart';
 
 /// 散歩タイプ選択ボトムシート
 /// 

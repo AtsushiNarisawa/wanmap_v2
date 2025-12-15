@@ -353,11 +353,22 @@ class _MapTabState extends ConsumerState<MapTab> {
               break;
             case 'pin_only':
               // ピン投稿のみ: ピン作成画面へ
+              // 現在地を取得
+              final gpsState = ref.read(gpsProviderRiverpod);
+              if (gpsState.currentLocation == null) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('現在地を取得中です。しばらくお待ちください。')),
+                  );
+                }
+                return;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const PinCreateScreen(
-                    routeId: null, // 公式コースに紐づかない
+                  builder: (context) => PinCreateScreen(
+                    routeId: '', // 公式コースに紐づかない（空文字列）
+                    location: gpsState.currentLocation!,
                   ),
                 ),
               );
