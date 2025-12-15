@@ -25,15 +25,20 @@ class WalkTypeBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: const EdgeInsets.all(WanMapSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return SafeArea(
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        decoration: BoxDecoration(
+          color: isDark ? WanMapColors.backgroundDark : WanMapColors.backgroundLight,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(WanMapSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
           // ドラッグハンドル
           Container(
             width: 40,
@@ -103,7 +108,9 @@ class WalkTypeBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: WanMapSpacing.sm),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
