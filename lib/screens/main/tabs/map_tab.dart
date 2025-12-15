@@ -15,7 +15,9 @@ import '../../../models/official_route.dart';
 import '../../../widgets/zoom_control_widget.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
+import '../../outing/pin_create_screen.dart';
 import '../../daily/daily_walking_screen.dart';
+import './walk_type_bottom_sheet.dart';
 
 /// MapTab - おでかけ散歩の中心（公式ルート、エリア、ピン）
 /// 
@@ -320,6 +322,52 @@ class _MapTabState extends ConsumerState<MapTab> {
             ),
           ),
         ],
+      ),
+      // 散歩開始FAB
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'map_start_walk',
+        onPressed: () async {
+          // 散歩タイプ選択ボトムシートを表示
+          final result = await WalkTypeBottomSheet.show(context);
+          if (result == null || !context.mounted) return;
+
+          // 選択されたタイプに応じて画面遷移
+          switch (result) {
+            case 'outing':
+              // お出かけ散歩: エリア一覧画面へ
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AreaListScreen(),
+                ),
+              );
+              break;
+            case 'daily':
+              // 日常散歩: 日常散歩画面へ
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DailyWalkingScreen(),
+                ),
+              );
+              break;
+            case 'pin_only':
+              // ピン投稿のみ: ピン作成画面へ
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PinCreateScreen(
+                    routeId: null, // 公式コースに紐づかない
+                  ),
+                ),
+              );
+              break;
+          }
+        },
+        backgroundColor: WanMapColors.accent,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.directions_walk),
+        label: const Text('散歩を始める'),
       ),
     );
   }
