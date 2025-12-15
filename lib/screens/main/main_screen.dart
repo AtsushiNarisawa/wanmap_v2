@@ -5,7 +5,7 @@ import '../../config/wanmap_typography.dart';
 import '../../widgets/active_walk_banner.dart';
 import 'tabs/home_tab.dart';
 import 'tabs/map_tab.dart';
-import 'tabs/records_tab.dart';
+import 'tabs/library_tab.dart';
 import 'tabs/profile_tab.dart';
 
 /// MainScreen - 新UI（BottomNavigationBar採用）
@@ -33,7 +33,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   static const List<Widget> _pages = [
     HomeTab(),
     MapTab(),
-    RecordsTab(),
+    LibraryTab(),
     ProfileTab(),
   ];
 
@@ -92,8 +92,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             label: 'マップ',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.collections_outlined, size: 28),
-            activeIcon: Icon(Icons.collections, size: 28),
+            icon: Icon(Icons.history, size: 28),
+            activeIcon: Icon(Icons.history, size: 28),
             label: 'ライブラリ',
           ),
           BottomNavigationBarItem(

@@ -11,23 +11,23 @@ import '../../../widgets/shimmer/wanmap_shimmer.dart';
 import '../../history/walk_history_screen.dart';
 import '../../history/outing_walk_detail_screen.dart';
 
-/// RecordsTab - 思い出ファースト構成
+/// LibraryTab - 思い出と履歴の振り返り
 /// 
 /// 構成:
 /// 1. コンパクトヘッダー（レベル、総距離、エリア数）
 /// 2. 今週の統計（1行）
 /// 3. タブ切り替え（全て/お出かけ/日常）
 /// 4. 最近の散歩リスト
-/// 5. バッジコレクション（簡略版）
+/// 5. ピン投稿履歴（予定）
 /// 6. 統計詳細リンク
-class RecordsTab extends ConsumerStatefulWidget {
-  const RecordsTab({super.key});
+class LibraryTab extends ConsumerStatefulWidget {
+  const LibraryTab({super.key});
 
   @override
-  ConsumerState<RecordsTab> createState() => _RecordsTabState();
+  ConsumerState<LibraryTab> createState() => _LibraryTabState();
 }
 
-class _RecordsTabState extends ConsumerState<RecordsTab> with SingleTickerProviderStateMixin {
+class _LibraryTabState extends ConsumerState<LibraryTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
