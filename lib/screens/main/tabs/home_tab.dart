@@ -1213,7 +1213,216 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                 : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
                           ),
                         ),
-                          ),
+                      ),
+                    ],
+                  ),
+                      // 2行目: 相対時間
+                      const SizedBox(height: WanMapSpacing.xs),
+                      Text(
+                        _formatTimeAgo(widget.pin.createdAt),
+                        style: WanMapTypography.bodySmall.copyWith(
+                          color: widget.isDark
+                              ? WanMapColors.textSecondaryDark
+                              : WanMapColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultImage() {
+    return Container(
+      color: widget.isDark ? Colors.grey[800] : Colors.grey[300],
+      child: Icon(
+        Icons.image_not_supported,
+        size: 40,
+        color: widget.isDark ? Colors.grey[600] : Colors.grey[400],
+      ),
+    );
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()}年前';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()}ヶ月前';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}日前';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}時間前';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}分前';
+    } else {
+      return 'たった今';
+    }
+  }
+}
+
+/// 人気ルートカード
+class _PopularRouteCard extends StatelessWidget {
+  final String routeId;
+  final String title;
+  final String description;
+  final String area;
+  final String prefecture;
+  final double distance;
+  final int duration;
+  final int totalWalks;
+  final String? thumbnailUrl;
+  final bool isDark;
+
+  const _PopularRouteCard({
+    required this.routeId,
+    required this.title,
+    required this.description,
+    required this.area,
+    required this.prefecture,
+    required this.distance,
+    required this.duration,
+    required this.totalWalks,
+    this.thumbnailUrl,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (kDebugMode) {
+          print('🗺️ Route tapped: $title (routeId: $routeId) → Navigate to RouteDetailScreen');
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RouteDetailScreen(routeId: routeId),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(WanMapSpacing.md),
+        decoration: BoxDecoration(
+          color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // サムネイル画像
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 80,
+                height: 80,
+                color: isDark ? Colors.grey[800] : Colors.grey[300],
+                child: thumbnailUrl != null && thumbnailUrl!.isNotEmpty
+                    ? Image.network(
+                        thumbnailUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.route,
+                          size: 40,
+                          color: WanMapColors.accent,
+                        ),
+                      )
+                    : Icon(
+                        Icons.route,
+                        size: 40,
+                        color: WanMapColors.accent,
+                      ),
+              ),
+            ),
+            const SizedBox(width: WanMapSpacing.md),
+            
+            // ルート情報
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // タイトル
+                  Text(
+                    title,
+                    style: WanMapTypography.titleMedium.copyWith(
+                      color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // エリア・県
+                  Text(
+                    '$area・$prefecture',
+                    style: WanMapTypography.bodySmall.copyWith(
+                      color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  // 距離・所要時間・今月の散歩数
+                  Row(
+                    children: [
+                      Icon(Icons.straighten, size: 14, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${(distance / 1000).toStringAsFixed(1)}km',
+                        style: WanMapTypography.bodySmall.copyWith(
+                          color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Icon(Icons.schedule, size: 14, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${duration}分',
+                        style: WanMapTypography.bodySmall.copyWith(
+                          color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Icon(Icons.pets, size: 14, color: WanMapColors.accent),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$totalWalks回',
+                        style: WanMapTypography.bodySmall.copyWith(
+                          color: WanMapColors.accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            // 矢印アイコン
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// 特集エリアカード（箱根専用・大きく表示）
 class _FeaturedAreaCard extends StatelessWidget {
