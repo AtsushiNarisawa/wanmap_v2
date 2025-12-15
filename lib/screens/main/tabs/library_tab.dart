@@ -73,27 +73,15 @@ class _LibraryTabState extends ConsumerState<LibraryTab> with SingleTickerProvid
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.collections, color: WanMapColors.accent, size: 28),
-                const SizedBox(width: 8),
-                Text(
-                  'ライブラリ',
-                  style: WanMapTypography.headlineMedium.copyWith(
-                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 2),
+            const Icon(Icons.collections, color: WanMapColors.accent, size: 28),
+            const SizedBox(width: 8),
             Text(
-              '愛犬との思い出を振り返る',
-              style: WanMapTypography.caption.copyWith(
-                color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+              'ライブラリ',
+              style: WanMapTypography.headlineMedium.copyWith(
+                color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -116,15 +104,16 @@ class _LibraryTabState extends ConsumerState<LibraryTab> with SingleTickerProvid
               labelColor: WanMapColors.accent,
               unselectedLabelColor: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
               indicatorColor: WanMapColors.accent,
-              labelStyle: WanMapTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-              unselectedLabelStyle: WanMapTypography.bodyMedium,
-              isScrollable: true,
+              labelStyle: WanMapTypography.bodySmall.copyWith(fontWeight: FontWeight.bold),
+              unselectedLabelStyle: WanMapTypography.bodySmall,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+              isScrollable: false,
               tabs: const [
-                Tab(icon: Icon(Icons.timelapse, size: 20), text: 'タイムライン'),
-                Tab(icon: Icon(Icons.photo_library, size: 20), text: 'アルバム'),
-                Tab(icon: Icon(Icons.explore, size: 20), text: 'お出かけ'),
-                Tab(icon: Icon(Icons.directions_walk, size: 20), text: '日常'),
-                Tab(icon: Icon(Icons.push_pin, size: 20), text: 'ピン投稿'),
+                Tab(icon: Icon(Icons.timelapse, size: 18), text: 'すべて'),
+                Tab(icon: Icon(Icons.photo_library, size: 18), text: 'アルバム'),
+                Tab(icon: Icon(Icons.explore, size: 18), text: 'お出かけ'),
+                Tab(icon: Icon(Icons.directions_walk, size: 18), text: '日常'),
+                Tab(icon: Icon(Icons.push_pin, size: 18), text: 'ピン'),
               ],
             ),
           ),
