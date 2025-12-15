@@ -180,79 +180,6 @@ class _MapTabState extends ConsumerState<MapTab> {
           Expanded(
             child: Column(
               children: [
-                // ボタングループ（カード上部に配置）
-                Container(
-                  padding: EdgeInsets.all(WanMapSpacing.md),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // お散歩ボタン（日常散歩）
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const DailyWalkingScreen()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: WanMapColors.accent,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              vertical: WanMapSpacing.md,
-                              horizontal: WanMapSpacing.sm,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(WanMapSpacing.md),
-                            ),
-                            elevation: 4,
-                          ),
-                          icon: const Icon(Icons.pets, size: 24),
-                          label: Text(
-                            'お散歩',
-                            style: WanMapTypography.bodyLarge.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(width: WanMapSpacing.md),
-                      
-                      // お出かけ散歩ボタン（既存）
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const AreaListScreen()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: WanMapColors.accent,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              vertical: WanMapSpacing.md,
-                              horizontal: WanMapSpacing.sm,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(WanMapSpacing.md),
-                            ),
-                            elevation: 4,
-                          ),
-                          icon: const Icon(Icons.explore, size: 24),
-                          label: Text(
-                            'おでかけ散歩',
-                            style: WanMapTypography.bodyLarge.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
                 // おすすめルートカード領域
                 Expanded(
                   child: Consumer(
@@ -324,6 +251,7 @@ class _MapTabState extends ConsumerState<MapTab> {
         ],
       ),
       // 散歩開始FAB
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'map_start_walk',
         onPressed: () async {
