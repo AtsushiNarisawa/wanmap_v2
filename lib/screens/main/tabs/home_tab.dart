@@ -14,6 +14,7 @@ import '../../../providers/recent_pins_provider.dart';
 import '../../../providers/pin_like_provider.dart';
 import '../../../providers/pin_bookmark_provider.dart';
 import '../../../providers/pin_comment_provider.dart';
+import '../../../providers/spot_review_provider.dart';
 import '../../../models/recent_pin_post.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
@@ -25,13 +26,13 @@ import '../../outing/route_list_screen.dart';
 import '../../../models/area.dart';
 import '../../../widgets/shimmer/wanmap_shimmer.dart';
 
-/// HomeTab - ビジュアル重視のホーム画面
+/// HomeTab - 発見・閲覧のホーム画面
 /// 
 /// 構成:
-/// 1. MAP表示（200px、最新ピン投稿中心）
-/// 2. 最新の写真付きピン投稿（横2枚）
-/// 3. 今月の人気ルート
-/// 4. おすすめエリア（3枚 + 一覧を見るボタン）
+/// 1. おすすめエリア（3枚 + 一覧を見るボタン）
+/// 2. 今月の人気コース
+/// 3. 最新のピン投稿（横2枚）
+/// 4. 高評価スポット（評価4以上）
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
 
@@ -94,23 +95,23 @@ class HomeTab extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. MAP表示（200px）
-            _buildMapPreview(context, isDark),
+            // 1. おすすめエリア（3枚 + 一覧ボタン）
+            _buildRecommendedAreas(context, isDark, areasAsync),
             
-            const SizedBox(height: WanMapSpacing.lg),
+            const SizedBox(height: WanMapSpacing.xl),
             
-            // 2. 今月の人気ルート
+            // 2. 今月の人気コース
             _buildPopularRoutes(context, isDark),
             
             const SizedBox(height: WanMapSpacing.xl),
             
-            // 3. 最新の写真付きピン投稿（横2枚）
+            // 3. 最新のピン投稿（横2枚）
             _buildRecentPinPosts(context, isDark),
             
-            const SizedBox(height: WanMapSpacing.xxxl),
+            const SizedBox(height: WanMapSpacing.xl),
             
-            // 4. おすすめエリア（3枚 + 一覧ボタン）
-            _buildRecommendedAreas(context, isDark, areasAsync),
+            // 4. 高評価スポット
+            _buildTopRatedSpots(context, isDark),
             
             const SizedBox(height: WanMapSpacing.xxxl),
           ],
@@ -325,19 +326,52 @@ class HomeTab extends ConsumerWidget {
       builder: (context, ref, child) {
         final recentPinsAsync = ref.watch(recentPinsProvider);
         
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '最新の写真付きピン投稿',
-                style: WanMapTypography.headlineSmall.copyWith(
-                  color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                  fontWeight: FontWeight.bold,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // セクションヘッダー
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.push_pin_rounded,
+                      color: Colors.green,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: WanMapSpacing.sm),
+                  Text(
+                    '最新のピン投稿',
+                    style: WanMapTypography.headlineMedium.copyWith(
+                      color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: WanMapSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Text(
+                'みんなが見つけた素敵なスポット',
+                style: WanMapTypography.bodyMedium.copyWith(
+                  color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                 ),
               ),
-              const SizedBox(height: WanMapSpacing.md),
+            ),
+            const SizedBox(height: WanMapSpacing.md),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Column(
+                children: [
               recentPinsAsync.when(
                 data: (pins) {
                   if (pins.isEmpty) {
@@ -359,15 +393,17 @@ class HomeTab extends ConsumerWidget {
                   count: 2,
                   height: 180,
                 ),
-                error: (error, _) {
-                  if (kDebugMode) {
-                    print('❌ 最新ピン投稿読み込みエラー: $error');
-                  }
-                  return _buildEmptyCard(isDark, 'ピン投稿の読み込みに失敗しました');
-                },
+                  error: (error, _) {
+                    if (kDebugMode) {
+                      print('❌ 最新ピン投稿読み込みエラー: $error');
+                    }
+                    return _buildEmptyCard(isDark, 'ピン投稿の読み込みに失敗しました');
+                  },
+                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -376,19 +412,52 @@ class HomeTab extends ConsumerWidget {
   /// おすすめエリア（3枚 + 一覧を見るボタン）
   /// おすすめエリア（箱根大きく + 2枚 + 一覧ボタン）
   Widget _buildRecommendedAreas(BuildContext context, bool isDark, AsyncValue<dynamic> areasAsync) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'おすすめエリア',
-            style: WanMapTypography.headlineSmall.copyWith(
-              color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-              fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // セクションヘッダー
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: WanMapColors.primary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.explore_rounded,
+                  color: WanMapColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: WanMapSpacing.sm),
+              Text(
+                'おすすめエリア',
+                style: WanMapTypography.headlineMedium.copyWith(
+                  color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: WanMapSpacing.sm),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+          child: Text(
+            '愛犬と行きたい人気のお出かけスポット',
+            style: WanMapTypography.bodyMedium.copyWith(
+              color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
             ),
           ),
-          const SizedBox(height: WanMapSpacing.md),
+        ),
+        const SizedBox(height: WanMapSpacing.md),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+          child: Column(
+            children: [
           areasAsync.when(
             data: (areas) {
               if (areas.isEmpty) {
@@ -476,16 +545,18 @@ class HomeTab extends ConsumerWidget {
                 ],
               );
             },
-            loading: () => Column(
-              children: const [
-                AreaCardShimmer(count: 1, isFeatured: true),
-                AreaCardShimmer(count: 2),
-              ],
+              loading: () => Column(
+                children: const [
+                  AreaCardShimmer(count: 1, isFeatured: true),
+                  AreaCardShimmer(count: 2),
+                ],
+              ),
+              error: (error, _) => _buildEmptyCard(isDark, 'エリアの読み込みに失敗しました'),
             ),
-            error: (error, _) => _buildEmptyCard(isDark, 'エリアの読み込みに失敗しました'),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -498,19 +569,52 @@ class HomeTab extends ConsumerWidget {
         // 全ルート数を取得
         final allRoutesAsync = ref.watch(officialRoutesProvider);
         
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '今月の人気ルート',
-                style: WanMapTypography.headlineSmall.copyWith(
-                  color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                  fontWeight: FontWeight.bold,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // セクションヘッダー
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: WanMapColors.accent.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.route_rounded,
+                      color: WanMapColors.accent,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: WanMapSpacing.sm),
+                  Text(
+                    '今月の人気コース',
+                    style: WanMapTypography.headlineMedium.copyWith(
+                      color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: WanMapSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Text(
+                'みんなが歩いている散歩コース',
+                style: WanMapTypography.bodyMedium.copyWith(
+                  color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                 ),
               ),
-              const SizedBox(height: WanMapSpacing.md),
+            ),
+            const SizedBox(height: WanMapSpacing.md),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Column(
+                children: [
               popularRoutesAsync.when(
                 data: (routes) {
                   if (routes.isEmpty) {
@@ -578,16 +682,18 @@ class HomeTab extends ConsumerWidget {
                     ],
                   );
                 },
-                loading: () => const RouteCardShimmer(count: 3),
-                error: (error, _) {
-                  if (kDebugMode) {
-                    print('❌ 人気ルート読み込みエラー: $error');
-                  }
-                  return _buildEmptyCard(isDark, '人気ルートの読み込みに失敗しました');
-                },
+                  loading: () => const RouteCardShimmer(count: 3),
+                  error: (error, _) {
+                    if (kDebugMode) {
+                      print('❌ 人気ルート読み込みエラー: $error');
+                    }
+                    return _buildEmptyCard(isDark, '人気ルートの読み込みに失敗しました');
+                  },
+                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -1175,6 +1281,199 @@ class _FeaturedAreaCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 高評価スポット（評価4以上）
+  Widget _buildTopRatedSpots(BuildContext context, bool isDark) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final topRatedSpotsAsync = ref.watch(topRatedSpotIdsProvider);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // セクションヘッダー
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.star_rounded,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: WanMapSpacing.sm),
+                  Text(
+                    '高評価スポット',
+                    style: WanMapTypography.headlineMedium.copyWith(
+                      color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: WanMapSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+              child: Text(
+                '評価4以上の人気スポット',
+                style: WanMapTypography.bodyMedium.copyWith(
+                  color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                ),
+              ),
+            ),
+            const SizedBox(height: WanMapSpacing.md),
+
+            // スポット一覧
+            topRatedSpotsAsync.when(
+              data: (spotIds) {
+                if (spotIds.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+                    child: _buildEmptyCard(isDark, 'まだ高評価スポットがありません'),
+                  );
+                }
+
+                // 最大3件まで表示
+                final displaySpots = spotIds.take(3).toList();
+
+                return Column(
+                  children: displaySpots.map((spotId) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: WanMapSpacing.lg,
+                        vertical: WanMapSpacing.xs,
+                      ),
+                      child: _buildSpotCard(context, isDark, spotId, ref),
+                    );
+                  }).toList(),
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.all(WanMapSpacing.lg),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, stack) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
+                child: _buildEmptyCard(isDark, 'スポットの読み込みに失敗しました'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// スポットカードを構築
+  Widget _buildSpotCard(BuildContext context, bool isDark, String spotId, WidgetRef ref) {
+    final averageRatingAsync = ref.watch(spotAverageRatingProvider(spotId));
+    final reviewCountAsync = ref.watch(spotReviewCountProvider(spotId));
+
+    return Container(
+      padding: const EdgeInsets.all(WanMapSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // アイコン
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.location_on_rounded,
+              color: Colors.amber,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: WanMapSpacing.md),
+
+          // スポット情報
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'スポット $spotId',
+                  style: WanMapTypography.titleMedium.copyWith(
+                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    // 平均評価
+                    averageRatingAsync.when(
+                      data: (avg) {
+                        if (avg == null) return const SizedBox.shrink();
+                        return Row(
+                          children: [
+                            const Icon(Icons.star, color: Colors.amber, size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              avg.toStringAsFixed(1),
+                              style: WanMapTypography.bodySmall.copyWith(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      loading: () => const SizedBox(width: 50),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(width: WanMapSpacing.sm),
+                    // レビュー数
+                    reviewCountAsync.when(
+                      data: (count) {
+                        return Text(
+                          '($count件)',
+                          style: WanMapTypography.bodySmall.copyWith(
+                            color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                          ),
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // 矢印アイコン
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: isDark ? Colors.grey[600] : Colors.grey[400],
+          ),
+        ],
       ),
     );
   }
