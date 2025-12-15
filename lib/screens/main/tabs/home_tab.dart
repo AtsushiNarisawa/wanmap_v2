@@ -1213,77 +1213,6 @@ class _PopularRouteCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// 特集エリアカード（箱根専用・大きく表示）
-class _FeaturedAreaCard extends StatelessWidget {
-  final dynamic area;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _FeaturedAreaCard({
-    required this.area,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 160,
-        padding: const EdgeInsets.all(WanMapSpacing.xl),
-        decoration: BoxDecoration(
-          color: WanMapColors.accent,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: WanMapColors.accent.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.pets, color: Colors.white, size: 48),
-                const SizedBox(width: WanMapSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        area.name,
-                        style: WanMapTypography.headlineMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 28,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        area.prefecture,
-                        style: WanMapTypography.bodyLarge.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 24),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// 高評価スポット（評価4以上）
   Widget _buildTopRatedSpots(BuildContext context, bool isDark) {
@@ -1477,4 +1406,76 @@ class _FeaturedAreaCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 特集エリアカード（箱根専用・大きく表示）
+class _FeaturedAreaCard extends StatelessWidget {
+  final dynamic area;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _FeaturedAreaCard({
+    required this.area,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 160,
+        padding: const EdgeInsets.all(WanMapSpacing.xl),
+        decoration: BoxDecoration(
+          color: WanMapColors.accent,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: WanMapColors.accent.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.pets, color: Colors.white, size: 48),
+                const SizedBox(width: WanMapSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        area.name,
+                        style: WanMapTypography.headlineMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        area.prefecture,
+                        style: WanMapTypography.bodyLarge.copyWith(
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 24),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }
