@@ -15,6 +15,7 @@ import '../../../providers/pin_like_provider.dart';
 import '../../../providers/pin_bookmark_provider.dart';
 import '../../../providers/pin_comment_provider.dart';
 import '../../../providers/spot_review_provider.dart';
+import '../../../providers/route_pin_provider.dart';
 import '../../../models/recent_pin_post.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
@@ -790,105 +791,136 @@ class HomeTab extends ConsumerWidget {
 
   /// スポットカードを構築
   Widget _buildSpotCard(BuildContext context, bool isDark, String spotId, WidgetRef ref) {
+    final pinAsync = ref.watch(pinByIdProvider(spotId));
     final averageRatingAsync = ref.watch(spotAverageRatingProvider(spotId));
     final reviewCountAsync = ref.watch(spotReviewCountProvider(spotId));
 
-    return Container(
-      padding: const EdgeInsets.all(WanMapSpacing.md),
-      decoration: BoxDecoration(
-        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // アイコン
-          Container(
-            padding: const EdgeInsets.all(12),
+    return pinAsync.when(
+      data: (pin) {
+        if (pin == null) return const SizedBox.shrink();
+        
+        return GestureDetector(
+          onTap: () {
+            if (kDebugMode) {
+              print('📍 Spot tapped: ${pin.title} (spotId: $spotId) → Navigate to PinDetailScreen');
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PinDetailScreen(pinId: spotId),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(WanMapSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.2),
+              color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
               borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.location_on_rounded,
-              color: Colors.amber,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: WanMapSpacing.md),
-
-          // スポット情報
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'スポット $spotId',
-                  style: WanMapTypography.titleMedium.copyWith(
-                    color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    // 平均評価
-                    averageRatingAsync.when(
-                      data: (avg) {
-                        if (avg == null) return const SizedBox.shrink();
-                        return Row(
-                          children: [
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              avg.toStringAsFixed(1),
-                              style: WanMapTypography.bodySmall.copyWith(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                      loading: () => const SizedBox(width: 50),
-                      error: (_, __) => const SizedBox.shrink(),
-                    ),
-                    const SizedBox(width: WanMapSpacing.sm),
-                    // レビュー数
-                    reviewCountAsync.when(
-                      data: (count) {
-                        return Text(
-                          '($count件)',
-                          style: WanMapTypography.bodySmall.copyWith(
-                            color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+              ],
+            ),
+            child: Row(
+              children: [
+                // アイコン
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.location_on_rounded,
+                    color: Colors.amber,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: WanMapSpacing.md),
+
+                // スポット情報
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pin.title,
+                        style: WanMapTypography.titleMedium.copyWith(
+                          color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          // 平均評価
+                          averageRatingAsync.when(
+                            data: (avg) {
+                              if (avg == null) return const SizedBox.shrink();
+                              return Row(
+                                children: [
+                                  const Icon(Icons.star, color: Colors.amber, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    avg.toStringAsFixed(1),
+                                    style: WanMapTypography.bodySmall.copyWith(
+                                      color: Colors.amber,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            loading: () => const SizedBox(width: 50),
+                            error: (_, __) => const SizedBox.shrink(),
                           ),
-                        );
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
-                    ),
-                  ],
+                          const SizedBox(width: WanMapSpacing.sm),
+                          // レビュー数
+                          reviewCountAsync.when(
+                            data: (count) {
+                              return Text(
+                                '($count件)',
+                                style: WanMapTypography.bodySmall.copyWith(
+                                  color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
+                                ),
+                              );
+                            },
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, __) => const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 矢印アイコン
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: isDark ? Colors.grey[600] : Colors.grey[400],
                 ),
               ],
             ),
           ),
-
-          // 矢印アイコン
-          Icon(
-            Icons.arrow_forward_ios,
-            size: 16,
-            color: isDark ? Colors.grey[600] : Colors.grey[400],
-          ),
-        ],
+        );
+      },
+      loading: () => Container(
+        padding: const EdgeInsets.all(WanMapSpacing.md),
+        decoration: BoxDecoration(
+          color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 
