@@ -297,3 +297,70 @@ final isPinLikedProvider = FutureProvider.family<bool, String>(
     }
   },
 );
+
+/// ユーザーが投稿したピン一覧を取得するProvider
+final userPinsProvider = FutureProvider.family<List<RoutePin>, String>(
+  (ref, userId) async {
+    try {
+      // route_pinsテーブルからユーザーのピンを取得
+      final pinsResponse = await _supabase
+          .from('route_pins')
+          .select('id, route_id, user_id, pin_type, title, comment, likes_count, created_at')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      final pins = <RoutePin>[];
+      
+      for (var json in (pinsResponse as List)) {
+        try {
+          // 位置情報を手動で取得（WKB形式を回避）
+          final pinId = json['id'];
+          final locationQuery = await _supabase.rpc(
+            'get_pin_location',
+            params: {'pin_id': pinId}
+          );
+          
+          // locationQueryからlat/lonを取得してjsonに追加
+          if (locationQuery != null && locationQuery is List && locationQuery.isNotEmpty) {
+            final locationData = locationQuery[0];
+            json['pin_lat'] = locationData['latitude'];
+            json['pin_lon'] = locationData['longitude'];
+          }
+          
+          pins.add(RoutePin.fromJson(json));
+        } catch (e) {
+          if (kDebugMode) {
+            print('Failed to parse pin: $e');
+          }
+        }
+      }
+
+      // 各ピンの写真URLを取得
+      for (var pin in pins) {
+        try {
+          final photosResponse = await _supabase
+              .from('route_pin_photos')
+              .select('photo_url')
+              .eq('pin_id', pin.id)
+              .order('display_order', ascending: true);
+
+          final photoUrls = (photosResponse as List)
+              .map((photo) => photo['photo_url'] as String)
+              .toList();
+
+          // ピンに写真URLを設定（copyWithで新しいインスタンスを作成）
+          final index = pins.indexOf(pin);
+          pins[index] = pin.copyWith(photoUrls: photoUrls);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Failed to fetch photos for pin ${pin.id}: $e');
+          }
+        }
+      }
+
+      return pins;
+    } catch (e) {
+      throw Exception('Failed to fetch user pins: $e');
+    }
+  },
+);
