@@ -98,8 +98,8 @@ class HomeTab extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. おすすめエリア（3枚 + 一覧ボタン）
-            _buildRecommendedAreas(context, isDark, areasAsync),
+            // 1. 最新のピン投稿（横2枚）
+            _buildRecentPinPosts(context, isDark),
             
             const SizedBox(height: WanMapSpacing.xl),
             
@@ -108,8 +108,8 @@ class HomeTab extends ConsumerWidget {
             
             const SizedBox(height: WanMapSpacing.xl),
             
-            // 3. 最新のピン投稿（横2枚）
-            _buildRecentPinPosts(context, isDark),
+            // 3. おすすめエリア（3枚 + 一覧ボタン）
+            _buildRecommendedAreas(context, isDark, areasAsync),
             
             const SizedBox(height: WanMapSpacing.xl),
             
