@@ -525,13 +525,16 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
                   ],
                 ),
               ),
-              const Divider(height: 1),
-              // ルートリスト
-              Expanded(
-                child: gpsState.currentLocation == null
-                    ? _buildLoadingState(isDark)
-                    : _buildRoutesList(isDark),
-              ),
+              // 最小化時は Divider とリストを非表示
+              if (_bottomSheetHeight > _minHeight) ...[
+                const Divider(height: 1),
+                // ルートリスト
+                Expanded(
+                  child: gpsState.currentLocation == null
+                      ? _buildLoadingState(isDark)
+                      : _buildRoutesList(isDark),
+                ),
+              ],
             ],
           ),
         ),
