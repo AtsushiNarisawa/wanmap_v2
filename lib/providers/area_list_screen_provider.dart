@@ -103,7 +103,7 @@ List<Map<String, dynamic>> _groupHakoneAreas(List<Map<String, dynamic>> areas) {
       'id': 'hakone_group', // 特殊ID
       'name': '箱根',
       'prefecture': '神奈川県',
-      'description': 'DogHub所在地。5つのエリアから選択できます。',
+      'description': '神奈川県の人気観光地。温泉、美術館、芦ノ湖など多彩なスポットがあります。',
       'route_count': totalRoutes,
       'is_hakone_group': true, // 箱根グループフラグ
       'sub_areas': hakoneAreas, // サブエリア一覧
