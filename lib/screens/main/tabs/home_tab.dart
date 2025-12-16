@@ -980,7 +980,7 @@ class HomeTab extends ConsumerWidget {
       },
       child: Container(
         width: double.infinity,
-        height: 100,
+        height: 120,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -993,56 +993,44 @@ class HomeTab extends ConsumerWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            children: [
-              // 画像を下半分から表示（上の吹き出しを除外）
-              Positioned(
-                left: 0,
-                right: 0,
-                top: -80, // 上部をカット
-                bottom: 0,
-                child: Image.asset(
-                  'assets/images/hakone_banner.jpg',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.bottomCenter,
-                  errorBuilder: (context, error, stackTrace) {
-                    // フォールバック: グラデーション背景
-                    return Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            WanMapColors.primary,
-                            WanMapColors.primary.withOpacity(0.8),
-                          ],
-                        ),
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.map,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '箱根観光デジタルマップ',
-                              style: WanMapTypography.titleMedium.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+          child: Image.asset(
+            'assets/images/hakone_banner_new.jpg',
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              // フォールバック: グラデーション背景
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      WanMapColors.primary,
+                      WanMapColors.primary.withOpacity(0.8),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.map,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '箱根観光デジタルマップ',
+                        style: WanMapTypography.titleMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
