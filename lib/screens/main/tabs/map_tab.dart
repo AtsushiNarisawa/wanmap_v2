@@ -41,8 +41,8 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
   
   // Bottom Sheet制御
   late AnimationController _bottomSheetController;
-  double _bottomSheetHeight = 120.0; // 最小化状態
-  final double _minHeight = 120.0;
+  double _bottomSheetHeight = 110.0; // 最小化状態
+  final double _minHeight = 110.0;
   final double _midHeight = 300.0;
   final double _maxHeight = 500.0;
   
@@ -589,14 +589,12 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
           return _buildEmptyState(isDark);
         }
 
-        // 最初の1件はスキップ（地図上に表示済み）
-        final displayRoutes = nearbyRoutes.skip(1).toList();
-
+        // Bottom Sheetには全ルートを表示（地図上のカードとは別UI）
         return ListView.builder(
           padding: EdgeInsets.all(WanMapSpacing.md),
-          itemCount: displayRoutes.length,
+          itemCount: nearbyRoutes.length,
           itemBuilder: (context, index) {
-            final routeData = displayRoutes[index];
+            final routeData = nearbyRoutes[index];
             final route = routeData['route'] as OfficialRoute;
             final distance = routeData['distance'] as double;
 
