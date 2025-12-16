@@ -1080,60 +1080,119 @@ class _AreaCard extends StatelessWidget {
     required this.onTap,
   });
 
+  Color _getGradientColor(String name) {
+    // エリア名に基づいて色を変える
+    if (name.contains('横浜')) return Colors.blue;
+    if (name.contains('鎌倉')) return Colors.teal;
+    if (name.contains('江ノ島')) return Colors.cyan;
+    if (name.contains('伊豆')) return Colors.orange;
+    if (name.contains('熱海')) return Colors.red;
+    return WanMapColors.primary;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final baseColor = _getGradientColor(name);
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: isHorizontal ? double.infinity : 160,
-        padding: const EdgeInsets.all(WanMapSpacing.lg),
+        height: isHorizontal ? null : 120,
         decoration: BoxDecoration(
-          color: WanMapColors.accent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: WanMapColors.accent.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: isHorizontal
-            ? Row(
-                children: [
-                  const Icon(Icons.location_city, color: Colors.white, size: 40),
-                  const SizedBox(width: WanMapSpacing.md),
-                  Expanded(
-                    child: Text(
-                      name,
-                      style: WanMapTypography.bodyLarge.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // グラデーション背景
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      baseColor,
+                      baseColor.withOpacity(0.7),
+                    ],
                   ),
-                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.location_city, color: Colors.white, size: 40),
-                  const SizedBox(height: WanMapSpacing.sm),
-                  Text(
-                    name,
-                    style: WanMapTypography.bodyLarge.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                ),
               ),
+              // 装飾アイコン
+              Positioned(
+                right: -10,
+                bottom: -10,
+                child: Icon(
+                  Icons.location_city,
+                  size: 60,
+                  color: Colors.white.withOpacity(0.15),
+                ),
+              ),
+              // コンテンツ
+              Padding(
+                padding: const EdgeInsets.all(WanMapSpacing.md),
+                child: isHorizontal
+                    ? Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.location_on, color: Colors.white, size: 28),
+                          ),
+                          const SizedBox(width: WanMapSpacing.md),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: WanMapTypography.bodyLarge.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.location_on, color: Colors.white, size: 32),
+                          ),
+                          const SizedBox(height: WanMapSpacing.sm),
+                          Text(
+                            name,
+                            style: WanMapTypography.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1485,21 +1544,34 @@ class _PopularRouteCard extends StatelessWidget {
               child: Container(
                 width: 80,
                 height: 80,
-                color: isDark ? Colors.grey[800] : Colors.grey[300],
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      WanMapColors.accent.withOpacity(0.8),
+                      WanMapColors.primary.withOpacity(0.8),
+                    ],
+                  ),
+                ),
                 child: thumbnailUrl != null && thumbnailUrl!.isNotEmpty
                     ? Image.network(
                         thumbnailUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.route,
-                          size: 40,
-                          color: WanMapColors.accent,
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Icon(
+                            Icons.route,
+                            size: 40,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
                         ),
                       )
-                    : Icon(
-                        Icons.route,
-                        size: 40,
-                        color: WanMapColors.accent,
+                    : Center(
+                        child: Icon(
+                          Icons.route,
+                          size: 40,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
                       ),
               ),
             ),
@@ -1598,53 +1670,100 @@ class _FeaturedAreaCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 120,
-        padding: const EdgeInsets.all(WanMapSpacing.lg),
+        height: 140,
         decoration: BoxDecoration(
-          color: WanMapColors.accent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: WanMapColors.accent.withOpacity(0.3),
+              color: Colors.black.withOpacity(0.15),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.pets, color: Colors.white, size: 36),
-                const SizedBox(width: WanMapSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        area.name,
-                        style: WanMapTypography.headlineMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        area.prefecture,
-                        style: WanMapTypography.bodyMedium.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // 背景グラデーション（画像の代わり）
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      WanMapColors.accent,
+                      WanMapColors.accent.withOpacity(0.7),
+                      WanMapColors.primary.withOpacity(0.8),
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
-              ],
-            ),
-          ],
+              ),
+              // 装飾パターン
+              Positioned(
+                right: -20,
+                bottom: -20,
+                child: Icon(
+                  Icons.landscape,
+                  size: 100,
+                  color: Colors.white.withOpacity(0.1),
+                ),
+              ),
+              // コンテンツ
+              Padding(
+                padding: const EdgeInsets.all(WanMapSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.pets, color: Colors.white, size: 28),
+                        ),
+                        const SizedBox(width: WanMapSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                area.name,
+                                style: WanMapTypography.headlineMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                area.prefecture,
+                                style: WanMapTypography.bodyMedium.copyWith(
+                                  color: Colors.white.withOpacity(0.95),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
