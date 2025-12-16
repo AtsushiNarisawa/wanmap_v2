@@ -172,8 +172,9 @@ class CreatePinUseCase {
       }
       
       // 1. ピンレコードを作成
+      // routeIdが空文字列の場合はnullを設定（ルートに紐づかないピン）
       final pinResponse = await _supabase.from('route_pins').insert({
-        'route_id': routeId,
+        'route_id': routeId.isEmpty ? null : routeId,
         'user_id': userId,
         'location': 'SRID=4326;POINT($longitude $latitude)',  // PostGIS WKT形式
         'pin_type': pinType.value,
