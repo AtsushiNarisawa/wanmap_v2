@@ -8,6 +8,7 @@ import '../../config/wanmap_spacing.dart';
 import '../../providers/area_provider.dart';
 import '../../providers/area_list_screen_provider.dart';
 import 'route_list_screen.dart';
+import 'hakone_sub_area_screen.dart';
 
 /// エリア一覧画面（検索・フィルタ・ソート対応）
 class AreaListScreen extends ConsumerStatefulWidget {
@@ -93,16 +94,31 @@ class _AreaListScreenState extends ConsumerState<AreaListScreen> {
                           areaData: area,
                           isDark: isDark,
                           onTap: () {
-                            ref.read(selectedAreaIdProvider.notifier).selectArea(area['id']);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RouteListScreen(
-                                  areaId: area['id'],
-                                  areaName: area['name'],
+                            // 箱根グループの場合はサブエリア選択画面へ
+                            final isHakoneGroup = area['is_hakone_group'] as bool? ?? false;
+                            if (isHakoneGroup) {
+                              final subAreas = area['sub_areas'] as List<Map<String, dynamic>>;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HakoneSubAreaScreen(
+                                    subAreas: subAreas,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            } else {
+                              // 通常のエリアはルート一覧へ
+                              ref.read(selectedAreaIdProvider.notifier).selectArea(area['id']);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RouteListScreen(
+                                    areaId: area['id'],
+                                    areaName: area['name'],
+                                  ),
+                                ),
+                              );
+                            }
                           },
                         ),
                       );

@@ -46,6 +46,7 @@ final prefecturesProvider = FutureProvider<List<String>>((ref) async {
 });
 
 /// エリア一覧（検索・フィルタ・ソート対応）
+/// 箱根エリアをグループ化して表示
 final filteredAreasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final searchQuery = ref.watch(searchQueryProviderForAreaList);
   final selectedPrefecture = ref.watch(selectedPrefectureProviderForAreaList);
@@ -65,10 +66,53 @@ final filteredAreasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
     );
 
     final response = await query;
+    final areas = (response as List).cast<Map<String, dynamic>>();
     
-    return (response as List).cast<Map<String, dynamic>>();
+    // 2. 箱根エリアをグループ化
+    return _groupHakoneAreas(areas);
   } catch (e) {
     print('❌ エリア一覧取得エラー: $e');
     rethrow;
   }
 });
+
+/// 箱根エリアをグループ化する
+List<Map<String, dynamic>> _groupHakoneAreas(List<Map<String, dynamic>> areas) {
+  final hakoneAreas = <Map<String, dynamic>>[];
+  final otherAreas = <Map<String, dynamic>>[];
+  
+  for (final area in areas) {
+    final name = area['name'] as String;
+    if (name.startsWith('箱根・')) {
+      hakoneAreas.add(area);
+    } else {
+      otherAreas.add(area);
+    }
+  }
+  
+  // 箱根エリアが複数ある場合のみグループ化
+  if (hakoneAreas.length > 1) {
+    // 箱根グループの合計ルート数を計算
+    final totalRoutes = hakoneAreas.fold<int>(
+      0,
+      (sum, area) => sum + ((area['route_count'] as int?) ?? 0),
+    );
+    
+    // 箱根親エリアを作成
+    final hakoneParent = {
+      'id': 'hakone_group', // 特殊ID
+      'name': '箱根',
+      'prefecture': '神奈川県',
+      'description': 'DogHub所在地。5つのエリアから選択できます。',
+      'route_count': totalRoutes,
+      'is_hakone_group': true, // 箱根グループフラグ
+      'sub_areas': hakoneAreas, // サブエリア一覧
+    };
+    
+    // 箱根親エリアを先頭に、その後に他のエリア
+    return [hakoneParent, ...otherAreas];
+  } else {
+    // 箱根エリアが1つ以下の場合はそのまま返す
+    return areas;
+  }
+}
