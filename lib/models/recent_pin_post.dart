@@ -45,10 +45,10 @@ class RecentPinPost {
   factory RecentPinPost.fromJson(Map<String, dynamic> json) {
     return RecentPinPost(
       pinId: json['pin_id'] as String,
-      routeId: json['route_id'] as String,
-      routeName: json['route_name'] as String,
-      areaId: json['area_id'] as String,
-      areaName: json['area_name'] as String,
+      routeId: json['route_id'] as String?,
+      routeName: json['route_name'] as String?,
+      areaId: json['area_id'] as String?,
+      areaName: json['area_name'] as String?,
       prefecture: json['prefecture'] as String? ?? '',
       pinType: json['pin_type'] as String,
       title: json['title'] as String,
