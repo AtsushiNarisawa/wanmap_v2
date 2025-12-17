@@ -49,6 +49,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
   // 検索・フィルター
   final TextEditingController _searchController = TextEditingController();
   String _searchMode = 'name'; // 'name' or 'area'
+  String _searchKeyword = ''; // 検索キーワード
 
   @override
   void initState() {
@@ -241,6 +242,16 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
                   style: WanMapTypography.bodyMedium.copyWith(
                     color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
                   ),
+                  onSubmitted: (value) {
+                    setState(() {
+                      _searchKeyword = value.trim();
+                    });
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      _searchKeyword = value.trim();
+                    });
+                  },
                 ),
               ),
               // 検索モード切替ボタン
@@ -598,16 +609,19 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
       data: (allRoutes) {
         final nearbyRoutes = _getRecommendedRoutes(gpsState.currentLocation!, allRoutes);
         
-        if (nearbyRoutes.isEmpty) {
-          return _buildEmptyState(isDark);
+        // 検索キーワードでフィルタリング
+        final filteredRoutes = _filterRoutesBySearch(nearbyRoutes);
+        
+        if (filteredRoutes.isEmpty) {
+          return _buildEmptyState(isDark, isSearchResult: _searchKeyword.isNotEmpty);
         }
 
         // Bottom Sheetには全ルートを表示（地図上のカードとは別UI）
         return ListView.builder(
           padding: EdgeInsets.all(WanMapSpacing.md),
-          itemCount: nearbyRoutes.length,
+          itemCount: filteredRoutes.length,
           itemBuilder: (context, index) {
-            final routeData = nearbyRoutes[index];
+            final routeData = filteredRoutes[index];
             final route = routeData['route'] as OfficialRoute;
             final distance = routeData['distance'] as double;
 
@@ -624,7 +638,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
   }
 
   /// 0件の場合のUI
-  Widget _buildEmptyState(bool isDark) {
+  Widget _buildEmptyState(bool isDark, {bool isSearchResult = false}) {
     return SingleChildScrollView(
       child: Center(
         child: Padding(
@@ -633,37 +647,59 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.explore_off,
+                isSearchResult ? Icons.search_off : Icons.explore_off,
                 size: 64,
                 color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
               ),
               const SizedBox(height: WanMapSpacing.md),
               Text(
-                '現在地から50km以内に\nおすすめルートがありません',
+                isSearchResult 
+                    ? '「$_searchKeyword」に一致する\nルートが見つかりませんでした'
+                    : '現在地から50km以内に\nおすすめルートがありません',
                 textAlign: TextAlign.center,
                 style: WanMapTypography.bodyMedium.copyWith(
                   color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: WanMapSpacing.lg),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AreaListScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: WanMapColors.accent,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: WanMapSpacing.lg,
-                    vertical: WanMapSpacing.md,
+              if (isSearchResult)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchKeyword = '';
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: WanMapColors.accent,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: WanMapSpacing.lg,
+                      vertical: WanMapSpacing.md,
+                    ),
                   ),
+                  icon: const Icon(Icons.clear),
+                  label: const Text('検索をクリア'),
+                )
+              else
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AreaListScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: WanMapColors.accent,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: WanMapSpacing.lg,
+                      vertical: WanMapSpacing.md,
+                    ),
+                  ),
+                  icon: const Icon(Icons.list),
+                  label: const Text('エリア一覧を見る'),
                 ),
-                icon: const Icon(Icons.list),
-                label: const Text('エリア一覧を見る'),
-              ),
             ],
           ),
         ),
@@ -871,6 +907,28 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
     }
     
     return nearbyRoutes;
+  }
+
+  /// 検索キーワードでルートをフィルタリング
+  List<Map<String, dynamic>> _filterRoutesBySearch(List<Map<String, dynamic>> routes) {
+    if (_searchKeyword.isEmpty) {
+      return routes;
+    }
+
+    final keyword = _searchKeyword.toLowerCase();
+    
+    return routes.where((routeData) {
+      final route = routeData['route'] as OfficialRoute;
+      
+      if (_searchMode == 'name') {
+        // ルート名で検索
+        return route.name.toLowerCase().contains(keyword);
+      } else {
+        // エリア名で検索（現在はOfficialRouteにエリア名がないため、ルート名で代用）
+        // TODO: エリア情報を追加する場合はここを修正
+        return route.name.toLowerCase().contains(keyword);
+      }
+    }).toList();
   }
 
   /// Haversine公式で2地点間の距離を計算（km単位）
