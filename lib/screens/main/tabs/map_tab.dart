@@ -9,7 +9,6 @@ import '../../../config/wanmap_typography.dart';
 import '../../../config/wanmap_spacing.dart';
 import '../../../providers/gps_provider_riverpod.dart';
 import '../../../providers/official_route_provider.dart';
-import '../../../providers/official_routes_screen_provider.dart';
 import '../../../providers/area_provider.dart';
 import '../../../models/area.dart';
 import '../../../models/official_route.dart';
@@ -306,7 +305,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
       return const SizedBox.shrink();
     }
 
-    final routesAsync = ref.watch(officialRoutesProvider);
+    final routesAsync = ref.watch(allRoutesProvider);
 
     return Positioned(
       top: MediaQuery.of(context).padding.top + 80,
@@ -592,7 +591,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
   /// ルートリスト
   Widget _buildRoutesList(bool isDark) {
     final gpsState = ref.watch(gpsProviderRiverpod);
-    final routesAsync = ref.watch(officialRoutesProvider);
+    final routesAsync = ref.watch(allRoutesProvider);
 
     return routesAsync.when(
       data: (allRoutes) {
