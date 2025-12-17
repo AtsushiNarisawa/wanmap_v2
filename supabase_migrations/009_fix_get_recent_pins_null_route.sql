@@ -38,10 +38,10 @@ BEGIN
   SELECT 
     rp.id AS pin_id,
     rp.route_id,
-    r.title AS route_name,
-    r.area_id,
-    a.name AS area_name,
-    a.prefecture,
+    official_routes.title AS route_name,
+    official_routes.area_id,
+    areas.name AS area_name,
+    areas.prefecture,
     rp.pin_type,
     rp.title,
     rp.comment,
@@ -55,15 +55,15 @@ BEGIN
       LIMIT 1
     ) AS photo_url,
     rp.user_id,
-    COALESCE(u.raw_user_meta_data->>'display_name', 'Unknown User') AS user_name,
-    COALESCE(u.raw_user_meta_data->>'avatar_url', '') AS user_avatar_url,
+    COALESCE(auth.users.raw_user_meta_data->>'display_name', 'Unknown User') AS user_name,
+    COALESCE(auth.users.raw_user_meta_data->>'avatar_url', '') AS user_avatar_url,
     rp.created_at,
     ST_Y(rp.location::geometry) AS pin_lat,
     ST_X(rp.location::geometry) AS pin_lon
   FROM route_pins rp
-  LEFT JOIN official_routes r ON r.id = rp.route_id  -- JOINをLEFT JOINに変更
-  LEFT JOIN areas a ON a.id = r.area_id
-  LEFT JOIN auth.users u ON u.id = rp.user_id
+  LEFT JOIN official_routes ON official_routes.id = rp.route_id
+  LEFT JOIN areas ON areas.id = official_routes.area_id
+  LEFT JOIN auth.users ON auth.users.id = rp.user_id
   WHERE EXISTS (
     SELECT 1 FROM route_pin_photos rpp WHERE rpp.pin_id = rp.id
   )

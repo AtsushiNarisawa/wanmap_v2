@@ -849,6 +849,10 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
         route.startLocation,
       );
 
+      if (kDebugMode && distance <= 100.0) {
+        print('  🔵 Route: ${route.name} at ${route.startLocation.latitude},${route.startLocation.longitude} - ${distance.toStringAsFixed(1)}km');
+      }
+
       if (distance <= 50.0) {
         nearbyRoutes.add({
           'route': route,
@@ -863,7 +867,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
     nearbyRoutes.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
     
     if (kDebugMode) {
-      print('🔵 Total nearby routes (<=20km): ${nearbyRoutes.length}');
+      print('🔵 Total nearby routes (<=50km): ${nearbyRoutes.length}');
     }
     
     return nearbyRoutes;
