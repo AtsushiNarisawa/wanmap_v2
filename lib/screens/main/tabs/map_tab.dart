@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -66,8 +67,20 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
   
   /// 現在地を初期化
   Future<void> _initializeLocation() async {
+    if (kDebugMode) {
+      print('🗺️ MAP画面: GPS初期化開始');
+    }
     final gpsNotifier = ref.read(gpsProviderRiverpod.notifier);
     await gpsNotifier.getCurrentLocation();
+    
+    final gpsState = ref.read(gpsProviderRiverpod);
+    if (kDebugMode) {
+      if (gpsState.currentLocation != null) {
+        print('✅ MAP画面: GPS取得成功 ${gpsState.currentLocation!.latitude},${gpsState.currentLocation!.longitude}');
+      } else {
+        print('❌ MAP画面: GPS取得失敗');
+      }
+    }
   }
 
   @override
@@ -821,6 +834,11 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
     LatLng currentLocation,
     List<OfficialRoute> allRoutes,
   ) {
+    if (kDebugMode) {
+      print('🔵 _getRecommendedRoutes: currentLocation=${currentLocation.latitude},${currentLocation.longitude}');
+      print('🔵 Total routes: ${allRoutes.length}');
+    }
+    
     final List<Map<String, dynamic>> nearbyRoutes = [];
 
     for (final route in allRoutes) {
@@ -834,10 +852,18 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
           'route': route,
           'distance': distance,
         });
+        if (kDebugMode) {
+          print('  ✅ Found nearby route: ${route.name} (${distance.toStringAsFixed(1)}km)');
+        }
       }
     }
 
     nearbyRoutes.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
+    
+    if (kDebugMode) {
+      print('🔵 Total nearby routes (<=20km): ${nearbyRoutes.length}');
+    }
+    
     return nearbyRoutes;
   }
 
