@@ -4,10 +4,10 @@ import 'package:latlong2/latlong.dart';
 /// Supabase RPC `get_recent_pins` の返り値に対応
 class RecentPinPost {
   final String pinId;
-  final String routeId;
-  final String routeName;
-  final String areaId;
-  final String areaName;
+  final String? routeId;
+  final String? routeName;
+  final String? areaId;
+  final String? areaName;
   final String prefecture;
   final String pinType;
   final String title;
@@ -23,10 +23,10 @@ class RecentPinPost {
 
   RecentPinPost({
     required this.pinId,
-    required this.routeId,
-    required this.routeName,
-    required this.areaId,
-    required this.areaName,
+    this.routeId,
+    this.routeName,
+    this.areaId,
+    this.areaName,
     required this.prefecture,
     required this.pinType,
     required this.title,
