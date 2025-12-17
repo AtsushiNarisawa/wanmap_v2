@@ -9,6 +9,7 @@ import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
 import '../../models/route_pin.dart';
 import '../../providers/route_pin_provider.dart';
+import '../../providers/recent_pins_provider.dart';
 
 /// ピン作成画面
 /// ユーザーが公式ルート上に体験・発見を投稿
@@ -163,6 +164,9 @@ class _PinCreateScreenState extends ConsumerState<PinCreateScreen> {
       );
 
       if (mounted) {
+        // 最新ピン一覧を更新
+        ref.invalidate(recentPinsProvider);
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('ピンを投稿しました！'),
