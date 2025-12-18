@@ -1297,7 +1297,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          widget.pin.areaName,
+                          widget.pin.areaName ?? '不明',
                           style: WanMapTypography.bodySmall.copyWith(
                             color: widget.isDark
                                 ? WanMapColors.textSecondaryDark
@@ -1321,7 +1321,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          widget.pin.userName,
+                          widget.pin.userName ?? '匿名',
                           style: WanMapTypography.bodySmall.copyWith(
                             color: widget.isDark
                                 ? WanMapColors.textSecondaryDark
