@@ -1259,10 +1259,10 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
           ),
           child: Row(
             children: [
-              // サムネイル画像（固定サイズ120x120）
+              // サムネイル画像（固定サイズ110x110）
               SizedBox(
-                width: 120,
-                height: 120,
+                width: 110,
+                height: 110,
                 child: widget.pin.photoUrl.isNotEmpty
                     ? Image.network(
                         widget.pin.photoUrl,
@@ -1274,7 +1274,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
               // テキスト情報
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(WanMapSpacing.md),
+                  padding: const EdgeInsets.all(12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1291,7 +1291,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: WanMapSpacing.xs),
+                      const SizedBox(height: 3.0),
                       // ユーザー名・エリア
                       Text(
                         '${widget.pin.userName} · ${widget.pin.areaName}',
@@ -1303,7 +1303,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: WanMapSpacing.sm),
+                      const SizedBox(height: 6.0),
                       // アクションボタンと相対時間を2行に分ける
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1321,11 +1321,11 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                     );
                                   }
                                 },
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(20),
                                 child: Container(
                                   constraints: const BoxConstraints(
-                                    minWidth: 48,
-                                    minHeight: 48,
+                                    minWidth: 40,
+                                    minHeight: 40,
                                   ),
                                   alignment: Alignment.center,
                                   child: Row(
@@ -1333,7 +1333,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                     children: [
                                       Icon(
                                         isLiked ? Icons.favorite : Icons.favorite_border,
-                                        size: 20,
+                                        size: 18,
                                         color: isLiked ? Colors.red : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
                                       ),
                                       const SizedBox(width: 4),
@@ -1349,8 +1349,8 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: WanMapSpacing.sm),
-                              // コメントボタン（タップ領域48x48）
+                              const SizedBox(width: 6.0),
+                              // コメントボタン（タップ領域40x40）
                               InkWell(
                                 onTap: () {
                                   Navigator.push(
@@ -1363,11 +1363,11 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                     ),
                                   );
                                 },
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(20),
                                 child: Container(
                                   constraints: const BoxConstraints(
-                                    minWidth: 48,
-                                    minHeight: 48,
+                                    minWidth: 40,
+                                    minHeight: 40,
                                   ),
                                   alignment: Alignment.center,
                                   child: Row(
@@ -1375,7 +1375,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                     children: [
                                       Icon(
                                         Icons.chat_bubble_outline,
-                                        size: 20,
+                                        size: 18,
                                         color: widget.isDark ? Colors.grey[400] : Colors.grey[600],
                                       ),
                                       const SizedBox(width: 4),
@@ -1391,8 +1391,8 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: WanMapSpacing.sm),
-                              // ブックマークボタン（タップ領域48x48）
+                              const SizedBox(width: 6.0),
+                              // ブックマークボタン（タップ領域40x40）
                               InkWell(
                                 onTap: () async {
                                   final success = await bookmarkActions.toggleBookmark(widget.pin.pinId);
@@ -1402,16 +1402,16 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                                     );
                                   }
                                 },
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(20),
                                 child: Container(
                                   constraints: const BoxConstraints(
-                                    minWidth: 48,
-                                    minHeight: 48,
+                                    minWidth: 40,
+                                    minHeight: 40,
                                   ),
                                   alignment: Alignment.center,
                                   child: Icon(
                                     isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                                    size: 20,
+                                    size: 18,
                                     color: isBookmarked 
                                         ? WanMapColors.accent 
                                         : (widget.isDark ? Colors.grey[400] : Colors.grey[600]),
@@ -1421,7 +1421,7 @@ class _RecentPinCardState extends ConsumerState<_RecentPinCard> {
                             ],
                           ),
                           // 2行目: 相対時間
-                          const SizedBox(height: WanMapSpacing.xs),
+                          const SizedBox(height: 3.0),
                           Text(
                             _formatTimeAgo(widget.pin.createdAt),
                             style: WanMapTypography.bodySmall.copyWith(
