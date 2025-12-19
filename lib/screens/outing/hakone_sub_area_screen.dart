@@ -30,38 +30,34 @@ class HakoneSubAreaScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // ヘッダー説明
+          // DogHubバナー
           Padding(
             padding: const EdgeInsets.all(WanMapSpacing.lg),
-            child: Container(
-              padding: const EdgeInsets.all(WanMapSpacing.md),
-              decoration: BoxDecoration(
-                color: WanMapColors.accent.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: WanMapColors.accent.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: WanMapColors.accent,
-                    size: 24,
-                  ),
-                  const SizedBox(width: WanMapSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      '箱根は5つのエリアに分かれています。\nそれぞれのエリアの特色をご覧ください。',
-                      style: WanMapTypography.bodySmall.copyWith(
-                        color: isDark
-                            ? WanMapColors.textPrimaryDark
-                            : WanMapColors.textPrimaryLight,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                'https://www.genspark.ai/api/files/s/WnnUL0wc',
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'DogHub ペットホテル&カフェ 📍箱根',
+                        style: WanMapTypography.titleMedium.copyWith(
+                          color: isDark
+                              ? WanMapColors.textPrimaryDark
+                              : WanMapColors.textPrimaryLight,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
