@@ -35,29 +35,46 @@ class HakoneSubAreaScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(WanMapSpacing.lg),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                'https://www.genspark.ai/api/files/s/WnnUL0wc',
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'DogHub ペットホテル&カフェ 📍箱根',
-                        style: WanMapTypography.titleMedium.copyWith(
-                          color: isDark
-                              ? WanMapColors.textPrimaryDark
-                              : WanMapColors.textPrimaryLight,
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.network(
+                  'https://www.genspark.ai/api/files/s/WnnUL0wc',
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
+                      ),
+                      child: Center(
+                        child: Text(
+                          'DogHub ペットホテル&カフェ 📍箱根',
+                          style: WanMapTypography.titleMedium.copyWith(
+                            color: isDark
+                                ? WanMapColors.textPrimaryDark
+                                : WanMapColors.textPrimaryLight,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),
