@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
@@ -33,17 +34,23 @@ class HakoneSubAreaScreen extends ConsumerWidget {
           // DogHubバナー
           Padding(
             padding: const EdgeInsets.all(WanMapSpacing.lg),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
+            child: GestureDetector(
+              onTap: () async {
+                final uri = Uri.parse('https://www.dog-hub.shop/');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
                 child: Image.network(
                   'https://www.genspark.ai/api/files/s/WnnUL0wc',
                   width: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
+                      height: 150,
                       decoration: BoxDecoration(
                         color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
                       ),
@@ -59,6 +66,7 @@ class HakoneSubAreaScreen extends ConsumerWidget {
                   },
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
+                      height: 150,
                       decoration: BoxDecoration(
                         color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
                       ),
