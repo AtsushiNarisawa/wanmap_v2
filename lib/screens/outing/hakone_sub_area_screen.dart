@@ -19,6 +19,13 @@ class HakoneSubAreaScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // デバッグ: 渡されたsubAreasの内容を確認
+    print('🟢 HakoneSubAreaScreen: subAreas=${subAreas.length}件');
+    for (var i = 0; i < subAreas.length; i++) {
+      final area = subAreas[i];
+      print('  [$i] name=${area['name']}, route_count=${area['route_count']}');
+    }
 
     return Scaffold(
       backgroundColor: isDark
@@ -163,6 +170,11 @@ class _HakoneSubAreaCard extends StatelessWidget {
     final name = areaData['name'] as String;
     final description = areaData['description'] as String?;
     final routeCount = areaData['route_count'] as int? ?? 0;
+    
+    // デバッグ: areaDataの内容を確認
+    print('🔍 HakoneSubAreaCard: name=$name, route_count=$routeCount');
+    print('🔍 areaData keys: ${areaData.keys.toList()}');
+    print('🔍 areaData全体: $areaData');
 
     // エリア名から「箱根・」を除去してサブエリア名を取得
     final subAreaName = name.replaceFirst('箱根・', '');
