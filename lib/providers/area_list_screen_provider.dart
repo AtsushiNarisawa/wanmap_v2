@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/area.dart';
 import '../config/supabase_config.dart';
 
@@ -76,7 +77,7 @@ final filteredAreasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
     for (final area in areasList) {
       final routeCountResponse = await supabase
           .from('official_routes')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('*', const FetchOptions(count: CountOption.exact, head: true))
           .eq('area_id', area['id']);
       
       final routeCount = routeCountResponse.count ?? 0;
