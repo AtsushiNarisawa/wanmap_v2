@@ -144,113 +144,121 @@ class _LibraryTabState extends ConsumerState<LibraryTab> with SingleTickerProvid
     final outingAsync = ref.watch(outingWalkHistoryProvider(OutingHistoryParams(userId: userId)));
     final dailyAsync = ref.watch(dailyWalkHistoryProvider(DailyHistoryParams(userId: userId)));
 
-    return outingAsync.when(
-      data: (outingWalks) => dailyAsync.when(
-        data: (dailyWalks) {
-          // 今月の散歩を集計
-          final now = DateTime.now();
-          final thisMonthOuting = outingWalks.where((w) => 
-            w.walkedAt.year == now.year && w.walkedAt.month == now.month
-          ).length;
-          final thisMonthDaily = dailyWalks.where((w) => 
-            w.walkedAt.year == now.year && w.walkedAt.month == now.month
-          ).length;
-          final monthlyWalkCount = thisMonthOuting + thisMonthDaily;
+    // ローディング状態の確認
+    if (outingAsync.isLoading || dailyAsync.isLoading) {
+      return Container(
+        height: 80,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(),
+      );
+    }
 
-          // 今月の総距離を計算
-          final thisMonthDistance = outingWalks
-              .where((w) => w.walkedAt.year == now.year && w.walkedAt.month == now.month)
-              .fold<double>(0, (sum, w) => sum + w.distanceMeters) +
-            dailyWalks
-              .where((w) => w.walkedAt.year == now.year && w.walkedAt.month == now.month)
-              .fold<double>(0, (sum, w) => sum + w.distanceMeters);
-          
-          final formattedDistance = thisMonthDistance < 1000
-              ? '${thisMonthDistance.toStringAsFixed(0)}m'
-              : '${(thisMonthDistance / 1000).toStringAsFixed(1)}km';
+    // エラー状態の確認
+    if (outingAsync.hasError || dailyAsync.hasError) {
+      return const SizedBox.shrink();
+    }
 
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg, vertical: WanMapSpacing.md),
+    // データがある場合のみ表示
+    final outingWalks = outingAsync.value ?? [];
+    final dailyWalks = dailyAsync.value ?? [];
+
+    // 今月の散歩を集計
+    final now = DateTime.now();
+    final thisMonthOuting = outingWalks.where((w) => 
+      w.walkedAt.year == now.year && w.walkedAt.month == now.month
+    ).length;
+    final thisMonthDaily = dailyWalks.where((w) => 
+      w.walkedAt.year == now.year && w.walkedAt.month == now.month
+    ).length;
+    final monthlyWalkCount = thisMonthOuting + thisMonthDaily;
+
+    // 今月の総距離を計算
+    final thisMonthDistance = outingWalks
+        .where((w) => w.walkedAt.year == now.year && w.walkedAt.month == now.month)
+        .fold<double>(0, (sum, w) => sum + w.distanceMeters) +
+      dailyWalks
+        .where((w) => w.walkedAt.year == now.year && w.walkedAt.month == now.month)
+        .fold<double>(0, (sum, w) => sum + w.distanceMeters);
+    
+    final formattedDistance = thisMonthDistance < 1000
+        ? '${thisMonthDistance.toStringAsFixed(0)}m'
+        : '${(thisMonthDistance / 1000).toStringAsFixed(1)}km';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg, vertical: WanMapSpacing.md),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            WanMapColors.accent.withOpacity(0.1),
+            WanMapColors.accent.withOpacity(0.05),
+          ],
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? WanMapColors.borderDark : WanMapColors.borderLight,
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  WanMapColors.accent.withOpacity(0.1),
-                  WanMapColors.accent.withOpacity(0.05),
-                ],
-              ),
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark ? WanMapColors.borderDark : WanMapColors.borderLight,
-                  width: 0.5,
-                ),
-              ),
+              color: WanMapColors.accent.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Icon(
+              Icons.calendar_today,
+              size: 20,
+              color: WanMapColors.accent,
+            ),
+          ),
+          const SizedBox(width: WanMapSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: WanMapColors.accent.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.calendar_today,
-                    size: 20,
-                    color: WanMapColors.accent,
+                Text(
+                  '今月の記録',
+                  style: WanMapTypography.caption.copyWith(
+                    color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                   ),
                 ),
-                const SizedBox(width: WanMapSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '今月の記録',
-                        style: WanMapTypography.caption.copyWith(
-                          color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
-                        ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(
+                      '$monthlyWalkCount回',
+                      style: WanMapTypography.titleMedium.copyWith(
+                        color: WanMapColors.accent,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Text(
-                            '$monthlyWalkCount回',
-                            style: WanMapTypography.titleMedium.copyWith(
-                              color: WanMapColors.accent,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: WanMapSpacing.sm),
-                          Text(
-                            '・',
-                            style: WanMapTypography.bodyMedium.copyWith(
-                              color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
-                            ),
-                          ),
-                          const SizedBox(width: WanMapSpacing.xs),
-                          Text(
-                            formattedDistance,
-                            style: WanMapTypography.bodyMedium.copyWith(
-                              color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                    ),
+                    const SizedBox(width: WanMapSpacing.sm),
+                    Text(
+                      '・',
+                      style: WanMapTypography.bodyMedium.copyWith(
+                        color: isDark ? WanMapColors.textSecondaryDark : WanMapColors.textSecondaryLight,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: WanMapSpacing.xs),
+                    Text(
+                      formattedDistance,
+                      style: WanMapTypography.bodyMedium.copyWith(
+                        color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          );
-        },
-        loading: () => const SizedBox(height: 60),
-        error: (_, __) => const SizedBox.shrink(),
+          ),
+        ],
       ),
-      loading: () => const SizedBox(height: 60),
-      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
