@@ -14,7 +14,7 @@ class Environment {
   static String get thunderforestApiKey => dotenv.get('THUNDERFOREST_API_KEY', fallback: '');
   
   // アプリ設定
-  static String get appName => dotenv.get('APP_NAME', fallback: 'WanMap');
+  static String get appName => dotenv.get('APP_NAME', fallback: 'WanWalk');
   static String get appVersion => dotenv.get('APP_VERSION', fallback: '1.0.0');
   
   // デバッグモード
