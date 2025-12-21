@@ -69,7 +69,7 @@ class HomeTab extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  'WanMap',
+                  'WanWalk',
                   style: WanMapTypography.headlineMedium.copyWith(
                     color: isDark ? WanMapColors.textPrimaryDark : WanMapColors.textPrimaryLight,
                     fontWeight: FontWeight.bold,

@@ -30,7 +30,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             children: [
               // タイトル
               Text(
-                'WanMap プライバシーポリシー',
+                'WanWalk プライバシーポリシー',
                 style: WanMapTypography.headlineLarge.copyWith(
                   color: WanMapColors.textPrimaryLight,
                 ),
@@ -48,7 +48,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
               _buildSection(
                 '個人情報の収集',
-                'WanMap（以下「当社」）は、本サービスの利用に際して、以下の個人情報を収集します。\n\n'
+                'WanWalk（以下「当社」）は、本サービスの利用に際して、以下の個人情報を収集します。\n\n'
                 '• メールアドレス\n'
                 '• ユーザー名\n'
                 '• プロフィール情報（任意）\n'
@@ -164,7 +164,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               _buildSection(
                 'お問い合わせ窓口',
                 '本ポリシーに関するお問い合わせは、以下の窓口までお願いいたします。\n\n'
-                'サービス名: WanMap\n'
+                'サービス名: WanWalk\n'
                 'メールアドレス: privacy@wanmap.app\n\n'
                 '※お問い合わせへの回答には、数日かかる場合があります。',
               ),
