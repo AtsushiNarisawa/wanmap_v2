@@ -210,19 +210,40 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.doghub.wanmap',
           ),
-          // ルートライン（明確なオレンジ色で太く表示）
-          if (route.routeLine != null && route.routeLine!.isNotEmpty) ...[
+          // ルートライン（スポット座標から生成）
+          if (spots.isNotEmpty) ...[
             Builder(
               builder: (context) {
-                print('🛣️ Rendering PolylineLayer with ${route.routeLine!.length} points');
+                final routePoints = spots.map((spot) => spot.location).toList();
+                print('🛣️ Rendering PolylineLayer from ${routePoints.length} spot locations');
+                print('🛣️ Line color: #FF6B35 (orange), width: 5.0');
+                return PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: routePoints,
+                      strokeWidth: 5.0,
+                      color: const Color(0xFFFF6B35), // 鮮やかなオレンジ色
+                      borderStrokeWidth: 2.0,
+                      borderColor: Colors.white.withOpacity(0.8),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+          // フォールバック：route.routeLine（スポットがない場合のみ）
+          if (spots.isEmpty && route.routeLine != null && route.routeLine!.isNotEmpty) ...[
+            Builder(
+              builder: (context) {
+                print('🛣️ Rendering PolylineLayer from route.routeLine (${route.routeLine!.length} points) - FALLBACK');
                 print('🛣️ Line color: #FF6B35 (orange), width: 5.0');
                 return PolylineLayer(
                   polylines: [
                     Polyline(
                       points: route.routeLine!,
-                      strokeWidth: 5.0, // 4.0 → 5.0 に拡大
-                      color: const Color(0xFFFF6B35), // 鮮やかなオレンジ色
-                      borderStrokeWidth: 2.0, // 白いボーダーを追加
+                      strokeWidth: 5.0,
+                      color: const Color(0xFFFF6B35),
+                      borderStrokeWidth: 2.0,
                       borderColor: Colors.white.withOpacity(0.8),
                     ),
                   ],
