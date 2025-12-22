@@ -169,12 +169,15 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
           // ルートスポットマーカー
           spotsAsync.when(
             data: (spots) {
+              if (spots.isEmpty) {
+                return const SizedBox.shrink();
+              }
               return MarkerLayer(
                 markers: spots.map<Marker>((spot) {
                   return Marker(
                     point: spot.location,
-                    width: 32,
-                    height: 32,
+                    width: 40,
+                    height: 40,
                     alignment: Alignment.center,
                     child: _buildSpotMapIcon(spot.spotType, isDark),
                   );
@@ -263,13 +266,17 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
     final lonDiff = maxLon - minLon;
     final maxDiff = latDiff > lonDiff ? latDiff : lonDiff;
     
+    // 差分に基づいてズームレベルを計算（マージン20%追加で全体が見えるように）
+    final adjustedDiff = maxDiff * 1.2;
+    
     // 差分に基づいてズームレベルを計算（経験則）
-    if (maxDiff > 0.1) return 11.0;  // 約10km以上
-    if (maxDiff > 0.05) return 12.5; // 約5km
-    if (maxDiff > 0.02) return 13.5; // 約2km
-    if (maxDiff > 0.01) return 14.5; // 約1km
-    if (maxDiff > 0.005) return 15.5; // 約500m
-    return 16.5; // 500m未満
+    if (adjustedDiff > 0.1) return 11.0;  // 約10km以上
+    if (adjustedDiff > 0.05) return 12.0; // 約5km
+    if (adjustedDiff > 0.03) return 13.0; // 約3km
+    if (adjustedDiff > 0.02) return 13.5; // 約2km
+    if (adjustedDiff > 0.01) return 14.5; // 約1km
+    if (adjustedDiff > 0.005) return 15.5; // 約500m
+    return 16.0; // 500m未満
   }
   /// マーカーを構築（スタート=ゴールの場合は特別表示）
   List<Marker> _buildMarkers(OfficialRoute route) {
@@ -878,21 +885,21 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
     }
 
     return Container(
-      width: 32,
-      height: 32,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: Colors.white, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Icon(icon, color: Colors.white, size: 16),
+      child: Icon(icon, color: Colors.white, size: 20),
     );
   }
 
