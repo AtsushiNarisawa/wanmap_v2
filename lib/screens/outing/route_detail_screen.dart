@@ -983,15 +983,15 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         break;
       case RouteSpotType.landscape:
         icon = Icons.landscape;
-        color = WanMapColors.accent; // アクセントカラー（景観）
+        color = Colors.grey; // グレー（景観）
         break;
       case RouteSpotType.photoSpot:
         icon = Icons.camera_alt;
-        color = WanMapColors.accent; // アクセントカラー（フォト）
+        color = Colors.grey; // グレー（フォト）
         break;
       case RouteSpotType.facility:
         icon = Icons.store;
-        color = WanMapColors.accent; // アクセントカラー（施設）
+        color = Colors.grey; // グレー（施設）
         break;
       case RouteSpotType.end:
         icon = Icons.sports_score;
@@ -1023,15 +1023,15 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         break;
       case RouteSpotType.landscape:
         icon = Icons.landscape;
-        color = WanMapColors.accent; // アクセントカラー（景観）
+        color = Colors.grey; // グレー（景観）
         break;
       case RouteSpotType.photoSpot:
         icon = Icons.camera_alt;
-        color = WanMapColors.accent; // アクセントカラー（フォト）
+        color = Colors.grey; // グレー（フォト）
         break;
       case RouteSpotType.facility:
         icon = Icons.store;
-        color = WanMapColors.accent; // アクセントカラー（施設）
+        color = Colors.grey; // グレー（施設）
         break;
       case RouteSpotType.end:
         icon = Icons.sports_score;
