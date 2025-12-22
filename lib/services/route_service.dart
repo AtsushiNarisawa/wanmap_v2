@@ -363,7 +363,10 @@ class RouteService {
     try {
       final response = await _supabase
           .from('route_spots')
-          .select()
+          .select('''
+            *,
+            location_wkt:ST_AsText(location)
+          ''')
           .eq('route_id', routeId)
           .order('spot_order', ascending: true);
 
@@ -372,7 +375,13 @@ class RouteService {
       }
 
       return (response as List)
-          .map((json) => RouteSpot.fromJson(json))
+          .map((json) {
+            // location_wktがある場合はそれを使用、なければlocationを使用
+            final locationData = json['location_wkt'] ?? json['location'];
+            final modifiedJson = Map<String, dynamic>.from(json);
+            modifiedJson['location'] = locationData;
+            return RouteSpot.fromJson(modifiedJson);
+          })
           .toList();
     } catch (e) {
       if (kDebugMode) {
