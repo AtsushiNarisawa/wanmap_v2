@@ -144,6 +144,10 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
     // デバッグログ追加
     print('🗺️ _buildMapSection called for route: ${route.id}');
     print('🛣️ route.routeLine: ${route.routeLine?.length ?? 0} points');
+    if (route.routeLine != null && route.routeLine!.isNotEmpty) {
+      print('🛣️ First point: ${route.routeLine!.first}');
+      print('🛣️ Last point: ${route.routeLine!.last}');
+    }
     print('📍 spotsAsync state: ${spotsAsync.toString()}');
     
     // スポットデータとピンデータを取得
@@ -182,17 +186,26 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.doghub.wanmap',
           ),
-          // ルートライン
-          if (route.routeLine != null && route.routeLine!.isNotEmpty)
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: route.routeLine!,
-                  strokeWidth: 4.0,
-                  color: WanMapColors.accent,
-                ),
-              ],
+          // ルートライン（明確なオレンジ色で太く表示）
+          if (route.routeLine != null && route.routeLine!.isNotEmpty) ...[
+            Builder(
+              builder: (context) {
+                print('🛣️ Rendering PolylineLayer with ${route.routeLine!.length} points');
+                print('🛣️ Line color: #FF6B35 (orange), width: 5.0');
+                return PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: route.routeLine!,
+                      strokeWidth: 5.0, // 4.0 → 5.0 に拡大
+                      color: const Color(0xFFFF6B35), // 鮮やかなオレンジ色
+                      borderStrokeWidth: 2.0, // 白いボーダーを追加
+                      borderColor: Colors.white.withOpacity(0.8),
+                    ),
+                  ],
+                );
+              },
             ),
+          ],
           // ルートスポットマーカー
           if (spots.isNotEmpty) ...[
             Builder(
