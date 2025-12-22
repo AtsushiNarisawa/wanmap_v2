@@ -141,6 +141,17 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   Widget _buildMapSection(OfficialRoute route, AsyncValue pinsAsync, bool isDark) {
     final spotsAsync = ref.watch(routeSpotsProvider(route.id));
     
+    // スポットデータとピンデータを取得
+    final spots = spotsAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => <RouteSpot>[],
+    );
+    
+    final pins = pinsAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => [],
+    );
+    
     return Container(
       height: 300,
       color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
@@ -156,6 +167,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.doghub.wanmap',
           ),
+          // ルートライン
           if (route.routeLine != null && route.routeLine!.isNotEmpty)
             PolylineLayer(
               polylines: [
@@ -167,59 +179,44 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
               ],
             ),
           // ルートスポットマーカー
-          spotsAsync.when(
-            data: (spots) {
-              if (spots.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return MarkerLayer(
-                markers: spots.map<Marker>((spot) {
-                  return Marker(
-                    point: spot.location,
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
-                    child: _buildSpotMapIcon(spot.spotType, isDark),
-                  );
-                }).toList(),
-              );
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
+          if (spots.isNotEmpty)
+            MarkerLayer(
+              markers: spots.map<Marker>((spot) {
+                return Marker(
+                  point: spot.location,
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  child: _buildSpotMapIcon(spot.spotType, isDark),
+                );
+              }).toList(),
+            ),
           // スタート/ゴールマーカー（スポットがない場合のフォールバック）
-          spotsAsync.maybeWhen(
-            data: (spots) => spots.isEmpty ? MarkerLayer(markers: _buildMarkers(route)) : const SizedBox.shrink(),
-            orElse: () => MarkerLayer(markers: _buildMarkers(route)),
-          ),
+          if (spots.isEmpty)
+            MarkerLayer(markers: _buildMarkers(route)),
           // ピンマーカー
-          pinsAsync.when(
-            data: (pins) {
-              return MarkerLayer(
-                markers: pins.map<Marker>((pin) {
-                  return Marker(
-                    point: pin.location,
-                    width: 40,
-                    height: 40,
-                    child: Icon(
-                      Icons.location_on,
-                      color: WanMapColors.accent,
-                      size: 40,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
+          if (pins.isNotEmpty)
+            MarkerLayer(
+              markers: pins.map<Marker>((pin) {
+                return Marker(
+                  point: pin.location,
+                  width: 40,
+                  height: 40,
+                  child: Icon(
+                    Icons.location_on,
+                    color: WanMapColors.accent,
+                    size: 40,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
         ],
       ),
     );
