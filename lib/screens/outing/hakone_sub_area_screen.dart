@@ -44,7 +44,7 @@ class HakoneSubAreaScreen extends ConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
-                  'assets/images/hakone_banner_new.jpg',
+                  'assets/images/doghub_banner.jpg',
                   width: double.infinity,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
