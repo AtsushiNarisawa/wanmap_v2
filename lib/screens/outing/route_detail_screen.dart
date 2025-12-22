@@ -202,8 +202,8 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                   markers: spots.map<Marker>((spot) {
                     return Marker(
                       point: spot.location,
-                      width: 40,
-                      height: 40,
+                      width: 50,
+                      height: 50,
                       alignment: Alignment.center,
                       child: _buildSpotMapIcon(spot.spotType, isDark),
                     );
@@ -909,21 +909,21 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
     }
 
     return Container(
-      width: 40,
-      height: 40,
+      width: 50,
+      height: 50,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2.5),
+        border: Border.all(color: Colors.white, width: 3),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Icon(icon, color: Colors.white, size: 20),
+      child: Icon(icon, color: Colors.white, size: 24),
     );
   }
 
