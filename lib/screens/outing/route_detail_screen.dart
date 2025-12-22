@@ -141,16 +141,28 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   Widget _buildMapSection(OfficialRoute route, AsyncValue pinsAsync, bool isDark) {
     final spotsAsync = ref.watch(routeSpotsProvider(route.id));
     
+    // デバッグログ追加
+    print('🗺️ _buildMapSection called for route: ${route.id}');
+    print('📍 spotsAsync state: ${spotsAsync.toString()}');
+    
     // スポットデータとピンデータを取得
     final spots = spotsAsync.maybeWhen(
-      data: (data) => data,
-      orElse: () => <RouteSpot>[],
+      data: (data) {
+        print('✅ Spots data available: ${data.length} spots');
+        return data;
+      },
+      orElse: () {
+        print('⚠️ Spots data not available, using empty list');
+        return <RouteSpot>[];
+      },
     );
     
     final pins = pinsAsync.maybeWhen(
       data: (data) => data,
       orElse: () => [],
     );
+    
+    print('🎯 Final spots count for rendering: ${spots.length}');
     
     return Container(
       height: 300,
@@ -179,21 +191,36 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
               ],
             ),
           // ルートスポットマーカー
-          if (spots.isNotEmpty)
-            MarkerLayer(
-              markers: spots.map<Marker>((spot) {
-                return Marker(
-                  point: spot.location,
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  child: _buildSpotMapIcon(spot.spotType, isDark),
+          if (spots.isNotEmpty) ...[
+            Builder(
+              builder: (context) {
+                print('🎨 Building MarkerLayer with ${spots.length} spot markers');
+                for (var spot in spots) {
+                  print('  📌 Spot: ${spot.name} at (${spot.location.latitude}, ${spot.location.longitude})');
+                }
+                return MarkerLayer(
+                  markers: spots.map<Marker>((spot) {
+                    return Marker(
+                      point: spot.location,
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      child: _buildSpotMapIcon(spot.spotType, isDark),
+                    );
+                  }).toList(),
                 );
-              }).toList(),
+              },
             ),
+          ],
           // スタート/ゴールマーカー（スポットがない場合のフォールバック）
-          if (spots.isEmpty)
-            MarkerLayer(markers: _buildMarkers(route)),
+          if (spots.isEmpty) ...[
+            Builder(
+              builder: (context) {
+                print('⚠️ No spots, showing fallback start/goal markers');
+                return MarkerLayer(markers: _buildMarkers(route));
+              },
+            ),
+          ],
           // ピンマーカー
           if (pins.isNotEmpty)
             MarkerLayer(
