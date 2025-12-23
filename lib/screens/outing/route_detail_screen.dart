@@ -330,25 +330,9 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       return center;
     }
     
-    // スポットがなく、ルートラインがある場合
-    if (route.routeLine != null && route.routeLine!.isNotEmpty) {
-      print('📍 _calculateCenter: Using routeLine (${route.routeLine!.length} points)');
-      double latSum = 0;
-      double lonSum = 0;
-      for (var point in route.routeLine!) {
-        latSum += point.latitude;
-        lonSum += point.longitude;
-      }
-      final center = LatLng(
-        latSum / route.routeLine!.length,
-        lonSum / route.routeLine!.length,
-      );
-      print('📍 _calculateCenter result (routeLine): $center');
-      return center;
-    }
-    
-    // デフォルトはスタート地点
-    print('📍 _calculateCenter: Using startLocation (fallback)');
+    // スポットがない場合は、スタート地点を使用
+    // NOTE: route.routeLine は不正確な座標を持つ可能性があるため使用しない
+    print('📍 _calculateCenter: Using startLocation (initial)');
     print('📍 _calculateCenter result (startLocation): ${route.startLocation}');
     return route.startLocation;
   }
@@ -390,37 +374,9 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       return 16.0;
     }
     
-    // スポットがなく、ルートラインがある場合
-    if (route.routeLine != null && route.routeLine!.isNotEmpty) {
-      double minLat = route.routeLine!.first.latitude;
-      double maxLat = route.routeLine!.first.latitude;
-      double minLon = route.routeLine!.first.longitude;
-      double maxLon = route.routeLine!.first.longitude;
-      
-      for (var point in route.routeLine!) {
-        if (point.latitude < minLat) minLat = point.latitude;
-        if (point.latitude > maxLat) maxLat = point.latitude;
-        if (point.longitude < minLon) minLon = point.longitude;
-        if (point.longitude > maxLon) maxLon = point.longitude;
-      }
-      
-      final latDiff = maxLat - minLat;
-      final lonDiff = maxLon - minLon;
-      final maxDiff = latDiff > lonDiff ? latDiff : lonDiff;
-      // マージンを40%に拡大（全スポットが余裕を持って表示）
-      final adjustedDiff = maxDiff * 1.4;
-      
-      if (adjustedDiff > 0.1) return 11.0;
-      if (adjustedDiff > 0.05) return 12.0;
-      if (adjustedDiff > 0.03) return 13.0;
-      if (adjustedDiff > 0.02) return 13.5;
-      if (adjustedDiff > 0.01) return 14.5;
-      if (adjustedDiff > 0.005) return 15.5;
-      return 16.0;
-    }
-    
-    // デフォルト
-    return 15.0;
+    // スポットがない場合は、デフォルトのズームレベル
+    // NOTE: route.routeLine は不正確な座標を持つ可能性があるため使用しない
+    return 14.5; // 初期表示用の適度なズームレベル
   }
   /// マーカーを構築（スタート=ゴールの場合は特別表示）
   List<Marker> _buildMarkers(OfficialRoute route) {
