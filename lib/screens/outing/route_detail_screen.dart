@@ -263,19 +263,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                   print('  📌 Spot: ${spot.name} at (${spot.location.latitude}, ${spot.location.longitude})');
                 }
                 return MarkerLayer(
-                  markers: spots.map<Marker>((spot) {
-                    // スタート/ゴールは大きく、中間スポットは少し小さく
-                    final isStartOrEnd = spot.spotType == RouteSpotType.start || spot.spotType == RouteSpotType.end;
-                    final markerSize = isStartOrEnd ? 60.0 : 50.0;
-                    
-                    return Marker(
-                      point: spot.location,
-                      width: markerSize,
-                      height: markerSize,
-                      alignment: Alignment.center,
-                      child: _buildSpotMapIcon(spot.spotType, isDark, isStartOrEnd),
-                    );
-                  }).toList(),
+                  markers: _buildSpotMarkers(spots, isDark),
                 );
               },
             ),
@@ -1012,6 +1000,152 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   }
 
   /// マップ用のスポットアイコン（スタート/ゴールは特に強調）
+  /// スポットマーカーを構築（スタート=ゴールの場合は1つに統合）
+  List<Marker> _buildSpotMarkers(List<RouteSpot> spots, bool isDark) {
+    if (spots.isEmpty) return [];
+    
+    final markers = <Marker>[];
+    final processedIndices = <int>{};
+    
+    for (int i = 0; i < spots.length; i++) {
+      if (processedIndices.contains(i)) continue;
+      
+      final spot = spots[i];
+      final isStart = spot.spotType == RouteSpotType.start;
+      final isEnd = spot.spotType == RouteSpotType.end;
+      
+      // スタート地点の場合、同じ位置にゴールがあるかチェック
+      if (isStart) {
+        final goalIndex = spots.indexWhere((s) => 
+          s.spotType == RouteSpotType.end && 
+          _isSameLocation(s.location, spot.location)
+        );
+        
+        if (goalIndex != -1) {
+          // スタート=ゴールの場合、半分緑・半分赤のマーカーを作成
+          print('🎯 Start=Goal detected at ${spot.name}');
+          markers.add(Marker(
+            point: spot.location,
+            width: 60.0,
+            height: 60.0,
+            alignment: Alignment.center,
+            child: _buildStartGoalMarker(isDark),
+          ));
+          processedIndices.add(i);
+          processedIndices.add(goalIndex);
+          continue;
+        }
+      }
+      
+      // ゴール地点でスタートと同じ位置の場合はスキップ（既に処理済み）
+      if (isEnd) {
+        final startIndex = spots.indexWhere((s) => 
+          s.spotType == RouteSpotType.start && 
+          _isSameLocation(s.location, spot.location)
+        );
+        if (startIndex != -1 && processedIndices.contains(startIndex)) {
+          continue;
+        }
+      }
+      
+      // 通常のマーカー
+      final isStartOrEnd = isStart || isEnd;
+      final markerSize = isStartOrEnd ? 60.0 : 50.0;
+      
+      markers.add(Marker(
+        point: spot.location,
+        width: markerSize,
+        height: markerSize,
+        alignment: Alignment.center,
+        child: _buildSpotMapIcon(spot.spotType, isDark, isStartOrEnd),
+      ));
+      processedIndices.add(i);
+    }
+    
+    return markers;
+  }
+  
+  /// 2つの位置が同じかチェック（緯度経度の差が0.0001度未満）
+  bool _isSameLocation(LatLng loc1, LatLng loc2) {
+    const threshold = 0.0001; // 約10m
+    return (loc1.latitude - loc2.latitude).abs() < threshold &&
+           (loc1.longitude - loc2.longitude).abs() < threshold;
+  }
+  
+  /// スタート=ゴールの統合マーカー（半分緑・半分赤）
+  Widget _buildStartGoalMarker(bool isDark) {
+    return Stack(
+      children: [
+        // 左半分：緑（スタート）
+        ClipPath(
+          clipper: _LeftHalfClipper(),
+          child: Container(
+            width: 60.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50), // 緑
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // 右半分：赤（ゴール）
+        ClipPath(
+          clipper: _RightHalfClipper(),
+          child: Container(
+            width: 60.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF44336), // 赤
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // 中央のボーダー
+        Center(
+          child: Container(
+            width: 60.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4.0),
+            ),
+          ),
+        ),
+        // アイコン（旗マーク）
+        Center(
+          child: Icon(
+            Icons.flag,
+            color: Colors.white,
+            size: 28.0,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSpotMapIcon(RouteSpotType spotType, bool isDark, bool isStartOrEnd) {
     IconData icon;
     Color color;
@@ -1798,4 +1932,40 @@ class _PinCommentButtonState extends ConsumerState<_PinCommentButton> {
       ),
     );
   }
+}
+
+/// 左半分をクリップするClipper
+class _LeftHalfClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.addOval(Rect.fromCircle(
+      center: Offset(size.width / 2, size.height / 2),
+      radius: size.width / 2,
+    ));
+    path.addRect(Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height));
+    path.fillType = PathFillType.evenOdd;
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+/// 右半分をクリップするClipper
+class _RightHalfClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.addOval(Rect.fromCircle(
+      center: Offset(size.width / 2, size.height / 2),
+      radius: size.width / 2,
+    ));
+    path.addRect(Rect.fromLTWH(0, 0, size.width / 2, size.height));
+    path.fillType = PathFillType.evenOdd;
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
