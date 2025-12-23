@@ -9,13 +9,16 @@ import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
 import '../../config/env.dart';
 import '../../models/official_route.dart';
+import '../../models/route_spot.dart';
 import '../../models/walk_mode.dart';
 import '../../providers/gps_provider_riverpod.dart';
+import '../../providers/route_spots_provider.dart';
 import '../../services/profile_service.dart';
 import '../../services/walk_save_service.dart';
 import '../../services/photo_service.dart';
 import '../../widgets/zoom_control_widget.dart';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'pin_create_screen.dart';
 
 /// 散歩中画面（公式ルートを歩いている時）
@@ -339,6 +342,7 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
   /// マップ表示
   Widget _buildMap(GpsState gpsState) {
     final center = gpsState.currentLocation ?? widget.route.startLocation;
+    final spotsAsync = ref.watch(routeSpotsProvider(widget.route.id));
 
     return FlutterMap(
       mapController: _mapController,
@@ -369,7 +373,18 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
               ),
             ],
           ),
-        // 現在位置マーカー
+        // スポットマーカー（スタート・ゴール・中間スポット）
+        spotsAsync.when(
+          data: (spots) {
+            if (spots.isEmpty) return const SizedBox.shrink();
+            return MarkerLayer(
+              markers: _buildSpotMarkers(spots),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        ),
+        // 現在位置マーカー（最前面に表示）
         if (gpsState.currentLocation != null)
           MarkerLayer(
             markers: [
@@ -727,4 +742,171 @@ class _StatItem extends StatelessWidget {
       ],
     );
   }
+
+  /// スポットマーカーを生成（スタート・ゴール・中間スポット）
+  List<Marker> _buildSpotMarkers(List<RouteSpot> spots) {
+    if (spots.isEmpty) return [];
+
+    final markers = <Marker>[];
+    
+    // スタートとゴールが同じ位置かチェック
+    final startSpot = spots.firstWhere((s) => s.spotType == RouteSpotType.start, orElse: () => spots.first);
+    final endSpot = spots.firstWhere((s) => s.spotType == RouteSpotType.end, orElse: () => spots.last);
+    
+    final isSameLocation = (startSpot.location.latitude - endSpot.location.latitude).abs() < 0.0001 &&
+                           (startSpot.location.longitude - endSpot.location.longitude).abs() < 0.0001;
+
+    if (isSameLocation) {
+      // スタート=ゴールの場合：半分緑・半分赤のマーカー
+      markers.add(
+        Marker(
+          alignment: Alignment.center,
+          point: startSpot.location,
+          width: 50,
+          height: 50,
+          child: Stack(
+            children: [
+              // 左半分：緑（スタート）
+              ClipPath(
+                clipper: _LeftHalfClipper(),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                ),
+              ),
+              // 右半分：赤（ゴール）
+              ClipPath(
+                clipper: _RightHalfClipper(),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF44336),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                ),
+              ),
+              // 中央のアイコン
+              Center(
+                child: Icon(
+                  Icons.flag,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      
+      // 中間スポットを追加
+      for (var spot in spots) {
+        if (spot.spotType != RouteSpotType.start && spot.spotType != RouteSpotType.end) {
+          markers.add(_buildSpotMarker(spot, false));
+        }
+      }
+    } else {
+      // スタートとゴールが別の場合：全スポットを表示
+      for (var spot in spots) {
+        final isStartOrEnd = spot.spotType == RouteSpotType.start || spot.spotType == RouteSpotType.end;
+        markers.add(_buildSpotMarker(spot, isStartOrEnd));
+      }
+    }
+
+    return markers;
+  }
+
+  /// 個別スポットマーカーを生成
+  Marker _buildSpotMarker(RouteSpot spot, bool isStartOrEnd) {
+    final size = isStartOrEnd ? 50.0 : 40.0;
+    final iconSize = isStartOrEnd ? 24.0 : 20.0;
+    final borderWidth = isStartOrEnd ? 3.0 : 2.5;
+
+    Color backgroundColor;
+    IconData icon;
+
+    switch (spot.spotType) {
+      case RouteSpotType.start:
+        backgroundColor = const Color(0xFF4CAF50); // 緑
+        icon = Icons.flag;
+        break;
+      case RouteSpotType.end:
+        backgroundColor = const Color(0xFFF44336); // 赤
+        icon = Icons.sports_score;
+        break;
+      case RouteSpotType.landscape:
+        backgroundColor = const Color(0xFF9E9E9E); // グレー
+        icon = Icons.landscape;
+        break;
+      case RouteSpotType.photoSpot:
+        backgroundColor = const Color(0xFF9E9E9E); // グレー
+        icon = Icons.camera_alt;
+        break;
+      case RouteSpotType.facility:
+        backgroundColor = const Color(0xFF9E9E9E); // グレー
+        icon = Icons.store;
+        break;
+    }
+
+    return Marker(
+      alignment: Alignment.center,
+      point: spot.location,
+      width: size,
+      height: size,
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white,
+            width: borderWidth,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: iconSize,
+        ),
+      ),
+    );
+  }
+}
+
+/// 左半分をクリップするClipper
+class _LeftHalfClipper extends CustomClipper<ui.Path> {
+  @override
+  ui.Path getClip(Size size) {
+    final path = ui.Path();
+    path.addRect(Rect.fromLTWH(0, 0, size.width / 2, size.height));
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<ui.Path> oldClipper) => false;
+}
+
+/// 右半分をクリップするClipper
+class _RightHalfClipper extends CustomClipper<ui.Path> {
+  @override
+  ui.Path getClip(Size size) {
+    final path = ui.Path();
+    path.addRect(Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height));
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<ui.Path> oldClipper) => false;
 }
