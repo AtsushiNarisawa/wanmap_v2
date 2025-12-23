@@ -650,7 +650,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '🗺️ ルートタイムライン',
+              'ルートタイムライン',
               style: WanMapTypography.headlineSmall.copyWith(
                 color: isDark
                     ? WanMapColors.textPrimaryDark
@@ -1107,7 +1107,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '🐕 愛犬家向け情報',
+          '愛犬家向け情報',
           style: WanMapTypography.headlineSmall.copyWith(
             color: isDark
                 ? WanMapColors.textPrimaryDark
@@ -1468,16 +1468,13 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // セクションタイトル
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: WanMapSpacing.lg),
-          child: Text(
-            'ルートの写真',
-            style: WanMapTypography.headlineSmall.copyWith(
-              color: isDark
-                  ? WanMapColors.textPrimaryDark
-                  : WanMapColors.textPrimaryLight,
-              fontWeight: FontWeight.bold,
-            ),
+        Text(
+          'ルートの写真',
+          style: WanMapTypography.headlineSmall.copyWith(
+            color: isDark
+                ? WanMapColors.textPrimaryDark
+                : WanMapColors.textPrimaryLight,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: WanMapSpacing.md),
