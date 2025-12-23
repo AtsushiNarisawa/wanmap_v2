@@ -109,6 +109,12 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
 
                   const SizedBox(height: WanMapSpacing.xl),
 
+                  // ギャラリーセクション（ルートの写真）
+                  if (route.galleryImages != null && route.galleryImages!.isNotEmpty) ...[
+                    _buildGallerySection(route, isDark),
+                    const SizedBox(height: WanMapSpacing.xl),
+                  ],
+
                   // ルートタイムライン（スポット情報）
                   _buildRouteTimelineSection(route.id, isDark),
 
@@ -117,12 +123,6 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                   // 愛犬家向け情報
                   if (route.petInfo != null && route.petInfo!.hasAnyInfo) ...[
                     _buildPetInfoSection(route.petInfo!, isDark),
-                    const SizedBox(height: WanMapSpacing.xl),
-                  ],
-
-                  // ギャラリーセクション
-                  if (route.galleryImages != null && route.galleryImages!.isNotEmpty) ...[
-                    _buildGallerySection(route, isDark),
                     const SizedBox(height: WanMapSpacing.xl),
                   ],
 
