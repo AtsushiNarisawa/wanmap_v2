@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'dart:ui' as ui;
 import '../../config/wanmap_colors.dart';
 import '../../config/wanmap_typography.dart';
 import '../../config/wanmap_spacing.dart';
@@ -1935,37 +1936,37 @@ class _PinCommentButtonState extends ConsumerState<_PinCommentButton> {
 }
 
 /// 左半分をクリップするClipper
-class _LeftHalfClipper extends CustomClipper<Path> {
+class _LeftHalfClipper extends CustomClipper<ui.Path> {
   @override
-  Path getClip(Size size) {
-    final path = Path();
+  ui.Path getClip(Size size) {
+    final path = ui.Path();
     path.addOval(Rect.fromCircle(
       center: Offset(size.width / 2, size.height / 2),
       radius: size.width / 2,
     ));
     path.addRect(Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height));
-    path.fillType = PathFillType.evenOdd;
+    path.fillType = ui.PathFillType.evenOdd;
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<ui.Path> oldClipper) => false;
 }
 
 /// 右半分をクリップするClipper
-class _RightHalfClipper extends CustomClipper<Path> {
+class _RightHalfClipper extends CustomClipper<ui.Path> {
   @override
-  Path getClip(Size size) {
-    final path = Path();
+  ui.Path getClip(Size size) {
+    final path = ui.Path();
     path.addOval(Rect.fromCircle(
       center: Offset(size.width / 2, size.height / 2),
       radius: size.width / 2,
     ));
     path.addRect(Rect.fromLTWH(0, 0, size.width / 2, size.height));
-    path.fillType = PathFillType.evenOdd;
+    path.fillType = ui.PathFillType.evenOdd;
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<ui.Path> oldClipper) => false;
 }
