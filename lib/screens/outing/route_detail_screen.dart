@@ -478,56 +478,49 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       ),
     ];
   }
-  /// 統計情報
+  /// 統計情報（1行4列のコンパクト表示）
   Widget _buildStats(OfficialRoute route, bool isDark) {
-    return Column(
-      children: [
-        // 1行目: 距離・所要時間
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                icon: Icons.straighten,
-                label: '距離',
-                value: route.formattedDistance,
-                isDark: isDark,
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _StatCard(
+              icon: Icons.straighten,
+              label: '距離',
+              value: route.formattedDistance,
+              isDark: isDark,
             ),
-            const SizedBox(width: WanMapSpacing.sm),
-            Expanded(
-              child: _StatCard(
-                icon: Icons.timer,
-                label: '所要時間',
-                value: route.formattedDuration,
-                isDark: isDark,
-              ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.timer,
+              label: '時間',
+              value: route.formattedDuration,
+              isDark: isDark,
             ),
-          ],
-        ),
-        const SizedBox(height: WanMapSpacing.sm),
-        // 2行目: ピン数・総散歩回数
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                icon: Icons.push_pin,
-                label: 'ピン',
-                value: '${route.totalPins}個',
-                isDark: isDark,
-              ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.push_pin,
+              label: 'ピン',
+              value: '${route.totalPins}',
+              isDark: isDark,
             ),
-            const SizedBox(width: WanMapSpacing.sm),
-            Expanded(
-              child: _StatCard(
-                icon: Icons.directions_walk,
-                label: '総散歩回数',
-                value: '${route.totalWalks}回',
-                isDark: isDark,
-              ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.directions_walk,
+              label: '散歩',
+              value: '${route.totalWalks}',
+              isDark: isDark,
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1554,12 +1547,13 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
       decoration: BoxDecoration(
         color: isDark ? WanMapColors.cardDark : WanMapColors.cardLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
@@ -1574,6 +1568,8 @@ class _StatCard extends StatelessWidget {
                   ? WanMapColors.textSecondaryDark
                   : WanMapColors.textSecondaryLight,
             ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
           const SizedBox(height: 3.0),
           Text(
@@ -1583,7 +1579,11 @@ class _StatCard extends StatelessWidget {
                   ? WanMapColors.textPrimaryDark
                   : WanMapColors.textPrimaryLight,
               fontWeight: FontWeight.bold,
+              fontSize: 14, // 若干フォントサイズを調整
             ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
           ),
         ],
       ),
