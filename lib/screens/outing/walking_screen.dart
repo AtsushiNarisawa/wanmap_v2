@@ -758,17 +758,19 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
         ),
       );
       
-      // 中間スポットを追加
-      for (var spot in spots) {
+      // 中間スポットを追加（インデックス付き）
+      for (int i = 0; i < spots.length; i++) {
+        final spot = spots[i];
         if (spot.spotType != RouteSpotType.start && spot.spotType != RouteSpotType.end) {
-          markers.add(_buildSpotMarker(spot, false));
+          markers.add(_buildSpotMarker(spot, i, false));
         }
       }
     } else {
-      // スタートとゴールが別の場合：全スポットを表示
-      for (var spot in spots) {
+      // スタートとゴールが別の場合：全スポットを表示（インデックス付き）
+      for (int i = 0; i < spots.length; i++) {
+        final spot = spots[i];
         final isStartOrEnd = spot.spotType == RouteSpotType.start || spot.spotType == RouteSpotType.end;
-        markers.add(_buildSpotMarker(spot, isStartOrEnd));
+        markers.add(_buildSpotMarker(spot, i, isStartOrEnd));
       }
     }
 
@@ -776,13 +778,15 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
   }
 
   /// 個別スポットマーカーを生成
-  Marker _buildSpotMarker(RouteSpot spot, bool isStartOrEnd) {
-    final size = isStartOrEnd ? 50.0 : 40.0;
-    final iconSize = isStartOrEnd ? 24.0 : 20.0;
+  Marker _buildSpotMarker(RouteSpot spot, int index, bool isStartOrEnd) {
+    final size = isStartOrEnd ? 50.0 : 35.0; // サイズを小さく
+    final iconSize = isStartOrEnd ? 24.0 : 16.0;
     final borderWidth = isStartOrEnd ? 3.0 : 2.5;
 
     Color backgroundColor;
-    IconData icon;
+    IconData? icon;
+    bool showNumber = false;
+    int? spotNumber;
 
     switch (spot.spotType) {
       case RouteSpotType.start:
@@ -794,16 +798,11 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
         icon = Icons.sports_score;
         break;
       case RouteSpotType.landscape:
-        backgroundColor = const Color(0xFF9E9E9E); // グレー
-        icon = Icons.landscape;
-        break;
       case RouteSpotType.photoSpot:
-        backgroundColor = const Color(0xFF9E9E9E); // グレー
-        icon = Icons.camera_alt;
-        break;
       case RouteSpotType.facility:
         backgroundColor = const Color(0xFF9E9E9E); // グレー
-        icon = Icons.store;
+        showNumber = true;
+        spotNumber = index;
         break;
     }
 
@@ -828,11 +827,22 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
             ),
           ],
         ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: iconSize,
-        ),
+        child: showNumber
+            ? Center(
+                child: Text(
+                  '$spotNumber',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : Icon(
+                icon,
+                color: Colors.white,
+                size: iconSize,
+              ),
       ),
     );
   }

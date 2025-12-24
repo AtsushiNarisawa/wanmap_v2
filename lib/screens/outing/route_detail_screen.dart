@@ -673,7 +673,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
                   final spot = entry.value;
                   final isLast = index == spots.length - 1;
 
-                  return _buildSpotCard(spot, isLast, isDark);
+                  return _buildSpotCard(spot, index, isLast, isDark);
                 }).toList(),
               ),
             ),
@@ -694,14 +694,14 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   }
 
   /// スポットカードの構築
-  Widget _buildSpotCard(RouteSpot spot, bool isLast, bool isDark) {
+  Widget _buildSpotCard(RouteSpot spot, int index, bool isLast, bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // タイムライン表示（縦線とアイコン）
         Column(
           children: [
-            _buildSpotIcon(spot.spotType, isDark),
+            _buildSpotIcon(spot.spotType, index, isDark),
             if (!isLast)
               Container(
                 width: 2,
@@ -863,9 +863,11 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
   }
 
   /// スポットタイプに応じたアイコン
-  Widget _buildSpotIcon(RouteSpotType spotType, bool isDark) {
-    IconData icon;
+  Widget _buildSpotIcon(RouteSpotType spotType, int index, bool isDark) {
+    IconData? icon;
     Color color;
+    bool showNumber = false;
+    int? spotNumber;
 
     switch (spotType) {
       case RouteSpotType.start:
@@ -873,16 +875,12 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         color = const Color(0xFF4CAF50); // 緑（スタート）
         break;
       case RouteSpotType.landscape:
-        icon = Icons.landscape;
-        color = Colors.grey; // グレー（景観）
-        break;
       case RouteSpotType.photoSpot:
-        icon = Icons.camera_alt;
-        color = Colors.grey; // グレー（フォト）
-        break;
       case RouteSpotType.facility:
-        icon = Icons.store;
-        color = Colors.grey; // グレー（施設）
+        // 中間スポットは番号で表示
+        color = Colors.grey; // グレー
+        showNumber = true;
+        spotNumber = index; // インデックスをそのまま使用
         break;
       case RouteSpotType.end:
         icon = Icons.sports_score;
@@ -898,7 +896,18 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         shape: BoxShape.circle,
         border: Border.all(color: color, width: 2),
       ),
-      child: Icon(icon, color: color, size: 20),
+      child: showNumber
+          ? Center(
+              child: Text(
+                '$spotNumber',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : Icon(icon, color: color, size: 20),
     );
   }
 
@@ -953,14 +962,14 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
       
       // 通常のマーカー
       final isStartOrEnd = isStart || isEnd;
-      final markerSize = isStartOrEnd ? 60.0 : 50.0;
+      final markerSize = isStartOrEnd ? 50.0 : 35.0; // サイズを小さく
       
       markers.add(Marker(
         point: spot.location,
         width: markerSize,
         height: markerSize,
         alignment: Alignment.center,
-        child: _buildSpotMapIcon(spot.spotType, isDark, isStartOrEnd),
+        child: _buildSpotMapIcon(spot.spotType, i, isDark, isStartOrEnd),
       ));
       processedIndices.add(i);
     }
@@ -1049,9 +1058,11 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
     );
   }
 
-  Widget _buildSpotMapIcon(RouteSpotType spotType, bool isDark, bool isStartOrEnd) {
-    IconData icon;
+  Widget _buildSpotMapIcon(RouteSpotType spotType, int index, bool isDark, bool isStartOrEnd) {
+    IconData? icon;
     Color color;
+    bool showNumber = false;
+    int? spotNumber;
 
     switch (spotType) {
       case RouteSpotType.start:
@@ -1059,16 +1070,12 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         color = const Color(0xFF4CAF50); // 緑（スタート）
         break;
       case RouteSpotType.landscape:
-        icon = Icons.landscape;
-        color = Colors.grey; // グレー（景観）
-        break;
       case RouteSpotType.photoSpot:
-        icon = Icons.camera_alt;
-        color = Colors.grey; // グレー（フォト）
-        break;
       case RouteSpotType.facility:
-        icon = Icons.store;
-        color = Colors.grey; // グレー（施設）
+        // 中間スポットは番号で表示
+        color = Colors.grey; // グレー
+        showNumber = true;
+        spotNumber = index;
         break;
       case RouteSpotType.end:
         icon = Icons.sports_score;
@@ -1076,10 +1083,11 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         break;
     }
 
-    // スタート/ゴールは大きく、ボーダーと影を強調
-    final containerSize = isStartOrEnd ? 60.0 : 50.0;
-    final iconSize = isStartOrEnd ? 28.0 : 24.0;
+    // スタート/ゴールは大きく、中間スポットは小さく
+    final containerSize = isStartOrEnd ? 50.0 : 35.0;
+    final iconSize = isStartOrEnd ? 24.0 : 16.0;
     final borderWidth = isStartOrEnd ? 4.0 : 3.0;
+    final numberFontSize = 16.0;
 
     return Container(
       width: containerSize,
@@ -1096,7 +1104,18 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
           ),
         ],
       ),
-      child: Icon(icon, color: Colors.white, size: iconSize),
+      child: showNumber
+          ? Center(
+              child: Text(
+                '$spotNumber',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: numberFontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : Icon(icon, color: Colors.white, size: iconSize),
     );
   }
 
