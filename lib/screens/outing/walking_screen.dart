@@ -53,8 +53,11 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
     print('🚶 WalkingScreen initialized for route: ${widget.route.id}');
     print('🛣️ route.routeLine: ${widget.route.routeLine?.length ?? 0} points');
     if (widget.route.routeLine != null && widget.route.routeLine!.isNotEmpty) {
-      print('🛣️ First point: ${widget.route.routeLine!.first}');
-      print('🛣️ Last point: ${widget.route.routeLine!.last}');
+      print('🛣️ First 3 points:');
+      for (var i = 0; i < widget.route.routeLine!.length && i < 3; i++) {
+        final point = widget.route.routeLine![i];
+        print('  Point $i: lat=${point.latitude}, lon=${point.longitude}');
+      }
     } else {
       print('⚠️ route.routeLine is null or empty!');
     }
@@ -373,30 +376,19 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.doghub.wanmap',
         ),
-        // 公式ルートライン
-        if (widget.route.routeLine != null) ...[
-          Builder(
-            builder: (context) {
-              print('🛣️ Rendering PolylineLayer in WalkingScreen: ${widget.route.routeLine!.length} points');
-              return PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: widget.route.routeLine!,
-                    strokeWidth: 4.0,
-                    color: WanMapColors.accent.withOpacity(0.6),
-                  ),
-                ],
-              );
-            },
+        // 公式ルートライン（鮮やかなオレンジ色、太線）
+        if (widget.route.routeLine != null && widget.route.routeLine!.isNotEmpty)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: widget.route.routeLine!,
+                strokeWidth: 6.0, // より太く
+                color: const Color(0xFFFF6B35), // 鮮やかなオレンジ色（不透明）
+                borderStrokeWidth: 2.0,
+                borderColor: Colors.white.withOpacity(0.8), // 白い縁取り
+              ),
+            ],
           ),
-        ] else ...[
-          Builder(
-            builder: (context) {
-              print('⚠️ No route line to render in WalkingScreen');
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
         // スポットマーカー（スタート・ゴール・中間スポット）
         spotsAsync.when(
           data: (spots) {
