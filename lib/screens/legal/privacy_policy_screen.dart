@@ -165,7 +165,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'お問い合わせ窓口',
                 '本ポリシーに関するお問い合わせは、以下の窓口までお願いいたします。\n\n'
                 'サービス名: WanWalk\n'
-                'メールアドレス: privacy@wanmap.app\n\n'
+                'メールアドレス: privacy@wanwalk.app\n\n'
                 '※お問い合わせへの回答には、数日かかる場合があります。',
               ),
 

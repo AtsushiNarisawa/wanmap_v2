@@ -338,7 +338,7 @@ class _DailyWalkingScreenState extends ConsumerState<DailyWalkingScreen> {
       children: [
         TileLayer(
           urlTemplate: 'https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=${Environment.thunderforestApiKey}',
-          userAgentPackageName: 'com.doghub.wanmap',
+          userAgentPackageName: 'com.doghub.wanwalk',
         ),
         // 歩いたルートを表示
         if (gpsState.currentRoutePoints.length > 1)

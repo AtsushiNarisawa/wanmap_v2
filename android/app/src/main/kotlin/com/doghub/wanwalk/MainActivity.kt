@@ -1,4 +1,4 @@
-package com.example.wanmap_v2
+package com.doghub.wanwalk
 
 import io.flutter.embedding.android.FlutterActivity
 

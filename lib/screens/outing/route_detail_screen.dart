@@ -210,7 +210,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen> {
         children: [
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.doghub.wanmap',
+            userAgentPackageName: 'com.doghub.wanwalk',
           ),
           // ルートライン（優先度: route.routeLine > スポット座標）
           if (route.routeLine != null && route.routeLine!.isNotEmpty) ...[

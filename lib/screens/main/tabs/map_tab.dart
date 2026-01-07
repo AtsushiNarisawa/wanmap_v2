@@ -152,7 +152,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.doghub.wanmap',
+                userAgentPackageName: 'com.doghub.wanwalk',
               ),
               // 現在地マーカー
               if (_currentLocation != null)

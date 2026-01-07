@@ -215,7 +215,7 @@ class WanMapRouteCard extends StatelessWidget {
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.doghub.wanmap',
+          userAgentPackageName: 'com.doghub.wanwalk',
         ),
         PolylineLayer(
           polylines: [

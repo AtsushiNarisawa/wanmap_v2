@@ -374,7 +374,7 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.doghub.wanmap',
+          userAgentPackageName: 'com.doghub.wanwalk',
         ),
         // 公式ルートライン（鮮やかなオレンジ色、太線）
         if (widget.route.routeLine != null && widget.route.routeLine!.isNotEmpty)

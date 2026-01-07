@@ -59,7 +59,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
 
       await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://wanmap.app/auth/reset-password', // TODO: 実際のディープリンクURLに変更
+        redirectTo: 'https://wanwalk.app/auth/reset-password', // TODO: 実際のディープリンクURLに変更
       );
 
       if (!mounted) return;
