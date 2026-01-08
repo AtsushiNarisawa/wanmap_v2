@@ -137,9 +137,9 @@ async function processRoute(route, index, total) {
     // 座標配列を作成（OpenRouteServiceは [lon, lat] 形式）
     const coordinates = spots.map(spot => {
       // PostGISのPOINT形式 "POINT(lon lat)" をパース
-      const match = spot.location.match(/POINT\(([\d.]+)\s+([\d.]+)\)/);
+      const match = spot.location_text.match(/POINT\(([\d.]+)\s+([\d.]+)\)/);
       if (!match) {
-        throw new Error(`Invalid location format: ${spot.location}`);
+        throw new Error(`Invalid location format: ${spot.location_text}`);
       }
       return [parseFloat(match[1]), parseFloat(match[2])];
     });
