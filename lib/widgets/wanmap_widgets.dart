@@ -4,7 +4,7 @@
 /// 
 /// 使用例:
 /// ```dart
-/// import 'package:wanmap_v2/widgets/wanmap_widgets.dart';
+/// import 'package:wanwalk/widgets/wanmap_widgets.dart';
 /// 
 /// // ボタン
 /// WanMapButton(

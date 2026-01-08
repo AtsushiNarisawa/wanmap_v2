@@ -1,4 +1,4 @@
-import 'package:wanmap_v2/models/route_model.dart';
+import 'package:wanwalk/models/route_model.dart';
 
 /// トリップ（旅行計画）モデル
 class TripModel {
