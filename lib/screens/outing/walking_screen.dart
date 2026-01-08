@@ -326,6 +326,48 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
     ref.read(gpsProviderRiverpod.notifier).resumeRecording();
   }
 
+  /// 地図の中心位置を計算
+  /// 優先順位: routeLine の中心 > 現在地 > startLocation
+  LatLng _calculateMapCenter(GpsState gpsState) {
+    // 1. routeLine が存在する場合、その中心を計算
+    if (widget.route.routeLine != null && widget.route.routeLine!.isNotEmpty) {
+      final points = widget.route.routeLine!;
+      
+      // 緯度・経度の範囲を計算
+      double minLat = points[0].latitude;
+      double maxLat = points[0].latitude;
+      double minLng = points[0].longitude;
+      double maxLng = points[0].longitude;
+      
+      for (final point in points) {
+        if (point.latitude < minLat) minLat = point.latitude;
+        if (point.latitude > maxLat) maxLat = point.latitude;
+        if (point.longitude < minLng) minLng = point.longitude;
+        if (point.longitude > maxLng) maxLng = point.longitude;
+      }
+      
+      // 中心座標を計算
+      final centerLat = (minLat + maxLat) / 2;
+      final centerLng = (minLng + maxLng) / 2;
+      
+      print('🗺️ Map center calculated from routeLine:');
+      print('  Center: ($centerLat, $centerLng)');
+      print('  Bounds: lat[$minLat, $maxLat], lng[$minLng, $maxLng]');
+      
+      return LatLng(centerLat, centerLng);
+    }
+    
+    // 2. 現在地が存在する場合
+    if (gpsState.currentLocation != null) {
+      print('🗺️ Map center: using current location');
+      return gpsState.currentLocation!;
+    }
+    
+    // 3. startLocation をフォールバック
+    print('🗺️ Map center: using startLocation');
+    return widget.route.startLocation;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -355,7 +397,8 @@ class _WalkingScreenState extends ConsumerState<WalkingScreen> {
 
   /// マップ表示
   Widget _buildMap(GpsState gpsState) {
-    final center = gpsState.currentLocation ?? widget.route.startLocation;
+    // ルートラインが存在する場合は、その中心を計算
+    final center = _calculateMapCenter(gpsState);
     final spotsAsync = ref.watch(routeSpotsProvider(widget.route.id));
 
     return FlutterMap(
