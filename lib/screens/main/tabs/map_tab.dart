@@ -11,10 +11,16 @@ import '../../../providers/gps_provider_riverpod.dart';
 import '../../../providers/official_route_provider.dart';
 import '../../../providers/area_provider.dart';
 import '../../../models/area.dart';
+import '../../../providers/route_pin_provider.dart';
+
 import '../../../models/official_route.dart';
+import '../../../models/route_pin.dart';
+
 import '../../../widgets/zoom_control_widget.dart';
 import '../../outing/area_list_screen.dart';
 import '../../outing/route_detail_screen.dart';
+import '../../outing/pin_detail_screen.dart';
+
 import '../../outing/pin_create_screen.dart';
 import '../../daily/daily_walking_screen.dart';
 import './walk_type_bottom_sheet.dart';
@@ -178,6 +184,9 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
               ),
+              // ユーザー投稿ピンマーカー
+              _buildPinMarkers(context, ref),
+
             ],
           ),
 
@@ -901,5 +910,108 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
     final c = 2 * asin(sqrt(a));
 
     return R * c;
+  }
+
+  /// ピンマーカーを構築
+  Widget _buildPinMarkers(BuildContext context, WidgetRef ref) {
+    final pinsAsync = ref.watch(allPinsProvider);
+
+    return pinsAsync.when(
+      data: (pins) {
+        if (pins.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return MarkerLayer(
+          markers: pins.map((pin) {
+            return Marker(
+              point: pin.location,
+              width: 45,
+              height: 45,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PinDetailScreen(pinId: pin.id),
+                    ),
+                  );
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(
+                      _getPinIcon(pin.pinType),
+                      color: _getPinColor(pin.pinType),
+                      size: 40,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 4,
+                          color: Colors.black26,
+                        ),
+                      ],
+                    ),
+                    if (pin.isOfficial)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.verified,
+                            color: Colors.purple,
+                            size: 14,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (error, stack) {
+        if (kDebugMode) {
+          print('❌ ピンマーカー表示エラー: $error');
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  IconData _getPinIcon(PinType pinType) {
+    switch (pinType) {
+      case PinType.scenery:
+        return Icons.landscape;
+      case PinType.shop:
+        return Icons.store;
+      case PinType.encounter:
+        return Icons.pets;
+      case PinType.facility:
+        return Icons.business;
+      case PinType.other:
+        return Icons.place;
+    }
+  }
+
+  Color _getPinColor(PinType pinType) {
+    switch (pinType) {
+      case PinType.scenery:
+        return Colors.blue;
+      case PinType.shop:
+        return Colors.orange;
+      case PinType.encounter:
+        return Colors.green;
+      case PinType.facility:
+        return Colors.purple;
+      case PinType.other:
+        return Colors.grey;
+    }
   }
 }
